@@ -10,8 +10,6 @@ class ScanService:
         scan_id = self.db.fetchone()[0]
         self.cur_scan = Scan(scan_id, max_breadth)
         return self.cur_scan
-    def mark_user_scanned(self, twitter_id):
-        self.db.execute('INSERT INTO "scan_user" (scan_id, twitter_id) VALUES (%s, %s);', (self.cur_scan.getId(), twitter_id))
     def done(self, now):
         self.db.execute('UPDATE "scan" SET end_time = %s WHERE id = %s', (now, self.cur_scan.getId()))
         self.cur_scan = None
