@@ -84,9 +84,9 @@ def main(api, dbc, rds, logfile):
                     max_tweet_id = max(max_tweet_id, tweet_id)
                     max_dt = status["created_at"]
 
-            tweetservice.commit()
-
             n_tweets = tweetservice.get_number_of_queued()
+
+            tweetservice.commit()
 
             print("Found %d tweets." % (n_tweets), file=logfile)
 
