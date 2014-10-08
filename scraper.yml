@@ -13,4 +13,4 @@
       - restart scraper
   handlers:
     - name: restart scraper
-      service: name=smisc state=restarted
+      service: name=smisc-scraper state=restarted

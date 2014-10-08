@@ -126,8 +126,10 @@ if __name__ == "__main__":
     print("Pacsocial Twitter Scanner")
 
     config = configparser.ConfigParser()
-    config.read('/usr/local/share/smisc.ini')
+    config.read('/usr/local/share/scraper.ini')
     logfile = open(config['bot']['log'], 'a+')
+    sys.stdout = logfile
+    sys.stderr = logfile
 
     print("Pacsocial Twitter Scanner started at %s" % (datetime.datetime.now().strftime("%b %d %H:%M:%S")), file=logfile)
 
