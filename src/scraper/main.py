@@ -35,18 +35,21 @@ def main(api, dbc, rds, logfile):
     scan = scanservice.new_scan(start_time, max_breadth)
     print("Starting scan %d" % (scan.getId()), file=logfile)
     db = dbc.cursor()
+    tweetservice = TweetService(dbc.cursor())
 
     try:
         query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower'
-        since_id = None
         max_id = None
+        since_id = tweetservice.get_latest_tweet_id()
+        print(since_id)
+        return
 
         since_dt = ''
         max_dt = ''
 
         while True:
             if max_id is None and since_id is None:
-                # first query
+                # first query ever
                 print("Seeking any tweets we can get.", file=logfile)
                 results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100})
             elif max_id is not None: # seeking old
@@ -65,20 +68,8 @@ def main(api, dbc, rds, logfile):
 
             for status in results.get_iterator():
                 tweet_id = int(status["id"])
-                text = status["text"]
-                timestamp = (datetime.datetime.strptime(status["created_at"], "%a %b %d %H:%M:%S +0000 %Y") - datetime.datetime(1970,1,1)).total_seconds()
-                user = status["user"]
-                user_id = int(user["id"])
 
-                if len(status["entities"]["urls"]) > 0:
-                    for url in status["entities"]["urls"]:
-                        entities.append( (tweet_id, "url", url["url"]) )
-
-                if len(status["entities"]["hashtags"]) > 0:
-                    for htag in status["entities"]["hashtags"]:
-                        entities.append( (tweet_id, "hashtag", htag["text"]) )
-
-                tweets.append( (tweet_id, user_id, text, timestamp) )
+                tweetservice.queue_tweet(status)
 
                 if min_tweet_id is None:
                     min_tweet_id = tweet_id
@@ -94,12 +85,9 @@ def main(api, dbc, rds, logfile):
                     max_tweet_id = max(max_tweet_id, tweet_id)
                     max_dt = status["created_at"]
 
-            print("Found %d tweets." % (len(tweets)), file=logfile)
+            tweetservice.commit()
 
-            if len(tweets) > 0:
-                db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp) VALUES(%s, %s, %s, %s)', tweets)
-            if len(entities) > 0:
-                db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', entities)
+            print("Found %d tweets." % (tweetservice.get_number_of_queued()), file=logfile)
 
             if max_id is None and since_id is None:
                 # it was our first query, so just switch immediately to polling for new tweets.
