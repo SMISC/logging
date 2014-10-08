@@ -59,7 +59,6 @@ def main(api, dbc, rds, logfile):
                 print("Seeking new tweets since %s (%d)" % (since_dt, since_id), file=logfile)
                 results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'since_id': since_id})
 
-            tweets = []
             entities = []
             max_tweet_id = None
             min_tweet_id = None
@@ -87,7 +86,9 @@ def main(api, dbc, rds, logfile):
 
             tweetservice.commit()
 
-            print("Found %d tweets." % (tweetservice.get_number_of_queued()), file=logfile)
+            n_tweets = tweetservice.get_number_of_queued()
+
+            print("Found %d tweets." % (n_tweets), file=logfile)
 
             if max_id is None and since_id is None:
                 # it was our first query, so just switch immediately to polling for new tweets.
@@ -97,7 +98,7 @@ def main(api, dbc, rds, logfile):
                 max_id = None
                 time.sleep(20)
             else:
-                if len(tweets) < 100:
+                if n_tweets < 100:
                     # we got less than expected. switch to polling for new tweets.
                     if max_tweet_id is not None:
                         since_id = max_tweet_id

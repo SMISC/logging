@@ -40,6 +40,7 @@ class TweetService:
             self.db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp) VALUES(%s, %s, %s, %s)', self.tweets)
         if len(self.entities) > 0:
             self.db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', self.entities)
+
         self.tweets = []
         self.entities = []
 
