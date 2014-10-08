@@ -1,0 +1,18 @@
+---
+- name: Deploy the latest version of the configuration and code
+  hosts: manager
+  remote_user: root
+  tasks:
+  - name: sync config
+    rsync: src=config/scraper.ini dest=/usr/local/share/scraper.ini
+    notify:
+      - restart scraper
+  - name: sync code
+    rsync: src=src/ dest=/usr/local/src/smisc/
+    notify: 
+      - restart scraper
+  handlers:
+    - name: restart scraper
+      shell: monit unmonitor smisc
+      service: name=smisc state=restarted
+      shell: monit monitor smisc
