@@ -1,4 +1,4 @@
 [manager]
-jacob@104.131.159.186
+104.131.159.186 ansible_ssh_user=jacob
 
 [workers]
