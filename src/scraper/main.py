@@ -44,7 +44,7 @@ def main(api, dbc, rds, logfile):
         max_id = None
         since_id = tweetservice.get_latest_tweet_id()
 
-        since_dt = ''
+        since_dt = 'the beginning of time'
         max_dt = ''
 
         while True:
