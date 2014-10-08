@@ -126,12 +126,12 @@ if __name__ == "__main__":
     print("Pacsocial Twitter Scanner")
 
     config = configparser.ConfigParser()
-    config.read('/usr/local/share/pacsocial.ini')
+    config.read('/usr/local/share/smisc.ini')
     logfile = open(config['bot']['log'], 'a+')
 
     print("Pacsocial Twitter Scanner started at %s" % (datetime.datetime.now().strftime("%b %d %H:%M:%S")), file=logfile)
 
-    api = TwitterAPI(config['twitter']['key'], config['twitter']['secret'], auth_type='oAuth2')
+    api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True
