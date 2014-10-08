@@ -19,6 +19,8 @@ from scraper.filtr import FilterService
 from scraper.scraper import ScrapeJob
 from scraper.scraper import ScrapeService
 
+from scraper.tweet import TweetService
+
 from scraper.edge import EdgeService
 
 from scraper.ratelimit import RateLimitedTwitterAPI
@@ -41,8 +43,6 @@ def main(api, dbc, rds, logfile):
         query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower'
         max_id = None
         since_id = tweetservice.get_latest_tweet_id()
-        print(since_id)
-        return
 
         since_dt = ''
         max_dt = ''

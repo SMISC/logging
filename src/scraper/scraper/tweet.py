@@ -1,3 +1,5 @@
+import datetime
+
 class TweetService:
     def __init__(self, db):
         self.db = db
@@ -35,9 +37,9 @@ class TweetService:
 
     def commit(self):
         if len(self.tweets) > 0:
-            db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp) VALUES(%s, %s, %s, %s)', self.tweets)
+            self.db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp) VALUES(%s, %s, %s, %s)', self.tweets)
         if len(self.entities) > 0:
-            db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', self.entities)
+            self.db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', self.entities)
         self.tweets = []
         self.entities = []
 
