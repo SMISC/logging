@@ -13,12 +13,6 @@ from TwitterAPI import TwitterAPI
 from manager.scan import Scan
 from manager.scan import ScanService
 
-from manager.filtr import FilterJob
-from manager.filtr import FilterService
-
-from manager.scraper import ScrapeJob
-from manager.scraper import ScrapeService
-
 from manager.tweet import TweetService
 
 from manager.edge import EdgeService

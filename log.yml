@@ -1,0 +1,5 @@
+---
+- hosts: all
+  tasks:
+    - name: tail the logs
+      command: tail /var/local/log/smisc.log

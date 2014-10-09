@@ -1,4 +1,11 @@
 ---
+- name: ensure local directory structure is set up
+  sudo: yes
+  command: mkdir -p "{{ item }}" creates={{ item }}
+  with_items:
+    - /var/local/log 
+    - /var/local/run
+
 - name: add base repositories
   sudo: yes
   apt_repository: repo='{{item}}' state=present
@@ -27,16 +34,4 @@
     - TwitterAPI
     - redis
     - psycopg2
-
-- name: Deploy smisc code
-  sudo: yes
-  synchronize: src=src/ dest=/usr/local/src/smisc/
-  notify: 
-    - restart scraper
-
-- name: Deploy smisc configuration
-  sudo: yes
-  synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
-  notify:
-    - restart scraper
 
