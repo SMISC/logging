@@ -1,51 +1,52 @@
 ---
-- name: Install packages
+- name: install base packages
   sudo: yes
-  tasks:
-  - name: install base packages
-    apt: name={{ item }} state=latest
-    with_items: 
-        - postgresql
-        - php5-fpm
-        - php5-pgsql
-        - ntp
-        - nginx
-        - vim
-        - python3-pip
-        - python-pip
-        - redis-server
-        - monit
+  apt: name={{ item }} state=latest
+  with_items: 
+    - postgresql
+    - php5-fpm
+    - php5-pgsql
+    - ntp
+    - nginx
+    - vim
+    - python3-pip
+    - python-pip
+    - redis-server
+    - monit
 
-- name: Synchronize base configuration
+- name: Synchronize nginx site configuration
   sudo: yes
-  tasks:
-  - name: sync nginx conf.d config
-    synchronize: src=config/nginx/conf.d/ dest=/etc/nginx/conf.d/
-    notify: 
-        - restart nginx
-  - name: sync nginx sites-enabled config
-    synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
-    notify: 
-        - restart nginx
+  synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
+  notify: 
+    - restart nginx
 
-- name: Install requisite Python modules
+- name: Synchronize manager's initscript
   sudo: yes
-  tasks:
-  - name: install python modules
-    pip: name={{ item }}
-    with_items:
-        TwitterAPI
-        redis
-        psycopg2
+  synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
-- name: Deploy the latest version of the configuration and code
+- name: Synchronize monit scripts
   sudo: yes
-  tasks:
-  - name: sync config
-    synchronize: src=config/scraper.ini dest=/usr/local/share/scraper.ini
-    notify:
-      - restart scraper
-  - name: sync code
-    synchronize: src=src/ dest=/usr/local/src/smisc/
-    notify: 
-      - restart scraper
+  synchronize: src=config/monit/ dest=/etc/monit/conf.d/
+  notify:
+     - reload monit
+
+- name: Install Python modules
+  sudo: yes
+  pip: name={{ item }} executable=pip-3.2
+  with_items:
+    - TwitterAPI
+    - redis
+    - psycopg2
+
+- name: Deploy smisc code
+  sudo: yes
+  synchronize: src=src/ dest=/usr/local/src/smisc/
+  notify: 
+    - restart scraper
+
+- name: Deploy smisc configuration
+  sudo: yes
+  synchronize: src=config/scraper.ini dest=/usr/local/share/scraper.ini
+  notify:
+    - restart scraper
+

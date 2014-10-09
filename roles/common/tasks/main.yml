@@ -1,0 +1,31 @@
+---
+- name: install base packages
+  sudo: yes
+  apt: name={{ item }} state=latest
+  with_items: 
+    - ntp
+    - vim
+    - python3-pip
+    - python-pip
+    - monit
+
+- name: Install Python modules
+  sudo: yes
+  pip: name={{ item }} executable=pip-3.2
+  with_items:
+    - TwitterAPI
+    - redis
+    - psycopg2
+
+- name: Deploy smisc code
+  sudo: yes
+  synchronize: src=src/ dest=/usr/local/src/smisc/
+  notify: 
+    - restart scraper
+
+- name: Deploy smisc configuration
+  sudo: yes
+  synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
+  notify:
+    - restart scraper
+

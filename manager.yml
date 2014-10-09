@@ -1,4 +1,5 @@
 ---
 - hosts: manager
   roles: 
+    - common
     - manager

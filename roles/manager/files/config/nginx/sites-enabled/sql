@@ -1,0 +1,17 @@
+server {
+	listen 80;
+	server_name sql.pacsocial.jwgur.com;
+	root /usr/share/nginx/sql;
+	index index.php;
+
+	location / {
+		try_files $uri $uri/ index.php;
+	}
+
+	location ~ .php$ {
+		include "fastcgi_params";
+		fastcgi_index index.php;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		fastcgi_pass 127.0.0.1:9000;
+	}
+}
