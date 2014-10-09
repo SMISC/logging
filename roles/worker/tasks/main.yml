@@ -1,19 +1,15 @@
 - name: Synchronize initscript
-  sudo: yes
   synchronize: src=config/initscripts/smisc-scraper dest=/etc/init.d/smisc-scraper
 
 - name: Deploy smisc code
-  sudo: yes
   synchronize: src=src/ dest=/usr/local/src/smisc/
   notify: 
     - restart scraper
 
 - name: Deploy smisc configuration
-  sudo: yes
   synchronize: src=../../common/files/config/smisc.ini dest=/usr/local/share/smisc.ini
   notify:
     - restart scraper
 
 - name: Ensure scraper is running
-  sudo: yes
   service: name=smisc-scraper state=started

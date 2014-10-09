@@ -1,6 +1,5 @@
 ---
 - name: install base packages
-  sudo: yes
   apt: name={{ item }} state=latest
   with_items: 
     - postgresql
@@ -10,33 +9,27 @@
     - redis-server
 
 - name: Synchronize nginx site configuration
-  sudo: yes
   synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
   notify: 
     - restart nginx
 
 - name: Synchronize manager's initscript
-  sudo: yes
   synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
 - name: Synchronize monit scripts
-  sudo: yes
   synchronize: src=config/monit/ dest=/etc/monit/conf.d/
   notify:
      - reload monit
 
 - name: Deploy smisc code
-  sudo: yes
   synchronize: src=src/ dest=/usr/local/src/smisc/
   notify: 
     - restart manager
 
 - name: Deploy smisc configuration
-  sudo: yes
   synchronize: src=../../common/files/config/smisc.ini dest=/usr/local/share/smisc.ini
   notify:
     - restart manager
 
 - name: Ensure manager is running
-  sudo: yes
   service: name=smisc-manager state=started

@@ -1,20 +1,17 @@
 ---
 - name: ensure local directory structure is set up
-  sudo: yes
   command: mkdir -p "{{ item }}" creates={{ item }}
   with_items:
     - /var/local/log 
     - /var/local/run
 
 - name: add base repositories
-  sudo: yes
   apt_repository: repo='{{item}}' state=present
   with_items:
     - deb http://http.debian.net/debian wheezy main contrib non-free
     - deb-src http://http.debian.net/debian wheezy main contrib non-free
 
 - name: install base packages
-  sudo: yes
   apt: name={{ item }} state=latest
   with_items: 
     - ntp
@@ -28,7 +25,6 @@
     - libpq-dev
 
 - name: Install Python modules
-  sudo: yes
   pip: name={{ item }} executable=pip-3.2
   with_items:
     - TwitterAPI
