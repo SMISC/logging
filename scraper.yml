@@ -1,4 +1,22 @@
 ---
+- name: Install packages
+  hosts: manager
+  sudo: yes
+  tasks:
+  - name: install base packages
+    apt: name={{ item }} state=latest
+    with_items: 
+        - postgresql
+        - php5-fpm
+        - php5-pgsql
+        - ntp
+        - nginx
+        - vim
+        - python3-pip
+        - python-pip
+        - redis-server
+        - monit
+
 - name: Deploy the latest version of the configuration and code
   hosts: manager
   sudo: yes
