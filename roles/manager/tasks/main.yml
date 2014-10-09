@@ -13,6 +13,11 @@
   notify: 
     - restart nginx
 
+- name: Synchronize PostgreSQL configuration
+  synchronize: src=config/postgresql/ dest=/etc/postgresql/9.1/main/
+  notify:
+    - restart postgresql
+
 - name: Synchronize manager's initscript
   synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
