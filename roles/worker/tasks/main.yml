@@ -1,9 +1,3 @@
 - name: Synchronize initscript
   sudo: yes
   synchronize: src=config/initscripts/smisc-scraper dest=/etc/init.d/smisc-scraper
-
-- name: Deploy smisc configuration
-  sudo: yes
-  synchronize: src=config/scraper.ini dest=/usr/local/share/scraper.ini
-  notify:
-    - restart scraper

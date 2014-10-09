@@ -6,13 +6,8 @@
     - postgresql
     - php5-fpm
     - php5-pgsql
-    - ntp
     - nginx
-    - vim
-    - python3-pip
-    - python-pip
     - redis-server
-    - monit
 
 - name: Synchronize nginx site configuration
   sudo: yes
@@ -29,24 +24,4 @@
   synchronize: src=config/monit/ dest=/etc/monit/conf.d/
   notify:
      - reload monit
-
-- name: Install Python modules
-  sudo: yes
-  pip: name={{ item }} executable=pip-3.2
-  with_items:
-    - TwitterAPI
-    - redis
-    - psycopg2
-
-- name: Deploy smisc code
-  sudo: yes
-  synchronize: src=src/ dest=/usr/local/src/smisc/
-  notify: 
-    - restart scraper
-
-- name: Deploy smisc configuration
-  sudo: yes
-  synchronize: src=config/scraper.ini dest=/usr/local/share/scraper.ini
-  notify:
-    - restart scraper
 
