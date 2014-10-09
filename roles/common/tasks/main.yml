@@ -1,4 +1,11 @@
 ---
+- name: add base repositories
+  sudo: yes
+  apt_repository: repo='{{item}}' state=present
+  with_items:
+    - deb http://http.debian.net/debian wheezy main contrib non-free
+    - deb-src http://http.debian.net/debian wheezy main contrib non-free
+
 - name: install base packages
   sudo: yes
   apt: name={{ item }} state=latest
@@ -7,6 +14,9 @@
     - vim
     - python3-pip
     - python-pip
+    - build-essential
+    - python-dev
+    - python3-dev
     - monit
 
 - name: Install Python modules

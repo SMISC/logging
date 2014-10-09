@@ -1,5 +1,5 @@
-- name: restart scraper
-  service: name=smisc-scraper state=restarted
+- name: restart manager
+  service: name=smisc-manager state=restarted
 - name: restart nginx
   service: name=nginx state=restarted
 - name: restart postgresql
