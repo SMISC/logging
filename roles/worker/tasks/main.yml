@@ -13,3 +13,7 @@
   synchronize: src=../../common/files/config/smisc.ini dest=/usr/local/share/smisc.ini
   notify:
     - restart scraper
+
+- name: Ensure scraper is running
+  sudo: yes
+  service: name=smisc-scraper state=started
