@@ -1,6 +1,5 @@
 ---
 - name: Install packages
-  hosts: manager
   sudo: yes
   tasks:
   - name: install base packages
@@ -17,8 +16,29 @@
         - redis-server
         - monit
 
+- name: Synchronize base configuration
+  sudo: yes
+  tasks:
+  - name: sync nginx conf.d config
+    synchronize: src=config/nginx/conf.d/ dest=/etc/nginx/conf.d/
+    notify: 
+        - restart nginx
+  - name: sync nginx sites-enabled config
+    synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
+    notify: 
+        - restart nginx
+
+- name: Install requisite Python modules
+  sudo: yes
+  tasks:
+  - name: install python modules
+    pip: name={{ item }}
+    with_items:
+        TwitterAPI
+        redis
+        psycopg2
+
 - name: Deploy the latest version of the configuration and code
-  hosts: manager
   sudo: yes
   tasks:
   - name: sync config
@@ -29,6 +49,3 @@
     synchronize: src=src/ dest=/usr/local/src/smisc/
     notify: 
       - restart scraper
-  handlers:
-    - name: restart scraper
-      service: name=smisc-scraper state=restarted
