@@ -28,7 +28,7 @@
   synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
 - name: Synchronize monit scripts
-  synchronize: src=config/monit/ dest=/etc/monit/conf.d/
+  synchronize: src=config/monit dest=/etc/monit
   notify:
      - reload monit
 
