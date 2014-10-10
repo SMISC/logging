@@ -6,5 +6,5 @@
   service: name=postgresql state=restarted
 - name: restart php
   service: name=php5-fpm state=restarted
-- name: reload monit
-  service: name=monit state=reloaded
+- name: restart monit
+  service: name=monit state=restarted

@@ -32,6 +32,16 @@
     - redis
     - psycopg2
 
+- name: Install Python modules for 2-7
+  pip: name={{ item }} executable=pip-2.7
+  with_items:
+    - psycopg2
+
+- name: Ensure files have the proper mode and owner
+  file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }}
+  with_items:
+    - { src: "/etc/monit/monitrc" }
+
 - name: Core services are running
   service: name={{ item }} state=started
   with_items:

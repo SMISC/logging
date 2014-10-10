@@ -27,15 +27,33 @@
 - name: Synchronize manager's initscript
   synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
-- name: Synchronize monit scripts
-  synchronize: src=config/monit dest=/etc/monit
+- name: Synchronize php-fpm config
+  synchronize: src=config/php/{{ item }} dest=/etc/php5/fpm/{{ item }} archive=no
+  with_items:
+    - pool.d/www.conf
+    - php.ini
+    - php-fpm.conf
   notify:
-     - reload monit
+    - restart php
+
+- name: Synchronize monit scripts
+  synchronize: src=config/monit/ dest=/etc/monit/ group=no owner=no perms=no recursive=yes
+  notify:
+     - restart monit
 
 - name: Deploy smisc code
   synchronize: src=src/ dest=/usr/local/src/smisc/
   notify: 
     - restart manager
+
+- name: Synchronize phpPgAdmin
+  synchronize: src=pgsql/ dest=/usr/share/nginx/sql group=no owner=no perms=no recursive=yes
+
+- name: Add the pacsocial user to postgres
+  postgresql_user: name=pacsocial state=present
+
+- name: Add the pacsocial database to postgres
+  postgresql_db: name=pacsocial state=present owner=pacsocial
 
 - name: Deploy smisc configuration
   synchronize: src=../../common/files/config/smisc.ini dest=/usr/local/share/smisc.ini
