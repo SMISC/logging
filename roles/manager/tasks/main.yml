@@ -7,11 +7,18 @@
     - php5-pgsql
     - nginx
     - redis-server
+    - htop
 
 - name: Synchronize nginx site configuration
   synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
   notify: 
     - restart nginx
+
+- name: Increase stock SHMMAX
+  sysctl: name=kernel.shmmax value=8589934592 sysctl_set=yes
+
+- name: Increase stock SHMALL
+  sysctl: name=kernel.shmall value=2097152 sysctl_set=yes
 
 - name: Synchronize PostgreSQL configuration
   synchronize: src=config/postgresql/ dest=/etc/postgresql/9.1/main/
@@ -36,5 +43,10 @@
   notify:
     - restart manager
 
-- name: Ensure manager is running
-  service: name=smisc-manager state=started
+- name: Core services are running
+  service: name={{ item }} state=started
+  with_items:
+    - postgresql
+    - nginx
+    - php5-fpm
+    - smisc-manager

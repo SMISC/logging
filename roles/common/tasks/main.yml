@@ -31,3 +31,7 @@
     - redis
     - psycopg2
 
+- name: Core services are running
+  service: name={{ item }} state=started
+  with_items:
+    - monit
