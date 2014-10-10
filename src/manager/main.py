@@ -10,14 +10,14 @@ import datetime
 
 from TwitterAPI import TwitterAPI
 
-from manager.scan import Scan
-from manager.scan import ScanService
+from manager.manager.scan import Scan
+from manager.manager.scan import ScanService
 
-from manager.tweet import TweetService
+from manager.manager.tweet import TweetService
 
-from manager.edge import EdgeService
+from manager.manager.edge import EdgeService
 
-from manager.ratelimit import RateLimitedTwitterAPI
+from manager.manager.ratelimit import RateLimitedTwitterAPI
 
 def main(api, dbc, rds, logfile):
     print("Inspecting rate limit status...", file=logfile)

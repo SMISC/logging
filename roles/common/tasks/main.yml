@@ -23,6 +23,7 @@
     - python3-dev
     - monit
     - libpq-dev
+    - htop
 
 - name: Install Python modules
   pip: name={{ item }} executable=pip-3.2

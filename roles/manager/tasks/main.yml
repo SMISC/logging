@@ -7,7 +7,6 @@
     - php5-pgsql
     - nginx
     - redis-server
-    - htop
 
 - name: Synchronize nginx site configuration
   synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
