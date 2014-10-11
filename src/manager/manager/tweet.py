@@ -8,7 +8,7 @@ class TweetService:
     def get_latest_tweet_id(self):
         self.db.execute("select MAX(tweet_id) from tweet")
         rslt = self.db.fetchone()
-        if rslt is not None:
+        if rslt is not None and rslt[0] is not None:
             return int(rslt[0])
         return None
 
