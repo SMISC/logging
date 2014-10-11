@@ -84,28 +84,24 @@ def main(api, dbc, rds, logfile):
 
             print("Found %d tweets." % (n_tweets), file=logfile)
 
-            if max_id is None and since_id is None:
-                # it was our first query, so just switch immediately to polling for new tweets.
-                since_id = max_tweet_id
-                since_dt = max_dt
+            if n_tweets < 100:
+                # we got less than expected. switch to polling for new tweets.
+                since_id = tweetservice.get_latest_tweet_id()
+                if max_id is not None:
+                    # were paging. no clue what the date was
+                    since_dt = '(?)'
+                else:
+                    since_dt = max_dt
+
                 max_dt = ''
                 max_id = None
                 time.sleep(20)
             else:
-                if n_tweets < 100:
-                    # we got less than expected. switch to polling for new tweets.
-                    if max_tweet_id is not None:
-                        since_id = max_tweet_id
-                        since_dt = max_dt
-                    max_dt = ''
-                    max_id = None
-                    time.sleep(20)
-                else:
-                    # we got 100. start paging.
-                    since_id = None
-                    since_dt = ''
-                    max_id = min_tweet_id - 1
-                    max_dt = min_dt
+                # we got 100. start paging.
+                since_id = None
+                since_dt = ''
+                max_id = min_tweet_id - 1
+                max_dt = min_dt
 
             logfile.flush()
             time.sleep(1)
