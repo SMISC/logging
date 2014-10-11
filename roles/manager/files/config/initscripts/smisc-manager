@@ -17,9 +17,10 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="SMISC Manager"
 NAME=smisc-manager
 DAEMON=/usr/bin/python3
-DAEMON_ARGS="/usr/local/src/smisc/manager/main.py"
+DAEMON_ARGS="-m manager.main"
 PIDFILE=/var/local/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+DIR="/usr/local/src/smisc"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -46,7 +47,7 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --background --make-pidfile -- \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chdir $DIR --background --make-pidfile -- \
 		$DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready

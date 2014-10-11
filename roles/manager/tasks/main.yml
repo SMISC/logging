@@ -43,6 +43,8 @@
 
 - name: Deploy smisc code
   synchronize: src=src/ dest=/usr/local/src/smisc/
+  tags: 
+    - hot
   notify: 
     - restart manager
 
@@ -50,13 +52,17 @@
   synchronize: src=pgsql/ dest=/usr/share/nginx/sql group=no owner=no perms=no recursive=yes
 
 - name: Add the pacsocial user to postgres
+  sudo_user: postgres
   postgresql_user: name=pacsocial state=present
 
 - name: Add the pacsocial database to postgres
+  sudo_user: postgres
   postgresql_db: name=pacsocial state=present owner=pacsocial
 
 - name: Deploy smisc configuration
   synchronize: src=../../common/files/config/smisc.ini dest=/usr/local/share/smisc.ini
+  tags: 
+    - hot
   notify:
     - restart manager
 
@@ -67,3 +73,5 @@
     - nginx
     - php5-fpm
     - smisc-manager
+  tags:
+    - hot
