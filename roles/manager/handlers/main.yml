@@ -4,6 +4,8 @@
   service: name=nginx state=restarted
 - name: restart postgresql
   service: name=postgresql state=restarted
+- name: restart redis
+  service: name=redis state=restarted
 - name: restart php
   service: name=php5-fpm state=restarted
 - name: restart monit

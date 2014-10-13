@@ -24,6 +24,11 @@
   notify:
     - restart postgresql
 
+- name: Synchronize redis configuration
+  synchronize: src=config/redis/ dest=/etc/redis/
+  notify:
+    - restart redis
+
 - name: Synchronize manager's initscript
   synchronize: src=config/initscripts/smisc-manager dest=/etc/init.d/smisc-manager
 
