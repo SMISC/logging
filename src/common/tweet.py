@@ -12,6 +12,21 @@ class TweetService:
             return int(rslt[0])
         return None
 
+    def get_recent_tweets(self, min_tweet_id, batch_size = 100):
+        result = self.db.execute("select tweet_id, user_id, text, timestamp from tweet where tweet_id > %s limit %s", (min_tweet_id, batch_size))
+        results = self.db.fetchall()
+        tweets = []
+        if results is not None:
+            for result in results:
+                tweets.append({
+                    "tweet_id": int(result[0]),
+                    "user_id": int(result[1]),
+                    "text": result[2],
+                    "timestamp": int(result[3])
+                })
+            return tweets
+        return []
+
     def queue_tweet(self, status):
         tweet_id = int(status["id"])
         text = status["text"]

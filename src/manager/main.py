@@ -1,7 +1,6 @@
 import sys
 import os
 import queue
-import threading
 import redis
 import psycopg2
 import time
@@ -13,7 +12,7 @@ from TwitterAPI import TwitterAPI
 from manager.manager.scan import Scan
 from manager.manager.scan import ScanService
 
-from manager.manager.tweet import TweetService
+from common.tweet import TweetService
 
 from manager.manager.edge import EdgeService
 
