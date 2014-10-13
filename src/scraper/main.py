@@ -5,8 +5,6 @@ import psycopg2
 import redis
 import sys
 
-from TwitterAPI import TwitterAPI
-
 # from common.scraper import ScrapeJob
 from common.scraper import ScrapeService
 
@@ -69,4 +67,4 @@ if __name__ == "__main__":
     dbc.autocommit = True
     rds = redis.StrictRedis(host=config['redis']['host'], port=config['redis']['port'], db=int(config['redis']['database']))
 
-    main(api, dbc, rds, logfile)
+    main(dbc, rds, logfile)

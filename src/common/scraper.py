@@ -51,7 +51,7 @@ class ScrapeService:
         self.scan_id = scan_id
     def is_user_queued(self, user_id):
         return self.rds.sismember('scrape_%d_progress' % (self.scan_id), user_id)
-    def enqueue(self, user_id);
+    def enqueue(self, user_id):
         self.rds.sadd('scrape_%d_progress' % (self.scan_id), user_id)
         self.rds.lpush('scrape_%d_queue' % (self.scan_id), user_id)
     def dequeue(self):
