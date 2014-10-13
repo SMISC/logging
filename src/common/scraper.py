@@ -2,16 +2,18 @@ import threading
 import time
 
 class ScrapeJob(threading.Thread):
-    def __init__(self, rlapi, edgeservice, scrapeservice):
+    def __init__(self, rlapi, edgeservice, scrapeservice, logfile):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.edgeservice = edgeservice
+        self.logfile = logfile
         self.aborted = False
     def abort(self):
         self.aborted = True
     def run(self):
         while not self.aborted:
+            print("Scraping", file=self.logfile)
             user_id = self.scrapeservice.dequeue()
             if user_id:
                 cursor = -1

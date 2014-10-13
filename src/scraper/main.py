@@ -38,7 +38,7 @@ def main(dbc, rds, logfile, credentials):
         api = TwitterAPI(key, secret, auth_type='oAuth2')
         rlapi = RateLimitedTwitterAPI(api)
         rlapi.update()
-        followjob = ScrapeJob(rlapi, edgeservice, scrapeservice)
+        followjob = ScrapeJob(rlapi, edgeservice, scrapeservice, logfile)
         followjobs.append(followjob)
 
     for job in followjobs:
