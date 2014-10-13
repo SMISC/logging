@@ -1,6 +1,5 @@
 class EdgeService:
-    def __init__(self, rds, db):
-        self.rds = rds
+    def __init__(self, db):
         self.db = db
         self.cur_scan_id = None
     def set_current_scan_id(self, scan_id):

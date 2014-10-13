@@ -5,15 +5,19 @@ import psycopg2
 import redis
 import sys
 
-# from common.scraper import ScrapeJob
+from TwitterAPI import TwitterAPI
+
+from common.scraper import ScrapeJob
 from common.scraper import ScrapeService
 
 from common.tweet import TweetService
 from common.user import UserService
+from common.edge import EdgeService
+from common.ratelimit import RateLimitedTwitterAPI
 
 import time
 
-def main(dbc, rds, logfile):
+def main(dbc, rds, logfile, credentials):
     last_tweet_id = 0
     
     current_scan_id = int(rds.get('current_scan'))
@@ -22,6 +26,26 @@ def main(dbc, rds, logfile):
     userservice = UserService(dbc.cursor())
     scrapeservice = ScrapeService(rds)
     scrapeservice.set_current_scan_id(current_scan_id)
+
+    followjobs = []
+
+    print("[scraper-main] Initializing follower scrapers...", file=logfile)
+    logfile.flush()
+
+    for (key, secret) in credentials:
+        edgeservice = EdgeService(dbc.cursor())
+        edgeservice.set_current_scan_id(current_scan_id)
+        api = TwitterAPI(key, secret, auth_type='oAuth2')
+        rlapi = RateLimitedTwitterAPI(api)
+        rlapi.update()
+        followjob = ScrapeJob(rlapi, edgeservice, scrapeservice)
+        followjobs.append(followjob)
+
+    for job in followjobs:
+        job.start()
+
+    print("[scraper-main] Polling for tweets for user ids", file=logfile)
+    logfile.flush()
 
     try:
         while True:
@@ -34,13 +58,13 @@ def main(dbc, rds, logfile):
 
             user_ids_set = set(user_ids)
 
+            new_users = 0
+
             if len(user_ids):
                 users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
 
                 for user_id in users_in_postgres:
                     user_ids_set.discard(user['user_id'])
-
-                new_users = 0
 
                 for user_id in user_ids_set:
                     if not scrapeservice.is_user_queued(user_id):
@@ -48,11 +72,13 @@ def main(dbc, rds, logfile):
                         scrapeservice.enqueue(user_id)
 
             print("[scraper-main] backlog: %d\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length(), new_users, scrapeservice.total_processed()), file=logfile)
-            time.sleep(1)
+            time.sleep(10)
             logfile.flush()
     except KeyboardInterrupt:
         print("Caught interrupt signal. Exiting...", file=logfile)
         scrapeservice.erase()
+        for job in followjobs:
+            job.abort()
     
     dbc.close()
 
@@ -71,4 +97,15 @@ if __name__ == "__main__":
     dbc.autocommit = True
     rds = redis.StrictRedis(host=config['redis']['host'], port=config['redis']['port'], db=int(config['redis']['database']))
 
-    main(dbc, rds, logfile)
+    creds = []
+    keys = config['twitter-worker']['keys'].split("\n")
+    secrets = config['twitter-worker']['secrets'].split("\n")
+
+    if len(keys) != len(secrets):
+        print("Error: Mismatch in number of keys (%d) and secrets (%d)" % (len(keys), len(secrets)))
+        sys.exit(1)
+
+    for i in range(len(keys)):
+        creds.append((keys[i], secrets[i]))
+
+    main(dbc, rds, logfile, creds)

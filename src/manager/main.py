@@ -13,13 +13,10 @@ from manager.manager.scan import Scan
 from manager.manager.scan import ScanService
 
 from common.tweet import TweetService
-
-from manager.manager.edge import EdgeService
-
-from manager.manager.ratelimit import RateLimitedTwitterAPI
+from common.ratelimit import RateLimitedTwitterAPI
 
 def main(api, dbc, rds, logfile):
-    print("Inspecting rate limit status...", file=logfile)
+    print("[manager-main] Inspecting rate limit status...", file=logfile)
 
     rlapi = RateLimitedTwitterAPI(api)
     rlapi.update()
@@ -29,7 +26,7 @@ def main(api, dbc, rds, logfile):
     max_breadth = 2
     scan = scanservice.new_scan(start_time, max_breadth)
     rds.set('current_scan', scan.get_id())
-    print("Starting scan %d" % (scan.get_id()), file=logfile)
+    print("[manager-main] Starting scan %d" % (scan.get_id()), file=logfile)
     db = dbc.cursor()
     tweetservice = TweetService(dbc.cursor())
 
@@ -44,13 +41,13 @@ def main(api, dbc, rds, logfile):
         while True:
             if max_id is None and since_id is None:
                 # first query ever
-                print("Seeking any tweets we can get.", file=logfile)
+                print("[manager-main] Seeking any tweets we can get.", file=logfile)
                 results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100})
             elif max_id is not None: # seeking old
-                print("Seeking old tweets before %s (%d)" % (max_dt, max_id), file=logfile)
+                print("[manager-main] Seeking old tweets before %s (%d)" % (max_dt, max_id), file=logfile)
                 results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'max_id': max_id})
             else: # seeking new
-                print("Seeking new tweets since %s (%d)" % (since_dt, since_id), file=logfile)
+                print("[manager-main] Seeking new tweets since %s (%d)" % (since_dt, since_id), file=logfile)
                 results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'since_id': since_id})
 
             entities = []
@@ -82,7 +79,7 @@ def main(api, dbc, rds, logfile):
 
             tweetservice.commit()
 
-            print("Found %d tweets." % (n_tweets), file=logfile)
+            print("[manager-main] Found %d tweets." % (n_tweets), file=logfile)
 
             if n_tweets < 100:
                 # we got less than expected. switch to polling for new tweets.
@@ -107,7 +104,7 @@ def main(api, dbc, rds, logfile):
             time.sleep(1)
                 
     except KeyboardInterrupt:
-        print("Caught interrupt signal. Exiting...", file=logfile)
+        print("[manager-main] Caught interrupt signal. Exiting...", file=logfile)
     
     scanservice.done(int(time.time()))
 

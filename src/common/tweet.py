@@ -14,7 +14,7 @@ class TweetService:
 
     def tweets_where(self, where, args = [], limit = 100):
         args = args + [limit]
-        result = self.db.execute('select tweet_id, user_id, text, timestamp from "tweet" where ' + where + ' limit %s', tuple(args))
+        result = self.db.execute('select tweet_id, user_id, text, timestamp from "tweet" where ' + where + ' order by tweet_id asc limit %s', tuple(args))
         results = self.db.fetchall()
         tweets = []
         if results is not None:

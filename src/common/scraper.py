@@ -2,24 +2,19 @@ import threading
 import time
 
 class ScrapeJob(threading.Thread):
-    def __init__(self, rlapi, edgeservice, scrapeservice, scanservice, filterservice):
+    def __init__(self, rlapi, edgeservice, scrapeservice):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
-        self.filterservice = filterservice
-        self.scanservice = scanservice
         self.edgeservice = edgeservice
         self.aborted = False
     def abort(self):
         self.aborted = True
     def run(self):
         while not self.aborted:
-            job = self.scrapeservice.dequeue()
-            if job:
+            user_id = self.scrapeservice.dequeue()
+            if user_id:
                 cursor = -1
-                (user_id, breadth) = job
-                print("Scraping (breadth = %d)..." % (breadth))
-                self.filterservice.mark_user_scanned(user_id)
                 follower_ids = []
                 while True:
                     resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
@@ -37,9 +32,6 @@ class ScrapeJob(threading.Thread):
                     if cursor <= 0:
                         break
 
-                for follower_id in follower_ids:
-                    self.filterservice.push(follower_id, breadth+1)
-
             time.sleep(1)
 
 class ScrapeService:
@@ -55,7 +47,9 @@ class ScrapeService:
         self.rds.sadd('scrape_%d_progress' % (self.scan_id), user_id)
         self.rds.lpush('scrape_%d_queue' % (self.scan_id), user_id)
     def dequeue(self):
-        return int(self.rds.lpop('scrape_%d_queue' % (self.scan_id)))
+        result = self.rds.lpop('scrape_%d_queue' % (self.scan_id))
+        if result:
+            return int(result)
     def finished(self, user_id):
         self.rds.srem('scrape_%d_progress' % (self.scan_id), user_id)
     def length(self):
