@@ -29,23 +29,27 @@ def main(dbc, rds, logfile):
             
             user_ids = []
             for tweet in recent_tweets:
-                user_ids.append(tweet['user_id'])
+                user_ids.append(str(tweet['user_id'])) # postgresql wants string-keys
                 last_tweet_id = max(last_tweet_id, tweet['tweet_id'])
 
             user_ids_set = set(user_ids)
 
-            users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
+            if len(user_ids):
+                users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
 
-            for user_id in users_in_postgres:
-                user_ids_set.discard(user['user_id'])
+                for user_id in users_in_postgres:
+                    user_ids_set.discard(user['user_id'])
 
-            for user_id in user_ids_set:
-                if not scrapeservice.is_user_queued(user_id):
-                    new_users += 1
-                    scrapeservice.enqueue(user_id)
+                new_users = 0
 
-            print("[scraper-main] backlog: %d\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length(), new_users, scrapeservice.total_processed()))
+                for user_id in user_ids_set:
+                    if not scrapeservice.is_user_queued(user_id):
+                        new_users += 1
+                        scrapeservice.enqueue(user_id)
+
+            print("[scraper-main] backlog: %d\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length(), new_users, scrapeservice.total_processed()), file=logfile)
             time.sleep(1)
+            logfile.flush()
     except KeyboardInterrupt:
         print("Caught interrupt signal. Exiting...", file=logfile)
         scrapeservice.erase()
