@@ -2,6 +2,7 @@ import configparser
 import datetime
 import psycopg2
 import redis
+import sys
 
 from TwitterAPI import TwitterAPI
 
