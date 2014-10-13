@@ -28,12 +28,13 @@ def main(api, dbc, rds, logfile):
     start_time = int(time.time())
     max_breadth = 2
     scan = scanservice.new_scan(start_time, max_breadth)
-    print("Starting scan %d" % (scan.getId()), file=logfile)
+    rds.set('current_scan', scan.get_id())
+    print("Starting scan %d" % (scan.get_id()), file=logfile)
     db = dbc.cursor()
     tweetservice = TweetService(dbc.cursor())
 
     try:
-        query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower'
+        query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower OR #parentsdothework OR #saynotovaccines OR #vaccineeducated'
         max_id = None
         since_id = tweetservice.get_latest_tweet_id()
 

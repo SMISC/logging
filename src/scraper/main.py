@@ -7,10 +7,7 @@ import sys
 
 from TwitterAPI import TwitterAPI
 
-from common.filtr import FilterJob
-from common.filtr import FilterService
-
-from common.scraper import ScrapeJob
+# from common.scraper import ScrapeJob
 from common.scraper import ScrapeService
 
 from common.tweet import TweetService
@@ -20,30 +17,42 @@ import time
 
 def main(dbc, rds, logfile):
     last_tweet_id = 0
+    
+    current_scan_id = int(rds.get('current_scan'))
+
     tweetservice = TweetService(dbc.cursor())
     userservice = UserService(dbc.cursor())
+    scrapeservice = ScrapeService(rds)
+    scrapeservice.set_current_scan_id(current_scan_id)
 
-    while True:
-        filter_passes = 0
-        while filter_passes < 5:
-            recent_tweets = tweetservice.get_recent_tweets(last_tweet_id)
+    try:
+        while True:
+            recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             
             user_ids = []
             for tweet in recent_tweets:
                 user_ids.append(tweet['user_id'])
+                last_tweet_id = max(last_tweet_id, tweet['tweet_id'])
 
-            users_in_postgres = userservice.
+            user_ids_set = set(user_ids)
 
-                if tweet['user_id'] not in in_progress_user_ids and tweet['user_id'] not in queued_user_ids:
+            users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
+
+            for user_id in users_in_postgres:
+                user_ids_set.discard(user['user_id'])
+
+            for user_id in user_ids_set:
+                if not scrapeservice.is_user_queued(user_id):
                     new_users += 1
-                    rds.push(tweet['user_id'])
+                    scrapeservice.enqueue(user_id)
 
-            last_tweet_id = max(last_tweet_id, tweet['tweet_id'])
-
-        print("[scraper-main] backlog: %d\t\tin progress: %d\t\t%d pushed this cycle" % (backlog, len(), new_users))
-            
-    def get_recent_tweets(self, min_tweet_id, batch_size = 100):
-        time.sleep(1)
+            print("[scraper-main] backlog: %d\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length(), new_users, scrapeservice.total_processed()))
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Caught interrupt signal. Exiting...", file=logfile)
+        scrapeservice.erase()
+    
+    dbc.close()
 
 if __name__ == "__main__":
     print("Pacsocial Twitter Scraper")

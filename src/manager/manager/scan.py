@@ -11,14 +11,14 @@ class ScanService:
         self.cur_scan = Scan(scan_id, max_breadth)
         return self.cur_scan
     def done(self, now):
-        self.db.execute('UPDATE "scan" SET end_time = %s WHERE id = %s', (now, self.cur_scan.getId()))
+        self.db.execute('UPDATE "scan" SET end_time = %s WHERE id = %s', (now, self.cur_scan.get_id()))
         self.cur_scan = None
 
 class Scan:
     def __init__(self, scan_id, max_breadth):
         self.scan_id = scan_id
         self.max_breadth = max_breadth
-    def getId(self):
+    def get_id(self):
         return self.scan_id
-    def getMaxBreadth(self):
+    def get_max_breadth(self):
         return self.max_breadth
