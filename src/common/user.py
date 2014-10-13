@@ -3,7 +3,7 @@ class UserService:
         self.db = db
 
     def users_where(self, where, args = []):
-        result = self.db.execute("select user_id, screen_name, full_name, followers, bio from user where " + where, tuple(args))
+        result = self.db.execute('select user_id, screen_name, full_name, followers, bio from "user" where ' + where, tuple(args))
         results = self.db.fetchall()
         users = []
         if results is not None:
@@ -20,4 +20,4 @@ class UserService:
 
     def create_user(self, user):
         uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"])
-        result = self.db.execute("insert into user (user_id, screen_name, full_name, followers, bio) values (%s, %s, %s, %s, %s)", uval)
+        result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio) values (%s, %s, %s, %s, %s)', uval)

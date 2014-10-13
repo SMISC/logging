@@ -6,15 +6,15 @@ class TweetService:
         self.tweets = []
         self.entities = []
     def get_latest_tweet_id(self):
-        self.db.execute("select MAX(tweet_id) from tweet")
+        self.db.execute('select MAX(tweet_id) from "tweet"')
         rslt = self.db.fetchone()
         if rslt is not None and rslt[0] is not None:
             return int(rslt[0])
         return None
 
     def tweets_where(self, where, args = [], limit = 100):
-        args = args + [batch_size]
-        result = self.db.execute("select tweet_id, user_id, text, timestamp from tweet where " + where + " limit %s", tuple(args))
+        args = args + [limit]
+        result = self.db.execute('select tweet_id, user_id, text, timestamp from "tweet" where ' + where + ' limit %s', tuple(args))
         results = self.db.fetchall()
         tweets = []
         if results is not None:

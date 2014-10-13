@@ -5,7 +5,7 @@
 - name: restart postgresql
   service: name=postgresql state=restarted
 - name: restart redis
-  service: name=redis state=restarted
+  service: name=redis-server state=restarted
 - name: restart php
   service: name=php5-fpm state=restarted
 - name: restart monit
