@@ -13,7 +13,7 @@ class ScrapeJob(threading.Thread):
         self.aborted = True
     def run(self):
         while not self.aborted:
-            print("Scraping", file=self.logfile)
+            print("[scraper-followers] Scraping", file=self.logfile)
             user_id = self.scrapeservice.dequeue()
             if user_id:
                 cursor = -1
