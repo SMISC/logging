@@ -1,20 +1,25 @@
 import threading
 import time
+import sys
 
 from common.time import twittertime as twittertime
 
 class ScrapeFollowersJob(threading.Thread):
-    def __init__(self, rlapi, edgeservice, scrapeservice, evt):
+    def __init__(self, rlapi, edgeservice, scrapeservice, evt, logfile):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.edgeservice = edgeservice
         self.evt = evt
+        self.logfile = logfile
     def run(self):
+        sys.stdout = self.logfile
+        sys.stderr = self.logfile
         while not self.evt.is_set():
             user_id = self.scrapeservice.dequeue('follow')
             if user_id:
                 print("[scraper-followers] Scraping %d" % (user_id))
+                sys.stdout.flush()
                 cursor = -1
                 follower_ids = []
                 while True:
@@ -34,13 +39,16 @@ class ScrapeFollowersJob(threading.Thread):
                         break
 
 class ScrapeInfoJob(threading.Thread):
-    def __init__(self, rlapi, userservice, scrapeservice, evt):
+    def __init__(self, rlapi, userservice, scrapeservice, evt, logfile):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.userservice = userservice
         self.evt = evt
+        self.logfile = logfile
     def run(self):
+        sys.stdout = self.logfile
+        sys.stderr = self.logfile
         while not self.evt.is_set():
             ids = []
             t = 15 # wait up to 15 seconds, otherwise we're behind on average
@@ -52,6 +60,7 @@ class ScrapeInfoJob(threading.Thread):
                 self.evt.wait(1)
             if len(ids) > 0:
                 print('[scraper-info] Scraping %d' % (len(ids)))
+                sys.stdout.flush()
                 resp = self.rlapi.request('users/lookup', {'user_id': ','.join(ids)})
                 for user in resp.get_iterator():
                     self.userservice.create_user({

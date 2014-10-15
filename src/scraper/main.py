@@ -46,7 +46,7 @@ class ScraperMain:
             rlapi = RateLimitedTwitterAPI(api, self.wakeup)
             print('[scraper-main] Updating rate limits information for follower')
             rlapi.update()
-            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
+            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup, sys.stdout)
             self.jobs.append(followjob)
         
         (infokey, infosecret) = self.credentials[-1]
@@ -54,7 +54,7 @@ class ScraperMain:
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
         print('[scraper-main] Updating rate limits information for info')
         rlinfoapi.update()
-        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
+        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup, sys.stdout)
         self.jobs.append(infojob)
 
         for job in self.jobs:
@@ -98,7 +98,9 @@ class ScraperMain:
         print("Caught signal. Exiting gracefully...")
         self.dbc.close()
         self.wakeup.set()
-        self.scarpeservice.erase(['follow', 'info'])
+        self.scrapeservice.erase(['follow', 'info'])
+        for job in self.jobs:
+            job.join()
 
 if __name__ == "__main__":
     print("Pacsocial Twitter Scraper")
