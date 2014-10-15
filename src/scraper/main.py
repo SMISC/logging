@@ -124,4 +124,5 @@ if __name__ == "__main__":
     for i in range(len(keys)):
         creds.append((keys[i], secrets[i]))
 
-    main(dbc, rds, logfile, creds)
+    scraper = ScraperMain(dbc, rds, logfile, creds)
+    scraper.main()
