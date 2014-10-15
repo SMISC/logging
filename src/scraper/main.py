@@ -46,7 +46,7 @@ class ScraperMain:
             rlapi = RateLimitedTwitterAPI(api, self.wakeup)
             print('[scraper-main] Updating rate limits information for follower')
             rlapi.update()
-            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup, sys.stdout)
+            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
         (infokey, infosecret) = self.credentials[-1]
@@ -54,7 +54,7 @@ class ScraperMain:
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
         print('[scraper-main] Updating rate limits information for info')
         rlinfoapi.update()
-        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup, sys.stdout)
+        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
         self.jobs.append(infojob)
 
         for job in self.jobs:
@@ -107,11 +107,7 @@ if __name__ == "__main__":
 
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logfile = open(config['bot']['log'], 'a+')
-    sys.stdout = logfile
-    sys.stderr = logfile
-
-    print("Pacsocial Twitter Scraper started at %s" % (datetime.datetime.now().strftime("%b %d %H:%M:%S")), file=logfile)
+    print("Pacsocial Twitter Scraper started at %s" % (datetime.datetime.now().strftime("%b %d %H:%M:%S")))
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True

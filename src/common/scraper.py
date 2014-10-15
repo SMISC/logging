@@ -5,16 +5,13 @@ import sys
 from common.time import twittertime as twittertime
 
 class ScrapeFollowersJob(threading.Thread):
-    def __init__(self, rlapi, edgeservice, scrapeservice, evt, logfile):
+    def __init__(self, rlapi, edgeservice, scrapeservice, evt):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.edgeservice = edgeservice
         self.evt = evt
-        self.logfile = logfile
     def run(self):
-        sys.stdout = self.logfile
-        sys.stderr = self.logfile
         while not self.evt.is_set():
             user_id = self.scrapeservice.dequeue('follow')
             if user_id:
@@ -39,16 +36,13 @@ class ScrapeFollowersJob(threading.Thread):
                         break
 
 class ScrapeInfoJob(threading.Thread):
-    def __init__(self, rlapi, userservice, scrapeservice, evt, logfile):
+    def __init__(self, rlapi, userservice, scrapeservice, evt):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.userservice = userservice
         self.evt = evt
-        self.logfile = logfile
     def run(self):
-        sys.stdout = self.logfile
-        sys.stderr = self.logfile
         while not self.evt.is_set():
             ids = []
             t = 15 # wait up to 15 seconds, otherwise we're behind on average
