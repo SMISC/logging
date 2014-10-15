@@ -32,6 +32,8 @@ class ScraperMain:
         
         current_scan_id = int(self.rds.get('current_scan'))
 
+        print('[scraper-main] Current scan: %d' % (current_scan_id))
+
         tweetservice = TweetService(self.dbc.cursor())
         userservice = UserService(self.dbc.cursor())
         scrapeservice = ScrapeService(self.rds, current_scan_id)
