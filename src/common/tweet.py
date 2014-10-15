@@ -1,4 +1,4 @@
-from common import time.twittertime as twittertime
+from common.time import twittertime as twittertime
 
 class TweetService:
     def __init__(self, db):
