@@ -14,7 +14,7 @@ class UserService:
                     "full_name": result[2],
                     "followers": int(result[3]),
                     "following": int(result[4]),
-                    "bio": result[5]
+                    "bio": result[5],
                     "timestamp": int(result[6]),
                     "total_tweets": int(result[7])
                 })
