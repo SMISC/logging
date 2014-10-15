@@ -65,7 +65,7 @@ class ScraperMain:
         print('[scraper-main] Starting jobs...')
 
         for job in self.jobs:
-            pass#job.start()
+            job.start()
 
         print('[scraper-main] Polling for tweets for user ids starting at %d' % (last_tweet_id))
         sys.stdout.flush()
