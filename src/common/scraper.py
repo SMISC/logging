@@ -53,7 +53,7 @@ class ScrapeInfoJob(threading.Thread):
                 if user_id:
                     ids.append(int(user_id))
                 t = t - 1
-                self.evt.wait(1)
+                time.sleep(5)
             if len(ids) > 0:
                 print('[scraper-info] Scraping %d' % (len(ids)))
                 sys.stdout.flush()
