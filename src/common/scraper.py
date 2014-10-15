@@ -13,6 +13,7 @@ class ScrapeFollowersJob(threading.Thread):
         self.evt = evt
     def run(self):
         while not self.evt.is_set():
+            self.evt.wait(5)
             user_id = self.scrapeservice.dequeue('follow')
             if user_id:
                 print('[scraper-followers] Scraping %d' % (user_id))
@@ -53,7 +54,7 @@ class ScrapeInfoJob(threading.Thread):
                 if user_id:
                     ids.append(int(user_id))
                 t = t - 1
-                time.sleep(5)
+                self.evt.wait(1)
             if len(ids) > 0:
                 print('[scraper-info] Scraping %d' % (len(ids)))
                 sys.stdout.flush()
