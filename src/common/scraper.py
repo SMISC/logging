@@ -1,7 +1,7 @@
 import threading
 import time
 
-from common import time.twittertime as twittertime
+from common.time import twittertime as twittertime
 
 class ScrapeFollowersJob(threading.Thread):
     def __init__(self, rlapi, edgeservice, scrapeservice, evt):
