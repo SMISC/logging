@@ -70,8 +70,8 @@ class ScraperMain:
         print('[scraper-main] Polling for tweets for user ids starting at %d' % (last_tweet_id))
         self.stdout.flush()
         
-        signal.signal(signal.SIGINT, self.cleanup)
-        signal.signal(signal.SIGTERM, self.cleanup)
+        #signal.signal(signal.SIGINT, self.cleanup)
+        #signal.signal(signal.SIGTERM, self.cleanup)
 
         while True:
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
