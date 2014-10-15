@@ -15,11 +15,12 @@ class ScrapeFollowersJob(threading.Thread):
         while not self.evt.is_set():
             user_id = self.scrapeservice.dequeue('follow')
             if user_id:
-                print("[scraper-followers] Scraping %d" % (user_id))
+                print('[scraper-followers] Scraping %d' % (user_id))
                 sys.stdout.flush()
                 cursor = -1
                 follower_ids = []
-                while True:
+                while not self.evt.is_set():
+                    print('[scraper-followers] Paging %d' % (user_id))
                     resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
                     for follower in resp.get_iterator():
                         resp_follower_ids = []
@@ -47,6 +48,7 @@ class ScrapeInfoJob(threading.Thread):
             ids = []
             t = 15 # wait up to 15 seconds, otherwise we're behind on average
             while not self.evt.is_set() and len(ids) < 100 and t > 0:
+                print('[scraper-info] Accumulating (%d/100) with %d seconds left' % (len(ids), t))
                 user_id = self.scrapeservice.dequeue('info')
                 if user_id:
                     ids.append(int(user_id))
