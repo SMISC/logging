@@ -48,7 +48,6 @@ class ScraperMain:
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
             rlapi = RateLimitedTwitterAPI(api, self.wakeup)
-            print('[scraper-main] Updating rate limit status')
             sys.stdout.flush()
             rlapi.update()
             followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
@@ -58,12 +57,9 @@ class ScraperMain:
         (infokey, infosecret) = self.credentials[-1]
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
-        print('[scraper-main] Updating rate limits information for info')
         sys.stdout.flush()
         rlinfoapi.update()
-        print('[scraper-main] Finished updating rete limits.')
         infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
-        print('[scraper-main] Finished creating threads.')
         self.jobs.append(infojob)
 
         print('[scraper-main] Starting jobs...')
@@ -79,6 +75,8 @@ class ScraperMain:
 
         while True:
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
+            print('Grabbed %d recent tweets' % (len(recent_tweets)))
+            sys.stdout.flush()
             
             user_ids = []
             for tweet in recent_tweets:
@@ -102,11 +100,10 @@ class ScraperMain:
 
             print('[scraper-main] backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed' % (scrapeservice.length('info'), scrapeservice.length('follow'), new_users, scrapeservice.total_processed()))
             time.sleep(10)
-            sys.stdout.flush()
         
         self.dbc.close()
     def cleanup(self):
-        print("Caught signal. Exiting gracefully...")
+        print('Caught signal. Exiting gracefully...')
         self.dbc.close()
         self.wakeup.set()
         self.scrapeservice.erase(['follow', 'info'])
