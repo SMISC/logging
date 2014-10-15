@@ -2,20 +2,27 @@ import time
 import re
 
 class RateLimitedTwitterAPI:
-    def __init__(self, api):
+    # to make this thread wake up early, call `event`.set()
+    def __init__(self, api, wakeup):
         self.limits = None
         self.api = api
+        self.wakeup = wakeup
 
     def request(self, resource, params=None, files=None):
         if self.limits is not None:
             self.block_until_available(resource)
-        response = self.api.request(resource, params, files)
-        if (response.status_code) == 429:
-            quota = response.get_rest_quota()
-            if self.limits is not None and quota['reset'] is not None:
-                self.updateWith(resource, quota)
-            self.block_until_available(resource)
-        return response
+        if not self.wakeup.is_set():
+            response = self.api.request(resource, params, files)
+            if (response.status_code) == 429:
+                quota = response.get_rest_quota()
+                if self.limits is not None and quota['reset'] is not None:
+                    self.updateWith(resource, quota)
+                self.block_until_available(resource)
+                if self.wakeup.is_set(): # timed out
+                    return None
+            return response
+        # timed out
+        return None
 
     def flatten(self, response):
         limits_flattened = {}
@@ -72,6 +79,7 @@ class RateLimitedTwitterAPI:
             while limit['remaining'] <= 0 and limit['reset'] > now:
                 time_to_sleep = limit['reset'] - now
                 print("%d seconds left on %s rate limit" % (time_to_sleep, uri))
-                time.sleep(min(10,time_to_sleep))
+                if self.wakeup.wait(min(10, time_to_sleep)):
+                    return
                 now = int(time.time())
             self.update()

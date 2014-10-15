@@ -4,10 +4,12 @@ import datetime
 import psycopg2
 import redis
 import sys
+import signal
 
 from TwitterAPI import TwitterAPI
 
-from common.scraper import ScrapeJob
+from common.scraper import ScrapeFollowersJob
+from common.scraper import ScrapeInfoJob
 from common.scraper import ScrapeService
 
 from common.tweet import TweetService
@@ -17,37 +19,51 @@ from common.ratelimit import RateLimitedTwitterAPI
 
 import time
 
-def main(dbc, rds, logfile, credentials):
-    last_tweet_id = 0
-    
-    current_scan_id = int(rds.get('current_scan'))
+class ScraperMain:
+    def __init__(self, dbc, rds, credentials):
+        self.dbc = dbc
+        self.rds = rds
+        self.credentials = credentials
+        self.jobs = []
+        self.wakeup = threading.Event()
 
-    tweetservice = TweetService(dbc.cursor())
-    userservice = UserService(dbc.cursor())
-    scrapeservice = ScrapeService(rds)
-    scrapeservice.set_current_scan_id(current_scan_id)
+    def main(self):
+        last_tweet_id = 0
+        
+        current_scan_id = int(self.rds.get('current_scan'))
 
-    followjobs = []
+        tweetservice = TweetService(self.dbc.cursor())
+        userservice = UserService(self.dbc.cursor())
+        scrapeservice = ScrapeService(self.rds, current_scan_id)
 
-    print("[scraper-main] Initializing follower scrapers...", file=logfile)
-    logfile.flush()
+        print('[scraper-main] Initializing follower scrapers...')
+        sys.stdout.flush()
 
-    for (key, secret) in credentials:
-        edgeservice = EdgeService(dbc.cursor())
-        edgeservice.set_current_scan_id(current_scan_id)
-        api = TwitterAPI(key, secret, auth_type='oAuth2')
-        rlapi = RateLimitedTwitterAPI(api)
-        rlapi.update()
-        followjob = ScrapeJob(rlapi, edgeservice, scrapeservice, logfile)
-        followjobs.append(followjob)
+        for (key, secret) in credentials[:-1]: # save one for user info scraper
+            edgeservice = EdgeService(self.dbc.cursor())
+            edgeservice.set_current_scan_id(current_scan_id)
+            api = TwitterAPI(key, secret, auth_type='oAuth2')
+            rlapi = RateLimitedTwitterAPI(api, self.wakeup)
+            rlapi.update()
+            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
+            self.jobs.append(followjob)
+        
+        (infokey, infosecret) = credentials[-1]
+        infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
+        rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
+        rlinfoapi.update()
+        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
+        self.jobs.append(infojob)
 
-    for job in followjobs:
-        job.start()
+        for job in self.jobs:
+            job.start()
 
-    print("[scraper-main] Polling for tweets for user ids", file=logfile)
-    logfile.flush()
+        print('[scraper-main] Polling for tweets for user ids')
+        self.stdout.flush()
+        
+        signal.signal(signal.SIGINT, self.cleanup)
+        signal.signal(signal.SIGTERM, self.cleanup)
 
-    try:
         while True:
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             
@@ -71,16 +87,16 @@ def main(dbc, rds, logfile, credentials):
                         new_users += 1
                         scrapeservice.enqueue(user_id)
 
-            print("[scraper-main] backlog: %d\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length(), new_users, scrapeservice.total_processed()), file=logfile)
+            print("[scraper-main] backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed" % (scrapeservice.length('info'), scrapeservice.length('follow'), new_users, scrapeservice.total_processed()))
             time.sleep(10)
-            logfile.flush()
-    except KeyboardInterrupt:
-        print("Caught interrupt signal. Exiting...", file=logfile)
-        scrapeservice.erase()
-        for job in followjobs:
-            job.abort()
-    
-    dbc.close()
+            sys.stdout.flush()
+        
+        self.dbc.close()
+    def cleanup(self):
+        print("Caught signal. Exiting gracefully...")
+        self.dbc.close()
+        self.wakeup.set()
+        self.scarpeservice.erase(['follow', 'info'])
 
 if __name__ == "__main__":
     print("Pacsocial Twitter Scraper")

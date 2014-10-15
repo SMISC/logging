@@ -1,4 +1,4 @@
-import datetime
+from common import time.twittertime as twittertime
 
 class TweetService:
     def __init__(self, db):
@@ -31,7 +31,7 @@ class TweetService:
     def queue_tweet(self, status):
         tweet_id = int(status["id"])
         text = status["text"]
-        timestamp = (datetime.datetime.strptime(status["created_at"], "%a %b %d %H:%M:%S +0000 %Y") - datetime.datetime(1970,1,1)).total_seconds()
+        timestamp = twittertime(status['created_at'])
         user = status["user"]
         user_id = int(user["id"])
         self.tweets.append((tweet_id, user_id, text, timestamp))
@@ -59,6 +59,3 @@ class TweetService:
 
         self.tweets = []
         self.entities = []
-
-        
-

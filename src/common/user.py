@@ -3,7 +3,7 @@ class UserService:
         self.db = db
 
     def users_where(self, where, args = []):
-        result = self.db.execute('select user_id, screen_name, full_name, followers, bio from "user" where ' + where, tuple(args))
+        result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from "user" where ' + where, tuple(args))
         results = self.db.fetchall()
         users = []
         if results is not None:
@@ -13,11 +13,14 @@ class UserService:
                     "screen_name": result[1],
                     "full_name": result[2],
                     "followers": int(result[3]),
-                    "bio": result[4]
+                    "following": int(result[4]),
+                    "bio": result[5]
+                    "timestamp": int(result[6]),
+                    "total_tweets": int(result[7])
                 })
             return users
         return []
 
     def create_user(self, user):
-        uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"])
-        result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio) values (%s, %s, %s, %s, %s)', uval)
+        uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"], user["total_tweets"], user["timestamp"], user["following"])
+        result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
