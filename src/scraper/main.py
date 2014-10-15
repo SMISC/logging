@@ -61,7 +61,9 @@ class ScraperMain:
         print('[scraper-main] Updating rate limits information for info')
         sys.stdout.flush()
         rlinfoapi.update()
+        print('[scraper-main] Finished updating rete limits.')
         infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
+        print('[scraper-main] Finished creating threads.')
         self.jobs.append(infojob)
 
         print('[scraper-main] Starting jobs...')
