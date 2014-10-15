@@ -62,6 +62,8 @@ class ScraperMain:
         infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
         self.jobs.append(infojob)
 
+        print('[scraper-main] Starting jobs...')
+
         for job in self.jobs:
             job.start()
 
