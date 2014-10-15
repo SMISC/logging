@@ -23,21 +23,21 @@ class ManagerMain:
         self.rds = rds
         self.wait = threading.Event()
 
-    def main(api, dbc, rds, logfile):
+    def main():
         print('[manager-main] Inspecting rate limit status...')
 
         rlapi = RateLimitedTwitterAPI(self.api, self.wait)
         rlapi.update()
 
-        scanservice = ScanService(dbc.cursor())
+        scanservice = ScanService(self.dbc.cursor())
         start_time = int(time.time())
         max_breadth = 2
         scan = scanservice.new_scan(start_time, max_breadth)
-        rds.set('current_scan', scan.get_id())
+        self.rds.set('current_scan', scan.get_id())
 
         print('[manager-main] Starting scan %d' % (scan.get_id()))
-        db = dbc.cursor()
-        tweetservice = TweetService(dbc.cursor())
+        db = self.dbc.cursor()
+        tweetservice = TweetService(self.dbc.cursor())
 
         while not self.wait.is_set():
             query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower OR #parentsdothework OR #saynotovaccines OR #vaccineeducated'
