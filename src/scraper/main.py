@@ -40,19 +40,24 @@ class ScraperMain:
         sys.stdout.flush()
 
         for (key, secret) in self.credentials[:-1]: # save one for user info scraper
+            print('[scraper-main] Creating follower thread')
+            sys.stdout.flush()
             edgeservice = EdgeService(self.dbc.cursor())
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
             rlapi = RateLimitedTwitterAPI(api, self.wakeup)
-            print('[scraper-main] Updating rate limits information for follower')
+            print('[scraper-main] Updating rate limit status')
+            sys.stdout.flush()
             rlapi.update()
             followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
+        print('[scraper-main] Creating info thread')
         (infokey, infosecret) = self.credentials[-1]
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
         print('[scraper-main] Updating rate limits information for info')
+        sys.stdout.flush()
         rlinfoapi.update()
         infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
         self.jobs.append(infojob)
