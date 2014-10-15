@@ -39,7 +39,7 @@ class ScraperMain:
         print('[scraper-main] Initializing follower scrapers...')
         sys.stdout.flush()
 
-        for (key, secret) in credentials[:-1]: # save one for user info scraper
+        for (key, secret) in self.credentials[:-1]: # save one for user info scraper
             edgeservice = EdgeService(self.dbc.cursor())
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
@@ -48,7 +48,7 @@ class ScraperMain:
             followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
-        (infokey, infosecret) = credentials[-1]
+        (infokey, infosecret) = self.credentials[-1]
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
         rlinfoapi.update()
