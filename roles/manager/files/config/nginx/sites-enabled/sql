@@ -1,6 +1,6 @@
 server {
 	listen 80;
-	server_name sql.pacsocial.jwgur.com;
+	server_name sql.smisc.jwgur.com;
 	root /usr/share/nginx/sql;
 	index index.php;
 
