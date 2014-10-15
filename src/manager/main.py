@@ -23,7 +23,7 @@ class ManagerMain:
         self.rds = rds
         self.wait = threading.Event()
 
-    def main():
+    def main(self):
         print('[manager-main] Inspecting rate limit status...')
 
         rlapi = RateLimitedTwitterAPI(self.api, self.wait)
