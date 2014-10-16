@@ -106,7 +106,7 @@ class ManagerMain:
 
                     max_dt = ''
                     max_id = None
-                    time.sleep(20)
+                    self.wait.wait(20)
                 else:
                     # we got 100. start paging.
                     since_id = None
