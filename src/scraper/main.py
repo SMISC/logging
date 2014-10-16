@@ -47,7 +47,7 @@ class ScraperMain:
             edgeservice = EdgeService(self.dbc.cursor())
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
-            rlapi = RateLimitedTwitterAPI(api, self.wakeup)
+            rlapi = RateLimitedTwitterAPI(self.log.getChild('ratelimit'), api, self.wakeup)
             rlapi.update()
             followjob = ScrapeFollowersJob(self.log.getChild('followers'), rlapi, edgeservice, scrapeservice, self.wakeup)
             self.jobs.append(followjob)
@@ -55,7 +55,7 @@ class ScraperMain:
         self.log.debug('Creating info thread')
         (infokey, infosecret) = self.credentials[-1]
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
-        rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
+        rlinfoapi = RateLimitedTwitterAPI(self.log.getChild('ratelimit'), infoapi, self.wakeup)
         rlinfoapi.update()
         infojob = ScrapeInfoJob(self.log.getChild('info'), rlinfoapi, userservice, scrapeservice, self.wakeup)
         self.jobs.append(infojob)
@@ -133,4 +133,8 @@ if __name__ == "__main__":
         creds.append((keys[i], secrets[i]))
 
     scraper = ScraperMain(log, dbc, rds, creds)
-    scraper.main()
+    try:
+        scraper.main()
+    except Exception, err:
+        log.exception('Caught error: %s' % (str(err)))
+        scraper.cleanup()

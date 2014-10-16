@@ -134,4 +134,8 @@ if __name__ == '__main__':
     rds = redis.StrictRedis(host=config['redis']['host'], port=config['redis']['port'], db=int(config['redis']['database']))
 
     manager = ManagerMain(log, api, dbc, rds)
-    manager.main()
+    try:
+        manager.main()
+    except Exception, err:
+        log.exception('Caught error: %s' % (str(err)))
+        manager.cleanup()
