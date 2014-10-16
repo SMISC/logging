@@ -1,6 +1,8 @@
 ---
 - name: temporarily disable monitoring
   command: monit unmonitor smisc-manager
+  tags:
+    - hot
 
 - name: install base packages
   apt: name={{ item }} state=latest
@@ -86,3 +88,5 @@
 
 - name: re-enable monitoring
   command: monit monitor smisc-manager
+  tags:
+    - hot

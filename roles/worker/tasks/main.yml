@@ -1,5 +1,7 @@
-#- name: temporarily disable monitoring
-#  command: monit unmonitor smisc-scraper
+- name: temporarily disable monitoring
+  command: monit unmonitor smisc-scraper
+  tags:
+    - hot
 
 - name: Synchronize initscript
   synchronize: src=config/initscripts/smisc-scraper dest=/etc/init.d/smisc-scraper
@@ -30,3 +32,5 @@
 
 - name: re-enable monitoring
   command: monit monitor smisc-scraper
+  tags:
+    - hot
