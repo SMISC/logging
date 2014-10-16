@@ -109,13 +109,12 @@ class ScraperMain:
             job.join()
 
 if __name__ == "__main__":
-    logging.info('Pacsocial Twitter Scraper')
-
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
     logfile = config['bot']['log']
     logging.basicConfig(filename=logfile, level=50)
-    logging.info('Pacsocial Twitter Scraper started at %s' % (datetime.datetime.now().strftime("%b %d %H:%M:%S")))
+
+    logging.info('SMISC scraper started at %s' % (datetime.datetime.now().strftime("%b %d %H:%M:%S")))
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True

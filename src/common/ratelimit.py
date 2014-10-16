@@ -1,4 +1,5 @@
 import time
+import logging
 import re
 
 class RateLimitedTwitterAPI:
@@ -78,7 +79,7 @@ class RateLimitedTwitterAPI:
                 break
             while limit['remaining'] <= 0 and limit['reset'] > now:
                 time_to_sleep = limit['reset'] - now
-                print("%d seconds left on %s rate limit" % (time_to_sleep, uri))
+                logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
                 if self.wakeup.wait(min(10, time_to_sleep)):
                     return
                 now = int(time.time())

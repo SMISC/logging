@@ -7,6 +7,7 @@ import time
 import configparser
 import datetime
 import threading
+import logging
 
 from TwitterAPI import TwitterAPI
 
@@ -24,7 +25,7 @@ class ManagerMain:
         self.wait = threading.Event()
 
     def main(self):
-        print('[manager-main] Inspecting rate limit status...')
+        logging.debug('Inspecting rate limit status...')
 
         rlapi = RateLimitedTwitterAPI(self.api, self.wait)
         rlapi.update()
@@ -35,7 +36,7 @@ class ManagerMain:
         scan = scanservice.new_scan(start_time, max_breadth)
         self.rds.set('current_scan', scan.get_id())
 
-        print('[manager-main] Starting scan %d' % (scan.get_id()))
+        logging.info('Starting scan %d' % (scan.get_id()))
         db = self.dbc.cursor()
         tweetservice = TweetService(self.dbc.cursor())
 
@@ -50,13 +51,13 @@ class ManagerMain:
             while not self.wait.is_set():
                 if max_id is None and since_id is None:
                     # first query ever
-                    print('[manager-main] Seeking any tweets we can get.')
+                    logging.info('Seeking any tweets we can get.')
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100})
                 elif max_id is not None: # seeking old
-                    print('[manager-main] Seeking old tweets before %s (%d)' % (max_dt, max_id))
+                    logging.info('Seeking old tweets before %s (%d)' % (max_dt, max_id))
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'max_id': max_id})
                 else: # seeking new
-                    print('[manager-main] Seeking new tweets since %s (%d)' % (since_dt, since_id))
+                    logging.info('Seeking new tweets since %s (%d)' % (since_dt, since_id))
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'since_id': since_id})
 
                 entities = []
@@ -88,7 +89,7 @@ class ManagerMain:
 
                 tweetservice.commit()
 
-                print('[manager-main] Found %d tweets.' % (n_tweets))
+                logging.debug('Found %d tweets.' % (n_tweets))
 
                 if n_tweets < 100:
                     # we got less than expected. switch to polling for new tweets.
@@ -114,20 +115,16 @@ class ManagerMain:
                     
     
     def cleanup(self):
-        print('[manager-main] Caught interrupt signal. Exiting...')
+        logging.info('Caught interrupt signal. Exiting...')
         self.wait.set()
         scanservice.done(int(time.time()))
 
 if __name__ == '__main__':
-    print('Pacsocial Twitter Scanner')
-
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logfile = open(config['bot']['log'], 'a+')
-    sys.stdout = logfile
-    sys.stderr = logfile
+    logging.basicConfig(filename=config['bot']['log'], level=50)
 
-    print('Pacsocial Twitter Scanner started at %s' % (datetime.datetime.now().strftime('%b %d %H:%M:%S')), file=logfile)
+    logging.info('SMISC Manager started at %s' % (datetime.datetime.now().strftime('%b %d %H:%M:%S')))
 
     api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
 
