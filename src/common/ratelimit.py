@@ -10,19 +10,12 @@ class RateLimitedTwitterAPI:
         self.wakeup = wakeup
 
     def request(self, resource, params=None, files=None):
-        if self.limits is not None:
+        self.block_until_available(resource)
+        response = self.api.request(resource, params, files)
+        if response.status_code == 429:
+            self.next(resource)
             self.block_until_available(resource)
-        if not self.wakeup.is_set():
-            response = self.api.request(resource, params, files)
-            if (response.status_code) == 429:
-                if self.limits is not None:
-                    self.next(resource)
-                self.block_until_available(resource)
-                if self.wakeup.is_set(): # timed out
-                    raise EOFError("waking up...")
-            return response
-        # timed out
-        return None
+        return response
 
     def flatten(self, response):
         limits_flattened = {}
@@ -81,6 +74,6 @@ class RateLimitedTwitterAPI:
                 time_to_sleep = limit['reset'] - now
                 logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
                 if self.wakeup.wait(min(10, time_to_sleep)):
-                    return
+                    raise Exception("waking up...")
                 now = int(time.time())
             self.update()
