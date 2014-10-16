@@ -79,7 +79,7 @@ class ScraperMain:
             
             user_ids = []
             for tweet in recent_tweets:
-                user_ids.append(int(tweet['user_id'])) # postgresql wants string-keys
+                user_ids.append(str(tweet['user_id'])) # postgresql wants string-keys
                 last_tweet_id = max(last_tweet_id, tweet['tweet_id'])
 
             user_ids_set = set(user_ids)
@@ -90,7 +90,7 @@ class ScraperMain:
                 users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
 
                 for user in users_in_postgres:
-                    user_ids_set.discard(int(user['user_id']))
+                    user_ids_set.discard(str(user['user_id']))
 
                 for user_id in user_ids_set:
                     if not self.scrapeservice.is_user_queued(user_id):
