@@ -1,4 +1,5 @@
 import sys
+import signal
 import os
 import queue
 import redis
