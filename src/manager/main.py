@@ -136,6 +136,6 @@ if __name__ == '__main__':
     manager = ManagerMain(log, api, dbc, rds)
     try:
         manager.main()
-    except Exception, err:
+    except Exception as err:
         log.exception('Caught error: %s' % (str(err)))
         manager.cleanup()

@@ -135,6 +135,6 @@ if __name__ == "__main__":
     scraper = ScraperMain(log, dbc, rds, creds)
     try:
         scraper.main()
-    except Exception, err:
+    except Exception as err:
         log.exception('Caught error: %s' % (str(err)))
         scraper.cleanup()
