@@ -126,7 +126,9 @@ if __name__ == '__main__':
     formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
     handler.setFormatter(formatter)
     log.addHandler(handler)
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
+    
+    logging.getLogger('requests').setLevel(logging.ERROR)
 
     logging.info('SMISC Manager started')
 
