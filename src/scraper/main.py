@@ -66,7 +66,6 @@ class ScraperMain:
             job.start()
 
         logging.info('Polling for tweets for user ids starting at %d', last_tweet_id)
-        sys.stdout.flush()
         
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
@@ -74,8 +73,6 @@ class ScraperMain:
         while not self.wakeup.is_set():
             logging.debug('There are %d active workers', threading.active_count())
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
-            logging.info('Grabbed %d recent tweets since %d', len(recent_tweets), last_tweet_id)
-            sys.stdout.flush()
             
             user_ids = []
             for tweet in recent_tweets:
@@ -101,6 +98,7 @@ class ScraperMain:
             self.wakeup.wait(10)
         
         self.dbc.close()
+
     def cleanup(self):
         logging.info('Caught signal. Exiting gracefully...')
         self.dbc.close()
