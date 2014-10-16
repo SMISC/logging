@@ -17,11 +17,12 @@ class RateLimitedTwitterAPI:
             logging.debug('API response code: %d', response.status_code)
             if (response.status_code) == 429:
                 quota = response.get_rest_quota()
+                logging.debug('REST quota: %s', str(quota))
                 if self.limits is not None and quota['reset'] is not None:
                     self.updateWith(resource, quota)
                 self.block_until_available(resource)
                 if self.wakeup.is_set(): # timed out
-                    return None
+                    raise EOFError, "waking up..."
             return response
         # timed out
         return None

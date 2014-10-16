@@ -71,7 +71,7 @@ class ScraperMain:
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
 
-        while True:
+        while not self.wakeup.is_set():
             logging.debug('There are %d active workers', threading.active_count())
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             logging.info('Grabbed %d recent tweets since %d', len(recent_tweets), last_tweet_id)
@@ -98,7 +98,7 @@ class ScraperMain:
                         self.scrapeservice.enqueue(user_id)
 
             logging.info('scrape backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed', self.scrapeservice.length('info'), self.scrapeservice.length('follow'), new_users, self.scrapeservice.total_processed())
-            time.sleep(10)
+            self.wakeup.wait(10)
         
         self.dbc.close()
     def cleanup(self):

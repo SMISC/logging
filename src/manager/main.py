@@ -40,6 +40,9 @@ class ManagerMain:
         db = self.dbc.cursor()
         tweetservice = TweetService(self.dbc.cursor())
 
+        signal.signal(signal.SIGINT, self.cleanup)
+        signal.signal(signal.SIGTERM, self.cleanup)
+
         while not self.wait.is_set():
             query = '#vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower OR #parentsdothework OR #saynotovaccines OR #vaccineeducated'
             max_id = None
