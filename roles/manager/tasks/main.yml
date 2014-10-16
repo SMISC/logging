@@ -45,7 +45,7 @@
     - restart php
 
 - name: Synchronize monit scripts
-  synchronize: src=config/monit/ dest=/etc/monit/ group=no owner=no perms=no recursive=yes
+  synchronize: src=config/monit/conf.d/ dest=/etc/monit/conf.d/ group=no owner=no perms=no recursive=yes
   notify:
      - restart monit
 

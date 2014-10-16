@@ -42,6 +42,11 @@
   with_items:
     - { src: "/etc/monit/monitrc" }
 
+- name: Synchronize monitrc
+  synchronize: src=config/monitrc dest=/etc/monit/monitrc group=no owner=no perms=no
+  notify:
+    - restart monit
+
 - name: Core services are running
   service: name={{ item }} state=started
   with_items:
