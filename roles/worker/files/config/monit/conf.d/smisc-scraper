@@ -1,0 +1,5 @@
+check process smisc-scraper with pidfile /var/local/run/smisc-scraper.pid
+    every 10 cycles
+    start program = "/etc/init.d/smisc-scraper start"
+    stop  program = "/etc/init.d/smisc-scraper stop"
+
