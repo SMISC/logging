@@ -126,7 +126,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
     log = logging.getLogger(None)
-    handler = logging.handlers.RotatingFileHandler(config['bot']['log'], maxBytes=1024*1024*10)
+    handler = logging.handlers.RotatingFileHandler(config['bot']['log'], maxBytes=1024*1024*10, backupCount=5)
     formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
     handler.setFormatter(formatter)
     log.addHandler(handler)
