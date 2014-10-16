@@ -74,6 +74,7 @@ class ScraperMain:
         signal.signal(signal.SIGTERM, self.cleanup)
 
         while True:
+            print('[scraper-main] There are %d active workers.' % (threading.active_count()))
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             print('[scraper-main] Grabbed %d recent tweets' % (len(recent_tweets)))
             sys.stdout.flush()
