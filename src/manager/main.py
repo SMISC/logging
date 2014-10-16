@@ -123,14 +123,13 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
     log = logging.getLogger('smisc.manager')
-    fd = open(config['bot']['log'], 'a', 1)
-    handler = logging.StreamHandler(fd)
+    handler = logging.FileHandler(config['bot']['log'])
     formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
     handler.setFormatter(formatter)
     log.addHandler(handler)
     log.setLevel(logging.DEBUG)
 
-    logging.info('SMISC Manager started')
+    log.info('SMISC Manager started')
 
     api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
 
@@ -143,4 +142,5 @@ if __name__ == '__main__':
         manager.main()
     except Exception as err:
         log.exception('Caught error: %s' % (str(err)))
+        handler.close()
         manager.cleanup()
