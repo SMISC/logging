@@ -122,8 +122,10 @@ class ManagerMain:
 if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logging.basicConfig(filename=config['bot']['log'], level=50)
+    logging.basicConfig(filename=config['bot']['log'])
     log = logging.getLogger('smisc.manager')
+    log.setLevel(50)
+    log.setFormatter(logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s'))
 
     logging.info('SMISC Manager started at %s' % (datetime.datetime.now().strftime('%b %d %H:%M:%S')))
 
