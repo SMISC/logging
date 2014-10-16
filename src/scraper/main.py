@@ -118,7 +118,6 @@ if __name__ == "__main__":
     handler = logging.StreamHandler(fd)
     formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
     handler.setFormatter(formatter)
-    mhandler = logging.handlers.MemoryHandler(0, target=handler)
     log.addHandler(handler)
     log.setLevel(50)
 
