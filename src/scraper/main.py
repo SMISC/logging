@@ -27,6 +27,7 @@ class ScraperMain:
         self.credentials = credentials
         self.jobs = []
         self.log = log
+        self.scrapeservice = None
         self.wakeup = threading.Event()
 
     def main(self):
@@ -38,7 +39,7 @@ class ScraperMain:
 
         tweetservice = TweetService(self.dbc.cursor())
         userservice = UserService(self.dbc.cursor())
-        scrapeservice = ScrapeService(self.rds, current_scan_id)
+        self.scrapeservice = ScrapeService(self.rds, current_scan_id)
 
         self.log.debug('Initializing follower scrapers...')
 
@@ -49,7 +50,7 @@ class ScraperMain:
             api = TwitterAPI(key, secret, auth_type='oAuth2')
             rlapi = RateLimitedTwitterAPI(self.log.getChild('ratelimit'), api, self.wakeup)
             rlapi.update()
-            followjob = ScrapeFollowersJob(self.log.getChild('followers'), rlapi, edgeservice, scrapeservice, self.wakeup)
+            followjob = ScrapeFollowersJob(self.log.getChild('followers'), rlapi, edgeservice, self.scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
         self.log.debug('Creating info thread')
@@ -57,7 +58,7 @@ class ScraperMain:
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
         rlinfoapi = RateLimitedTwitterAPI(self.log.getChild('ratelimit'), infoapi, self.wakeup)
         rlinfoapi.update()
-        infojob = ScrapeInfoJob(self.log.getChild('info'), rlinfoapi, userservice, scrapeservice, self.wakeup)
+        infojob = ScrapeInfoJob(self.log.getChild('info'), rlinfoapi, userservice, self.scrapeservice, self.wakeup)
         self.jobs.append(infojob)
 
         self.log.debug('Starting jobs...')
@@ -93,11 +94,11 @@ class ScraperMain:
                     user_ids_set.discard(user['user_id'])
 
                 for user_id in user_ids_set:
-                    if not scrapeservice.is_user_queued(user_id):
+                    if not self.scrapeservice.is_user_queued(user_id):
                         new_users += 1
-                        scrapeservice.enqueue(user_id)
+                        self.scrapeservice.enqueue(user_id)
 
-            self.log.info('backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed' % (scrapeservice.length('info'), scrapeservice.length('follow'), new_users, scrapeservice.total_processed()))
+            self.log.info('backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed' % (self.scrapeservice.length('info'), self.scrapeservice.length('follow'), new_users, self.scrapeservice.total_processed()))
             time.sleep(10)
         
         self.dbc.close()
