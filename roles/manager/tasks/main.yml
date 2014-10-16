@@ -82,7 +82,6 @@
     - postgresql
     - nginx
     - php5-fpm
-    - smisc-manager
   tags:
     - hot
 
