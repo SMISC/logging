@@ -34,7 +34,7 @@ class ScraperMain:
         
         current_scan_id = int(self.rds.get('current_scan'))
 
-        logging.debug('Current scan: %d', current_scan_id)
+        logging.info('Current scan: %d', current_scan_id)
 
         tweetservice = TweetService(self.dbc.cursor())
         userservice = UserService(self.dbc.cursor())
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
     handler.setFormatter(formatter)
     log.addHandler(handler)
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
 
     log.info('SMISC Manager started')
 
