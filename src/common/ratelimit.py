@@ -14,6 +14,7 @@ class RateLimitedTwitterAPI:
             self.block_until_available(resource)
         if not self.wakeup.is_set():
             response = self.api.request(resource, params, files)
+            logging.debug('API response code: %d', response.status_code)
             if (response.status_code) == 429:
                 quota = response.get_rest_quota()
                 if self.limits is not None and quota['reset'] is not None:
