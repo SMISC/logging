@@ -1,4 +1,7 @@
 ---
+- name: temporarily disable monitoring
+  command: monit unmonitor smisc-scraper
+
 - name: install base packages
   apt: name={{ item }} state=latest
   with_items: 
@@ -80,3 +83,6 @@
     - smisc-manager
   tags:
     - hot
+
+- name: re-enable monitoring
+  command: monit monitor smisc-scraper
