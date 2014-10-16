@@ -128,6 +128,7 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     log.addHandler(handler)
     log.setLevel(50)
+
     logging.info('SMISC Manager started')
 
     api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
