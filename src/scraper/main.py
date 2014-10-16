@@ -113,12 +113,14 @@ class ScraperMain:
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logging.basicConfig(filename=config['bot']['log'])
-    log = logging.getLogger('smisc.scraper')
+    log = logging.getLogger('smisc.manager')
+    handler = logging.FileHandler(config['bot']['log'])
+    formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
     log.setLevel(50)
-    log.setFormatter(logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s'))
 
-    log.info('SMISC scraper started')
+    logging.info('SMISC Manager started')
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True

@@ -122,12 +122,13 @@ class ManagerMain:
 if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logging.basicConfig(filename=config['bot']['log'])
     log = logging.getLogger('smisc.manager')
+    handler = logging.FileHandler(config['bot']['log'])
+    formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
     log.setLevel(50)
-    log.setFormatter(logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s'))
-
-    logging.info('SMISC Manager started at %s' % (datetime.datetime.now().strftime('%b %d %H:%M:%S')))
+    logging.info('SMISC Manager started')
 
     api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
 
