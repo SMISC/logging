@@ -18,17 +18,16 @@ from common.tweet import TweetService
 from common.ratelimit import RateLimitedTwitterAPI
 
 class ManagerMain:
-    def __init__(self, log, api, dbc, rds):
+    def __init__(self, api, dbc, rds):
         self.api = api
         self.dbc = dbc
         self.rds = rds
-        self.log = log
         self.wait = threading.Event()
 
     def main(self):
-        self.log.debug('Inspecting rate limit status...')
+        logging.debug('Inspecting rate limit status...')
 
-        rlapi = RateLimitedTwitterAPI(self.log.getChild('ratelimit'), self.api, self.wait)
+        rlapi = RateLimitedTwitterAPI(self.api, self.wait)
         rlapi.update()
 
         scanservice = ScanService(self.dbc.cursor())
@@ -37,7 +36,7 @@ class ManagerMain:
         scan = scanservice.new_scan(start_time, max_breadth)
         self.rds.set('current_scan', scan.get_id())
 
-        self.log.info('Starting scan %d' % (scan.get_id()))
+        logging.info('Starting scan %d', scan.get_id())
         db = self.dbc.cursor()
         tweetservice = TweetService(self.dbc.cursor())
 
@@ -52,13 +51,13 @@ class ManagerMain:
             while not self.wait.is_set():
                 if max_id is None and since_id is None:
                     # first query ever
-                    self.log.info('Seeking any tweets we can get.')
+                    logging.info('Seeking any tweets we can get.')
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100})
                 elif max_id is not None: # seeking old
-                    self.log.info('Seeking old tweets before %s (%d)' % (max_dt, max_id))
+                    logging.info('Seeking old tweets before %s (%d)', max_dt, max_id)
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'max_id': max_id})
                 else: # seeking new
-                    self.log.info('Seeking new tweets since %s (%d)' % (since_dt, since_id))
+                    logging.info('Seeking new tweets since %s (%d)', since_dt, since_id)
                     results = rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'since_id': since_id})
 
                 entities = []
@@ -90,7 +89,7 @@ class ManagerMain:
 
                 tweetservice.commit()
 
-                self.log.debug('Found %d tweets.' % (n_tweets))
+                logging.debug('Found %d tweets', n_tweets)
 
                 if n_tweets < 100:
                     # we got less than expected. switch to polling for new tweets.
@@ -115,21 +114,21 @@ class ManagerMain:
                     
     
     def cleanup(self):
-        self.log.info('Caught interrupt signal. Exiting...')
+        logging.info('Caught interrupt signal. Exiting...')
         self.wait.set()
         scanservice.done(int(time.time()))
 
 if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    log = logging.getLogger('smisc.manager')
+    log = logging.getLogger(None)
     handler = logging.FileHandler(config['bot']['log'])
     formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
     handler.setFormatter(formatter)
     log.addHandler(handler)
     log.setLevel(logging.DEBUG)
 
-    log.info('SMISC Manager started')
+    logging.info('SMISC Manager started')
 
     api = TwitterAPI(config['twitter-manager']['key'], config['twitter-manager']['secret'], auth_type='oAuth2')
 
@@ -137,10 +136,10 @@ if __name__ == '__main__':
     dbc.autocommit = True
     rds = redis.StrictRedis(host=config['redis']['host'], port=config['redis']['port'], db=int(config['redis']['database']))
 
-    manager = ManagerMain(log, api, dbc, rds)
+    manager = ManagerMain(api, dbc, rds)
     try:
         manager.main()
     except Exception as err:
-        log.exception('Caught error: %s' % (str(err)))
+        logging.exception('Caught error: %s' % (str(err)))
         handler.close()
         manager.cleanup()

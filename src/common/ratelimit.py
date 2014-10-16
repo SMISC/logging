@@ -4,11 +4,10 @@ import re
 
 class RateLimitedTwitterAPI:
     # to make this thread wake up early, call `event`.set()
-    def __init__(self, log, api, wakeup):
+    def __init__(self, api, wakeup):
         self.limits = None
         self.api = api
         self.wakeup = wakeup
-        self.log = log
 
     def request(self, resource, params=None, files=None):
         if self.limits is not None:
@@ -80,7 +79,7 @@ class RateLimitedTwitterAPI:
                 break
             while limit['remaining'] <= 0 and limit['reset'] > now:
                 time_to_sleep = limit['reset'] - now
-                self.log.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
+                logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
                 if self.wakeup.wait(min(10, time_to_sleep)):
                     return
                 now = int(time.time())
