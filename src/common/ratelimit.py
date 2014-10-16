@@ -14,12 +14,9 @@ class RateLimitedTwitterAPI:
             self.block_until_available(resource)
         if not self.wakeup.is_set():
             response = self.api.request(resource, params, files)
-            logging.debug('API response code: %d', response.status_code)
             if (response.status_code) == 429:
-                quota = response.get_rest_quota()
-                logging.debug('REST quota: %s', str(quota))
-                if self.limits is not None and quota['reset'] is not None:
-                    self.updateWith(resource, quota)
+                if self.limits is not None:
+                    self.next(resource)
                 self.block_until_available(resource)
                 if self.wakeup.is_set(): # timed out
                     raise EOFError("waking up...")
@@ -64,9 +61,10 @@ class RateLimitedTwitterAPI:
         rate_limits = self.api.request('application/rate_limit_status')
         self.set_rate_limits(rate_limits)
 
-    def updateWith(self, uri, data):
+    def next(self, uri):
         uri_pattern = self._get_uri_pattern(uri)
-        data['reset'] = int(data['reset'].timestamp())
+        data['reset'] += 15*60
+        data['remaining'] = 0
         self.limits[uri_pattern]['limit'] = data
 
     def get_limit_info(self, uri):
