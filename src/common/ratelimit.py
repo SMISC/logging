@@ -57,7 +57,7 @@ class RateLimitedTwitterAPI:
     def next(self, uri):
         uri_pattern = self._get_uri_pattern(uri)
         self.limits[uri_pattern]['limit']['remaining'] = 0
-        self.limits[uri_pattern]['limit']['reset'] = += 15*60
+        self.limits[uri_pattern]['limit']['reset'] += 15*60
 
     def get_limit_info(self, uri):
         uri_pattern = self._get_uri_pattern(uri)
