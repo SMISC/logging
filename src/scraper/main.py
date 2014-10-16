@@ -1,5 +1,5 @@
 import threading
-import loggging
+import logging
 import configparser
 import datetime
 import psycopg2
@@ -21,11 +21,12 @@ from common.ratelimit import RateLimitedTwitterAPI
 import time
 
 class ScraperMain:
-    def __init__(self, dbc, rds, credentials):
+    def __init__(self, log, dbc, rds, credentials):
         self.dbc = dbc
         self.rds = rds
         self.credentials = credentials
         self.jobs = []
+        self.log = log
         self.wakeup = threading.Event()
 
     def main(self):
@@ -33,47 +34,47 @@ class ScraperMain:
         
         current_scan_id = int(self.rds.get('current_scan'))
 
-        logging.debug('Current scan: %d' % (current_scan_id))
+        self.log.debug('Current scan: %d' % (current_scan_id))
 
         tweetservice = TweetService(self.dbc.cursor())
         userservice = UserService(self.dbc.cursor())
         scrapeservice = ScrapeService(self.rds, current_scan_id)
 
-        logging.debug('Initializing follower scrapers...')
+        self.log.debug('Initializing follower scrapers...')
 
         for (key, secret) in self.credentials[:-1]: # save one for user info scraper
-            logging.debug('[scraper-main] Creating follower thread')
+            self.log.debug('[scraper-main] Creating follower thread')
             edgeservice = EdgeService(self.dbc.cursor())
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
             rlapi = RateLimitedTwitterAPI(api, self.wakeup)
             rlapi.update()
-            followjob = ScrapeFollowersJob(rlapi, edgeservice, scrapeservice, self.wakeup)
+            followjob = ScrapeFollowersJob(self.log.getChild('followers'), rlapi, edgeservice, scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
-        logging.debug('Creating info thread')
+        self.log.debug('Creating info thread')
         (infokey, infosecret) = self.credentials[-1]
         infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
         rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
         rlinfoapi.update()
-        infojob = ScrapeInfoJob(rlinfoapi, userservice, scrapeservice, self.wakeup)
+        infojob = ScrapeInfoJob(self.log.getChild('info'), rlinfoapi, userservice, scrapeservice, self.wakeup)
         self.jobs.append(infojob)
 
-        logging.debug('Starting jobs...')
+        self.log.debug('Starting jobs...')
 
         for job in self.jobs:
             job.start()
 
-        logging.info('Polling for tweets for user ids starting at %d' % (last_tweet_id))
+        self.log.info('Polling for tweets for user ids starting at %d' % (last_tweet_id))
         sys.stdout.flush()
         
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
 
         while True:
-            logging.debug('There are %d active workers.' % (threading.active_count()))
+            self.log.debug('There are %d active workers.' % (threading.active_count()))
             recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
-            logging.info('Grabbed %d recent tweets' % (len(recent_tweets)))
+            self.log.info('Grabbed %d recent tweets since %d' % (len(recent_tweets)))
             sys.stdout.flush()
             
             user_ids = []
@@ -96,12 +97,12 @@ class ScraperMain:
                         new_users += 1
                         scrapeservice.enqueue(user_id)
 
-            logging.info('backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed' % (scrapeservice.length('info'), scrapeservice.length('follow'), new_users, scrapeservice.total_processed()))
+            self.log.info('backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed' % (scrapeservice.length('info'), scrapeservice.length('follow'), new_users, scrapeservice.total_processed()))
             time.sleep(10)
         
         self.dbc.close()
     def cleanup(self):
-        logging.info('Caught signal. Exiting gracefully...')
+        self.log.info('Caught signal. Exiting gracefully...')
         self.dbc.close()
         self.wakeup.set()
         self.scrapeservice.erase(['follow', 'info'])
@@ -111,10 +112,10 @@ class ScraperMain:
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
-    logfile = config['bot']['log']
-    logging.basicConfig(filename=logfile, level=50)
+    logging.basicConfig(filename=config['bot']['log'], level=50)
+    log = logging.getLogger('smisc.scraper')
 
-    logging.info('SMISC scraper started at %s' % (datetime.datetime.now().strftime("%b %d %H:%M:%S")))
+    log.info('SMISC scraper started')
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True
@@ -125,11 +126,11 @@ if __name__ == "__main__":
     secrets = config['twitter-worker']['secrets'].split("\n")
 
     if len(keys) != len(secrets):
-        logging.error('Error: Mismatch in number of keys (%d) and secrets (%d)' % (len(keys), len(secrets)))
+        log.error('Error: Mismatch in number of keys (%d) and secrets (%d)' % (len(keys), len(secrets)))
         sys.exit(1)
 
     for i in range(len(keys)):
         creds.append((keys[i], secrets[i]))
 
-    scraper = ScraperMain(dbc, rds, creds)
+    scraper = ScraperMain(log, dbc, rds, creds)
     scraper.main()
