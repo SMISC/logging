@@ -114,13 +114,15 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
     log = logging.getLogger('smisc.manager')
-    handler = logging.FileHandler(config['bot']['log'])
+    fd = open(config['bot']['log'], 'a', 1)
+    handler = logging.StreamHandler(fd)
     formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
     handler.setFormatter(formatter)
+    mhandler = logging.handlers.MemoryHandler(0, target=handler)
     log.addHandler(handler)
     log.setLevel(50)
 
-    logging.info('SMISC Manager started')
+    log.info('SMISC Manager started')
 
     dbc = psycopg2.connect(user=config['postgres']['username'], database=config['postgres']['database'], host=config['postgres']['host'])
     dbc.autocommit = True
@@ -131,7 +133,7 @@ if __name__ == "__main__":
     secrets = config['twitter-worker']['secrets'].split("\n")
 
     if len(keys) != len(secrets):
-        log.error('Error: Mismatch in number of keys (%d) and secrets (%d)' % (len(keys), len(secrets)))
+        mlog.error('Error: Mismatch in number of keys (%d) and secrets (%d)' % (len(keys), len(secrets)))
         sys.exit(1)
 
     for i in range(len(keys)):

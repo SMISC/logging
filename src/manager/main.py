@@ -123,9 +123,11 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('/usr/local/share/smisc.ini')
     log = logging.getLogger('smisc.manager')
-    handler = logging.FileHandler(config['bot']['log'])
+    fd = open(config['bot']['log'], 'a', 1)
+    handler = logging.StreamHandler(fd)
     formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
     handler.setFormatter(formatter)
+    mhandler = logging.handlers.MemoryHandler(0, target=handler)
     log.addHandler(handler)
     log.setLevel(50)
 
