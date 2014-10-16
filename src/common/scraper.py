@@ -54,7 +54,7 @@ class ScrapeInfoJob(threading.Thread):
                 while not self.evt.is_set() and len(ids) < 100 and t > 0:
                     user_id = self.scrapeservice.dequeue('info')
                     if user_id:
-                        ids.append(int(user_id))
+                        ids.append(str(user_id))
                     t = t - 1
                     self.evt.wait(1)
                 logging.debug('Scraping info for %d users', len(ids))
