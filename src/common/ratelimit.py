@@ -22,7 +22,7 @@ class RateLimitedTwitterAPI:
                     self.updateWith(resource, quota)
                 self.block_until_available(resource)
                 if self.wakeup.is_set(): # timed out
-                    raise EOFError, "waking up..."
+                    raise EOFError("waking up...")
             return response
         # timed out
         return None
