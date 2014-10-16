@@ -37,12 +37,13 @@ class ScrapeFollowersJob(threading.Thread):
                         break
 
 class ScrapeInfoJob(threading.Thread):
-    def __init__(self, rlapi, userservice, scrapeservice, evt):
+    def __init__(self, log, rlapi, userservice, scrapeservice, evt):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.userservice = userservice
         self.evt = evt
+        self.log = Log
     def run(self):
         while not self.evt.is_set():
             ids = []
@@ -53,7 +54,7 @@ class ScrapeInfoJob(threading.Thread):
                     ids.append(int(user_id))
                 t = t - 1
                 self.evt.wait(1)
-            logging.debug('Scraping info for %d users' % (len(ids)))
+            self.log.debug('Scraping info for %d users' % (len(ids)))
 
             if len(ids) > 0:
                 resp = self.rlapi.request('users/lookup', {'user_id': ','.join(ids)})

@@ -119,7 +119,7 @@ if __name__ == "__main__":
     formatter = logging.Formatter('%(asctime):%(name)s:%(levelname): %(message)s')
     handler.setFormatter(formatter)
     log.addHandler(handler)
-    log.setLevel(50)
+    log.setLevel(logging.DEBUG)
 
     log.info('SMISC Manager started')
 
