@@ -62,16 +62,19 @@ class ScrapeInfoJob(threading.Thread):
                 if len(ids) > 0:
                     resp = self.rlapi.request('users/lookup', {'user_id': ','.join(ids)})
                     for user in resp.get_iterator():
-                        self.userservice.create_user({
-                            'user_id': user['id'],
-                            'screen_name': user['screen_name'],
-                            'total_tweets': user['statuses_count'],
-                            'followers': user['followers_count'],
-                            'following': user['friends_count'],
-                            'full_name': user['name'],
-                            'bio': user['description'],
-                            'timestamp': twittertime(user['created_at'])
-                        })
+                        if 'id' in user:
+                            self.userservice.create_user({
+                                'user_id': user['id'],
+                                'screen_name': user['screen_name'],
+                                'total_tweets': user['statuses_count'],
+                                'followers': user['followers_count'],
+                                'following': user['friends_count'],
+                                'full_name': user['name'],
+                                'bio': user['description'],
+                                'timestamp': twittertime(user['created_at'])
+                            })
+                        else:
+                            logging.info('Ignoring user with no id\n\n%s', str(user))
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
 
