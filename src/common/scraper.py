@@ -19,17 +19,16 @@ class ScrapeFollowersJob(threading.Thread):
                 user_id = self.scrapeservice.dequeue('follow')
                 if user_id:
                     logging.debug('Scraping followers for %d', user_id)
+                    self.scrapeservice.enqueue('info', user_id)
                     cursor = -1
-                    follower_ids = []
                     while not self.evt.is_set():
                         resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
                         for follower in resp.get_iterator():
-                            resp_follower_ids = []
-
                             if 'ids' in follower:
+                                resp_follower_ids = []
                                 for follower_id in follower['ids']:
                                     resp_follower_ids.append(str(follower_id))
-                                    follower_ids.append(str(follower_id))
+                                    self.scrapeservice.enqueue('info', follower_id)
 
                                 self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
                                 cursor = follower['next_cursor']

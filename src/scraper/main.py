@@ -93,7 +93,7 @@ class ScraperMain:
                 for user_id in user_ids_set:
                     if not self.scrapeservice.is_user_queued(user_id):
                         new_users += 1
-                        self.scrapeservice.enqueue(user_id)
+                        self.scrapeservice.enqueue('follow', user_id)
 
             logging.info('scrape backlog [%d info] [%d follow]\t\t%d pushed this cycle\t\t%d total processed', self.scrapeservice.length('info'), self.scrapeservice.length('follow'), new_users, self.scrapeservice.total_processed())
             self.wakeup.wait(10)
