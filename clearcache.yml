@@ -1,0 +1,12 @@
+- name: clear scraper cache
+  hosts: manager
+  tasks:
+    - name: inspect the current scan number
+      command: redis-cli get current_scan
+      register: scan
+    - name: purge
+      command: redis-cli del scrape_{{ scan.stdout_lines[0] }}_{{ item }}
+      with_items:
+        - progress
+        - queue_follow
+        - queue_info
