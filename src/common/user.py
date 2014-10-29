@@ -1,3 +1,5 @@
+import logging
+
 class UserService:
     def __init__(self, db):
         self.db = db
@@ -23,4 +25,9 @@ class UserService:
 
     def create_user(self, user):
         uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"], user["total_tweets"], user["timestamp"], user["following"])
-        result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
+        try:
+            result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
+            return True
+        except Exception as e:
+            logging.error('Error inserting user: %s\nData: %s\n\n', str(e), str(uval))
+            return False
