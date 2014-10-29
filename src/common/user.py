@@ -29,5 +29,5 @@ class UserService:
             result = self.db.execute('insert into tuser (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
             return True
         except Exception as e:
-            logging.exception('Error inserting user: %s\nData: %s\n\n', str(e), str(uval))
+            logging.exception('Error inserting user: %s', str(e))
             return False
