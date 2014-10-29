@@ -11,7 +11,7 @@ class EdgeService:
         for follower_id in follower_ids:
             edges.append((self.cur_scan_id, follower_id, followed_id))
         try:
-            self.db.executemany('INSERT INTO "user_user" (scan_id, from_user, to_user, weight) VALUES (%s, %s, %s, 1)', edges)
+            self.db.executemany('INSERT INTO tuser_tuser (scan_id, from_user, to_user, weight) VALUES (%s, %s, %s, 1)', edges)
         except Exception as e:
             logging.exception('Error inserting user-user edges: %s\nData: %s\n\n', str(e), str(edges))
             return False

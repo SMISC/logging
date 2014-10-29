@@ -5,7 +5,7 @@ class UserService:
         self.db = db
 
     def users_where(self, where, args = []):
-        result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from "user" where ' + where, tuple(args))
+        result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from tuser where ' + where, tuple(args))
         results = self.db.fetchall()
         users = []
         if results is not None:
@@ -26,7 +26,7 @@ class UserService:
     def create_user(self, user):
         uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"], user["total_tweets"], user["timestamp"], user["following"])
         try:
-            result = self.db.execute('insert into "user" (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
+            result = self.db.execute('insert into tuser (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following) values (%s, %s, %s, %s, %s, %s, %s, %s)', uval)
             return True
         except Exception as e:
             logging.exception('Error inserting user: %s\nData: %s\n\n', str(e), str(uval))
