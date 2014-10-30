@@ -1,4 +1,2 @@
 - include: manager.yml
   sudo: yes
-- include: worker.yml
-  sudo: yes

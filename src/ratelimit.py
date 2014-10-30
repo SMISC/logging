@@ -3,24 +3,13 @@ import logging
 import re
 
 class RateLimitedTwitterAPI:
-    # to make this thread wake up early, call `event`.set()
-    def __init__(self, api, wakeup):
-        self.limits = None
-        self.api = api
-        self.wakeup = wakeup
+    @staticmethod
+    def fromUnlimited(api):
+        rate_limits = RateLimitedTwitterAPI.flatten(api.request('application/rate_limit_status'))
+        return RateLimitedTwitterAPI(api, rate_limits)
 
-    def request(self, resource, params=None, files=None):
-        self.block_until_available(resource)
-        while True:
-            response = self.api.request(resource, params, files)
-            if response.status_code == 429:
-                self.next(resource)
-                self.block_until_available(resource)
-            elif response.status_code == 200:
-                return response
-
-
-    def flatten(self, response):
+    @staticmethod
+    def flatten(response):
         limits_flattened = {}
         for limits in response.get_iterator():
             for (category, items) in limits['resources'].items():
@@ -40,6 +29,20 @@ class RateLimitedTwitterAPI:
                         'regex': re.compile(re_text)
                     }
         return limits_flattened
+
+    def __init__(self, api, limits):
+        self.api = api
+
+    def request(self, resource, params=None, files=None):
+        self.block_until_available(resource)
+        while True:
+            response = self.api.request(resource, params, files)
+            if response.status_code == 429:
+                self.next(resource)
+                self.block_until_available(resource)
+            elif response.status_code == 200:
+                return response
+
 
     def set_rate_limits(self, limits):
         self.limits = self.flatten(limits)
@@ -75,7 +78,6 @@ class RateLimitedTwitterAPI:
             while limit['remaining'] <= 0 and limit['reset'] > now:
                 time_to_sleep = limit['reset'] - now
                 logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
-                if self.wakeup.wait(min(10, time_to_sleep)):
-                    raise Exception("waking up...")
+                time.sleep(min(10, time_to_sleep))
                 now = int(time.time())
             self.update()

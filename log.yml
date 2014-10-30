@@ -1,6 +1,0 @@
----
-- hosts: all
-  sudo: yes
-  tasks:
-    - name: tail the logs
-      command: tail /var/local/log/smisc.log

@@ -3,8 +3,6 @@
   hosts: all
   tasks:
     - name: disable monit
-      command: monit unmonitor {{ primary }}
+      command: monit unmonitor smisc-
     - name: stop the service
       service: name={{ primary }} state=stopped
-
-- include: clearcache.yml

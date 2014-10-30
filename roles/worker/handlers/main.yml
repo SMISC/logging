@@ -1,4 +1,0 @@
-- name: restart scraper
-  service: name=smisc-scraper state=restarted
-- name: restart monit
-  service: name=monit state=restarted

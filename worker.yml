@@ -1,6 +1,0 @@
----
-- hosts: worker
-  sudo: yes
-  roles: 
-    - common
-    - worker
