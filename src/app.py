@@ -1,3 +1,4 @@
+import psycopg2
 import redis
 import sys
 import logging
@@ -31,6 +32,10 @@ class SMISC:
         formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
         handler.setFormatter(formatter)
         self.log.addHandler(handler)
+
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        self.log.addHandler(stdout_handler)
+
         self.log.setLevel(logging.DEBUG)
 
         logging.getLogger('requests').setLevel(logging.ERROR)

@@ -14,28 +14,34 @@ class InfoScraper:
             rg = re.compile('[^A-z0-9#@.,;!\[\]]')
 
             while True:
-                ids = []
+                user_ids = []
                 t = 15      # wait up to 15 seconds, otherwise we're behind on average
 
-                while len(ids) < 100 and t > 0:
+                while len(user_ids) < 100 and t > 0:
+                    logging.debug('Accumulated %d users...' % (len(user_ids)))
+
                     user_id = self.scrapeservice.dequeue('info')
                     if user_id and not self.scrapeservice.is_user_queued(user_id):
                         self.scrapeservice.mark_queued(user_id)
+                        user_ids.append(user_id)
                     else:
                         time.sleep(1)
                         t = t - 1
 
-                users_in_postgres = userservice.users_where('user_id in %s', [tuple(user_ids)])
+                if len(user_ids) == 0:
+                    continue
+
+                user_ids_set = set(user_ids)
+                users_in_postgres = self.userservice.users_where('user_id in %s', [tuple(user_ids)])
 
                 for user in users_in_postgres:
                     user_ids_set.discard(user['user_id'])
 
-                logging.debug('Scraping info for %d users', len(ids))
+                user_ids = list(user_ids_set)
 
-                if len(ids) == 0:
-                    continue
+                logging.debug('Scraping info for %d users', len(user_ids))
 
-                resp = self.rlapi.request('users/lookup', {'user_id': ','.join(ids)})
+                resp = self.rlapi.request('users/lookup', {'user_id': ','.join(user_ids)})
                 for user in resp.get_iterator():
                     if 'id' not in user:
                         continue
