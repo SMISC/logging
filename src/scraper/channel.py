@@ -1,4 +1,5 @@
 import logging
+import time
 
 class ChannelScraper:
     def __init__(self, rlapi, tweetservice):

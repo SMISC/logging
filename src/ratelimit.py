@@ -32,6 +32,7 @@ class RateLimitedTwitterAPI:
 
     def __init__(self, api, limits):
         self.api = api
+        self.limits = limits
 
     def request(self, resource, params=None, files=None):
         self.block_until_available(resource)
@@ -44,9 +45,6 @@ class RateLimitedTwitterAPI:
                 return response
 
 
-    def set_rate_limits(self, limits):
-        self.limits = self.flatten(limits)
-
     def _get_uri_pattern(self, uri):
         for (uri_pattern, limit_mask) in self.limits.items():
             if limit_mask['regex'].match(uri):
@@ -58,7 +56,8 @@ class RateLimitedTwitterAPI:
 
     def update(self):
         rate_limits = self.api.request('application/rate_limit_status')
-        self.set_rate_limits(rate_limits)
+        logging.debug('got rate limits: %s', str(rate_limits))
+        self.limits = self.flatten(rate_limits)
 
     def next(self, uri):
         uri_pattern = self._get_uri_pattern(uri)
