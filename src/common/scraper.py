@@ -19,7 +19,7 @@ class ScrapeFollowersJob(threading.Thread):
                 self.evt.wait(5)
                 user_id = self.scrapeservice.dequeue('follow')
                 if user_id:
-                    logging.debug('Scraping followers for %d', user_id)
+                    logging.debug('Scraping followers for %d', int(user_id.decode('utf8')))
                     self.scrapeservice.enqueue('info', user_id)
                     cursor = -1
                     while not self.evt.is_set():
