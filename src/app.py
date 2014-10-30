@@ -93,12 +93,16 @@ class SMISC:
             return FollowersScraper(rlapi, edgeservice, scrapeservice)
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: python3 -m app [recenttweets | info | channel | followers]')
+        sys.exit(1)
+
     smisc = SMISC()
     smisc.setupLogging()
 
-    app = smisc.getProgram(sys.argv[0])
+    app = smisc.getProgram(sys.argv[1])
     if app is None:
-        logging.error('Invalid application "%s"' % (sys.argv[0]))
+        logging.error('Invalid application "%s"' % (sys.argv[1]))
     else:
         try:
             app.main()
