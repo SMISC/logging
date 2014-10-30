@@ -1,3 +1,4 @@
+import redis
 import sys
 import logging
 import logging.handlers
@@ -50,14 +51,26 @@ class SMISC:
         dbc = self.getDatabase()
         return dbc.cursor()
     
+    def _acquireKey(self, pipe, inuse_key, key, secret):
+        ttl = int(pipe.ttl(inuse_key))
+        if ttl <= 0:
+            pipe.multi()
+            pipe.set(inuse_key, True, 30)
+            pipe.execute()
+            return True
+
     def getTwitterAPI(self):
         rds = self.getRedis()
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
         for (key, secret) in zip(keys, secrets):
-            if rds.transaction(lambda pipe: self._acquireKey(pipe, key, secret)):
-                api = TwitterAPI(key, secret, auth_type='oAuth2')
-                return RateLimitedTwitterAPI.fromUnlimited(api)
+            inuse_key = 'client_id_%s' % (key)
+            try:
+                if rds.transaction(lambda pipe: self._acquireKey(pipe, inuse_key, key, secret), inuse_key):
+                    api = TwitterAPI(key, secret, auth_type='oAuth2')
+                    return RateLimitedTwitterAPI.fromUnlimited(api)
+            except redis.WatchError:
+                continue
 
         raise Exception('No keys left!')
 
