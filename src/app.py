@@ -55,7 +55,7 @@ class SMISC:
         ttl = int(pipe.ttl(inuse_key))
         if ttl <= 0:
             pipe.multi()
-            pipe.set(inuse_key, True, 30)
+            pipe.setex(inuse_key, 30, '1')
             pipe.execute()
             return True
 
