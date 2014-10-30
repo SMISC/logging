@@ -3,7 +3,8 @@ import sys
 import logging
 import logging.handlers
 import configparser
-import TwitterAPI
+
+from TwitterAPI import TwitterAPI
 
 from ratelimit import RateLimitedTwitterAPI
 
