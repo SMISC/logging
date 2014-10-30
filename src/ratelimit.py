@@ -10,6 +10,7 @@ class RateLimitedTwitterAPI:
 
     @staticmethod
     def flatten(response):
+        logging.debug('got rate limits: %s', str(response))
         limits_flattened = {}
         for limits in response.get_iterator():
             for (category, items) in limits['resources'].items():
@@ -56,7 +57,6 @@ class RateLimitedTwitterAPI:
 
     def update(self):
         rate_limits = self.api.request('application/rate_limit_status')
-        logging.debug('got rate limits: %s', str(rate_limits))
         self.limits = self.flatten(rate_limits)
 
     def next(self, uri):
