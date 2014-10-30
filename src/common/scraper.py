@@ -67,7 +67,7 @@ class ScrapeInfoJob(threading.Thread):
                     for user in resp.get_iterator():
                         if 'id' in user:
                             self.userservice.create_user({
-                                'user_id': user['id'],
+                                'user_id': user['id_str'],
                                 'screen_name': rg.sub('', user['screen_name']),
                                 'total_tweets': user['statuses_count'],
                                 'followers': user['followers_count'],
@@ -95,7 +95,7 @@ class ScrapeService:
     def dequeue(self, which):
         result = self.rds.lpop('scrape_%d_queue_%s' % (self.scan_id, which))
         if result:
-            return int(result)
+            return result
     def finished(self, user_id):
         self.rds.srem('scrape_%d_progress' % (self.scan_id), user_id)
     def length(self, which):

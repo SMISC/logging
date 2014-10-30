@@ -21,7 +21,7 @@ class TweetService:
             for result in results:
                 tweets.append({
                     "tweet_id": int(result[0]),
-                    "user_id": int(result[1]),
+                    "user_id": result[1],
                     "text": result[2],
                     "timestamp": int(result[3])
                 })
@@ -33,7 +33,7 @@ class TweetService:
         text = status["text"]
         timestamp = twittertime(status['created_at'])
         user = status["user"]
-        user_id = int(user["id"])
+        user_id = user["id_str"]
         self.tweets.append((tweet_id, user_id, text, timestamp))
 
         if "urls" in status["entities"] and len(status["entities"]["urls"]) > 0:
