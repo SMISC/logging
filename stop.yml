@@ -1,3 +1,4 @@
+---
 - name: stop scraper or manager services
   hosts: all
   tasks:
@@ -5,3 +6,5 @@
       command: monit unmonitor {{ primary }}
     - name: stop the service
       service: name={{ primary }} state=stopped
+
+- include: clearcache.yml
