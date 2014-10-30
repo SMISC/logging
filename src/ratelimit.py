@@ -72,9 +72,9 @@ class RateLimitedTwitterAPI:
         while True:
             limit = self.get_limit_info(uri)
             now = int(time.time())
-            if limit['remaining'] > 0 or limit['reset'] <= now:
+            if limit['remaining'] > 0 or limit['reset'] <= (now+10): #+10 to give some padding on clocks
                 break
-            while limit['remaining'] <= 0 and limit['reset'] > now:
+            while limit['remaining'] == 0 and limit['reset'] > (now+10):
                 time_to_sleep = limit['reset'] - now
                 logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
                 time.sleep(min(10, time_to_sleep))
