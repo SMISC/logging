@@ -1,5 +1,5 @@
 [manager]
-104.131.176.27 ansible_ssh_user=root
+104.131.176.27 ansible_ssh_user=root primary=smisc-manager
 
 [worker]
-104.131.71.175 ansible_ssh_user=root
+104.131.71.175 ansible_ssh_user=root primary=smisc-scraper

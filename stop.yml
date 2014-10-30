@@ -1,0 +1,7 @@
+- name: stop scraper or manager services
+  hosts: all
+  tasks:
+    - name: disable monit
+      command: monit unmonitor {{ primary }}
+    - name: stop the service
+      service: name={{ primary }} state=stopped
