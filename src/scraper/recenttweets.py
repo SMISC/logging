@@ -12,7 +12,7 @@ class RecentTweetsScraper:
         
         while True:
             logging.info('Polling for tweets > %d' % (last_tweet_id))
-            recent_tweets = tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
+            recent_tweets = self.tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             
             user_ids = []
             for tweet in recent_tweets:
