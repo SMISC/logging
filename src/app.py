@@ -51,14 +51,6 @@ class SMISC:
         dbc = self.getDatabase()
         return dbc.cursor()
     
-    def _acquireKey(self, pipe, inuse_key, key, secret):
-        ttl = int(pipe.ttl(inuse_key))
-        if ttl <= 0:
-            pipe.multi()
-            pipe.setex(inuse_key, 30, '1')
-            pipe.execute()
-            return True
-
     def getTwitterAPI(self):
         rds = self.getRedis()
         keys = self.config['twitter']['keys'].split("\n")
@@ -66,9 +58,15 @@ class SMISC:
         for (key, secret) in zip(keys, secrets):
             inuse_key = 'client_id_%s' % (key)
             try:
-                if rds.transaction(lambda pipe: self._acquireKey(pipe, inuse_key, key, secret), inuse_key):
-                    api = TwitterAPI(key, secret, auth_type='oAuth2')
-                    return RateLimitedTwitterAPI.fromUnlimited(api)
+                with self.rds.pipeline() as pipe:
+                    pipe.watch(inuse_key)
+                    ttl = int(pipe.ttl(inuse_key))
+                    if ttl <= 0:
+                        pipe.multi()
+                        pipe.setex(inuse_key, 30, '1')
+                        pipe.execute()
+                        api = TwitterAPI(key, secret, auth_type='oAuth2')
+                        return RateLimitedTwitterAPI.fromUnlimited(api)
             except redis.WatchError:
                 continue
 
