@@ -16,7 +16,7 @@ class RateLimitedTwitterAPI:
             if response.status_code == 429:
                 self.next(resource)
                 self.block_until_available(resource)
-            else if response.status_code == 200:
+            elif response.status_code == 200:
                 return response
 
 
