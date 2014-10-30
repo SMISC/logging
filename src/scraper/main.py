@@ -21,6 +21,8 @@ from common.ratelimit import RateLimitedTwitterAPI
 
 import time
 
+THREADS_FOLLOWERS = 13
+
 class ScraperMain:
     def __init__(self, dbc, rds, credentials):
         self.dbc = dbc
@@ -43,8 +45,11 @@ class ScraperMain:
 
         logging.debug('Initializing follower scrapers...')
 
-        for (key, secret) in self.credentials[:-1]: # save one for user info scraper
-            logging.debug('Creating follower thread')
+        followers_credentials = self.credentials[:THREADS_FOLLOWERS]
+        info_credentials = self.credentials[THREADS_FOLLOWERS:]
+
+        for (key, secret) in followers_credentials:
+            logging.info('Creating follower thread')
             edgeservice = EdgeService(self.dbc.cursor())
             edgeservice.set_current_scan_id(current_scan_id)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
@@ -53,13 +58,13 @@ class ScraperMain:
             followjob = ScrapeFollowersJob(rlapi, edgeservice, self.scrapeservice, self.wakeup)
             self.jobs.append(followjob)
         
-        logging.debug('Creating info thread')
-        (infokey, infosecret) = self.credentials[-1]
-        infoapi = TwitterAPI(infokey, infosecret, auth_type='oAuth2')
-        rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
-        rlinfoapi.update()
-        infojob = ScrapeInfoJob(rlinfoapi, userservice, self.scrapeservice, self.wakeup)
-        self.jobs.append(infojob)
+        for (key, secret) in info_credentials:
+            logging.info('Creating info thread')
+            infoapi = TwitterAPI(key, secret, auth_type='oAuth2')
+            rlinfoapi = RateLimitedTwitterAPI(infoapi, self.wakeup)
+            rlinfoapi.update()
+            infojob = ScrapeInfoJob(rlinfoapi, userservice, self.scrapeservice, self.wakeup)
+            self.jobs.append(infojob)
 
         logging.debug('Starting jobs...')
 

@@ -11,11 +11,14 @@ class RateLimitedTwitterAPI:
 
     def request(self, resource, params=None, files=None):
         self.block_until_available(resource)
-        response = self.api.request(resource, params, files)
-        if response.status_code == 429:
-            self.next(resource)
-            self.block_until_available(resource)
-        return response
+        while True:
+            response = self.api.request(resource, params, files)
+            if response.status_code == 429:
+                self.next(resource)
+                self.block_until_available(resource)
+            else if response.status_code == 200:
+                return response
+
 
     def flatten(self, response):
         limits_flattened = {}

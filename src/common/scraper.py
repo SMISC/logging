@@ -2,6 +2,7 @@ import threading
 import logging
 import time
 import sys
+import re
 
 from common.time import twittertime as twittertime
 
@@ -47,6 +48,8 @@ class ScrapeInfoJob(threading.Thread):
         self.evt = evt
     def run(self):
         try:
+            rg = re.compile('[^A-z0-9#@.,;!\[\]]')
+
             while not self.evt.is_set():
                 ids = []
                 t = 15 # wait up to 15 seconds, otherwise we're behind on average
@@ -65,12 +68,12 @@ class ScrapeInfoJob(threading.Thread):
                         if 'id' in user:
                             self.userservice.create_user({
                                 'user_id': user['id'],
-                                'screen_name': user['screen_name'],
+                                'screen_name': rg.sub('', user['screen_name']),
                                 'total_tweets': user['statuses_count'],
                                 'followers': user['followers_count'],
                                 'following': user['friends_count'],
-                                'full_name': user['name'],
-                                'bio': user['description'],
+                                'full_name': rg.sub('', user['name']),
+                                'bio': rg.sub('', user['description']),
                                 'timestamp': twittertime(user['created_at'])
                             })
                         else:
