@@ -2,7 +2,7 @@ import re
 import time
 import logging
 
-from common.time import twittertime as twittertime
+from util import twittertime as twittertime
 
 class InfoScraper:
     def __init__(self, rlapi, userservice, scrapeservice):

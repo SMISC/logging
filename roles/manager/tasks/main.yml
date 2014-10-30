@@ -69,17 +69,19 @@
   notify:
     - restart redis
 
-- name: Synchronize channel scraper init script
-  synchronize: src=config/initscripts/smisc-scraper-channel dest=/etc/init.d/smisc-scraper-channel
+# need more init scripts
+#- name: Synchronize channel scraper init script
+#  synchronize: src=config/initscripts/smisc-scraper-channel dest=/etc/init.d/smisc-scraper-channel
 
-- name: Synchronize php-fpm config
-  synchronize: src=config/php/{{ item }} dest=/etc/php5/fpm/{{ item }} archive=no
-  with_items:
-    - pool.d/www.conf
-    - php.ini
-    - php-fpm.conf
-  notify:
-    - restart php
+# this changes every time. broken? archivce=no maybe it is changing permissions
+#- name: Synchronize php-fpm config
+#  synchronize: src=config/php/{{ item }} dest=/etc/php5/fpm/{{ item }} archive=no
+#  with_items:
+#    - pool.d/www.conf
+#    - php.ini
+#    - php-fpm.conf
+#  notify:
+#    - restart php
 
 - name: Synchronize monit scripts
   synchronize: src=config/monit/ dest=/etc/monit/ group=no owner=no perms=no recursive=yes

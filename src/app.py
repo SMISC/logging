@@ -93,9 +93,6 @@ class SMISC:
             return FollowersScraper(rlapi, edgeservice, scrapeservice)
 
 if __name__ == '__main__':
-    print(sys.argv)
-    sys.exit(0)
-
     smisc = SMISC()
     smisc.setupLogging()
 

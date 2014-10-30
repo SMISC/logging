@@ -2,5 +2,4 @@
 - hosts: manager
   sudo: yes
   roles: 
-    - common
     - manager
