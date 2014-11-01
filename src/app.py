@@ -96,19 +96,23 @@ class SMISC:
             scrapeservice = self.getService('scrape')
             return RecentTweetsScraper(tweetservice, userservice, scrapeservice)
         elif 'info' == which:
-            rlapi = self.getTwitterAPI()
+            clients = []
+            for i in range(3):
+                clients.append(self.getTwitterAPI())
             userservice = self.getService('user')
             scrapeservice = self.getService('scrape')
-            return InfoScraper(rlapi, userservice, scrapeservice)
+            return InfoScraper(clients, userservice, scrapeservice)
         elif 'channel' == which:
             rlapi = self.getTwitterAPI()
             tweetservice = self.getService('tweet')
             return ChannelScraper(rlapi, tweetservice)
         elif 'followers' == which:
-            rlapi = self.getTwitterAPI()
+            clients = []
+            for i in range(3):
+                clients.append(self.getTwitterAPI())
             edgeservice = self.getService('edge')
             scrapeservice = self.getService('scrape')
-            return FollowersScraper(rlapi, edgeservice, scrapeservice)
+            return FollowersScraper(clients, edgeservice, scrapeservice)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

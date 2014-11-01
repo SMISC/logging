@@ -2,8 +2,8 @@ import time
 import logging
 
 class FollowersScraper:
-    def __init__(self, rlapi, edgeservice, scrapeservice):
-        self.rlapi = rlapi
+    def __init__(self, rlapis, edgeservice, scrapeservice):
+        self.rlapis = rlapis
         self.scrapeservice = scrapeservice
         self.edgeservice = edgeservice
     def main(self):
@@ -18,7 +18,7 @@ class FollowersScraper:
                 self.scrapeservice.enqueue('info', user_id)
                 cursor = -1
                 while cursor <= 0:
-                    resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
+                    resp = self.rlapis[0].request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
                     for follower in resp.get_iterator():
                         if 'ids' not in follower:
                             continue
