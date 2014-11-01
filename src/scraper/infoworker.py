@@ -1,14 +1,16 @@
+import threading
 import re
 import time
 import logging
 
-class InfoScraperWorker:
+class InfoScraperWorker(threading.Thread):
     def __init__(self, rlapi, userservice, scrapeservice, evt):
+        threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.userservice = userservice
         self.evt = evt
-    def main(self):
+    def run(self):
         try:
             rg = re.compile('[^A-z0-9#@.,;!\[\]]')
 

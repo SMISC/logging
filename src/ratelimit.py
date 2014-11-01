@@ -14,7 +14,6 @@ class RateLimitedTwitterAPI:
         for limits in response.get_iterator():
             for (category, items) in limits['resources'].items():
                 for (uri, limit) in items.items():
-                    logging.debug('got rate limits %s: %s', uri, limit)
                     uri_parts = uri.split('/')
                     re_parts = []
                     for part in uri_parts:
