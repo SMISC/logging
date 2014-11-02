@@ -32,5 +32,6 @@ class NeedsMetaScraper:
             for edge in edges:
                 self.scrapeservice.enqueue('info', edge['to_user'])
                 self.scrapeservice.enqueue('info', edge['from_user'])
+            edge_offset += len(edges)
 
             time.sleep(2)
