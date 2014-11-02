@@ -1,5 +1,0 @@
-check process smisc-manager with pidfile /var/local/run/smisc-manager.pid
-    every 10 cycles
-    start program = "/etc/init.d/smisc-manager start"
-    stop  program = "/etc/init.d/smisc-manager stop"
-

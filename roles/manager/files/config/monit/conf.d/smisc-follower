@@ -1,0 +1,5 @@
+check process smisc-follower with pidfile /var/local/run/smisc-follower.pid
+    every 10 cycles
+    start program = "/etc/init.d/smisc-follower start"
+    stop  program = "/etc/init.d/smisc-follower stop"
+

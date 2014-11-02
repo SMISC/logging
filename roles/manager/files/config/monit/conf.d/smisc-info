@@ -1,0 +1,5 @@
+check process smisc-info with pidfile /var/local/run/smisc-info.pid
+    every 10 cycles
+    start program = "/etc/init.d/smisc-info start"
+    stop  program = "/etc/init.d/smisc-info stop"
+
