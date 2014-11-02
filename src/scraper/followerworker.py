@@ -1,13 +1,15 @@
 import time
+import threading
 import logging
 
-class FollowersScraperWorker:
+class FollowersScraperWorker(threading.Thread):
     def __init__(self, rlapi, edgeservice, scrapeservice, evt):
+        threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.scrapeservice = scrapeservice
         self.edgeservice = edgeservice
         self.evt = evt
-    def main(self):
+    def run(self):
         try:
             while not self.evt.is_set():
                 time.sleep(5)
@@ -30,7 +32,7 @@ class FollowersScraperWorker:
                         self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
                         cursor = follower['next_cursor']
 
-                self.scrapeservice.finished(user['id_str'], 'follow')
+                self.scrapeservice.finished(user_id, 'follow')
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

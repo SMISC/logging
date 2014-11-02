@@ -4,7 +4,7 @@ import logging
 
 from .followerworker import FollowersScraperWorker
 
-class InfoScraper:
+class FollowersScraper:
     def __init__(self, rlapis, userservices, scrapeservices):
         self.rlapis = rlapis
         self.scrapeservices = scrapeservices
@@ -15,7 +15,7 @@ class InfoScraper:
         signal.signal(signal.SIGTERM, self.cleanup)
         for i in range(len(self.rlapis)):
             logging.debug('Starting follower worker')
-            thread = FollowerScraperWorker(rlapis[i], self.edgeservices[i], self.scrapeservices[i], self.evt)
+            thread = FollowersScraperWorker(self.rlapis[i], self.userservices[i], self.scrapeservices[i], self.evt)
             self.threads.append(thread)
             thread.start()
     def cleanup(self):
