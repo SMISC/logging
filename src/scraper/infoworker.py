@@ -42,7 +42,7 @@ class InfoScraperWorker(threading.Thread):
 
                 user_ids = list(user_ids_set)
 
-                logging.debug('Scraping info for %d users', len(user_ids))
+                logging.info('Scraping info for %d users', len(user_ids))
 
                 resp = self.rlapi.request('users/lookup', {'user_id': ','.join(user_ids)})
                 for user in resp.get_iterator():
@@ -59,8 +59,6 @@ class InfoScraperWorker(threading.Thread):
                         'bio': rg.sub('', user['description']),
                         'timestamp': twittertime(user['created_at'])
                     })
-
-                    self.scrapeservice.finished(user['id_str'], 'info')
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
