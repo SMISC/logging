@@ -1,36 +1,25 @@
-import time
+import signal
+import threading
 import logging
 
-class FollowersScraper:
-    def __init__(self, rlapis, edgeservice, scrapeservice):
+from .followerworker import FollowersScraperWorker
+
+class InfoScraper:
+    def __init__(self, rlapis, userservice, scrapeservice):
         self.rlapis = rlapis
         self.scrapeservice = scrapeservice
-        self.edgeservice = edgeservice
+        self.userservice = userservice
+        self.evt = threading.Event()
+        self.threads = []
     def main(self):
-        try:
-            while True:
-                time.sleep(5)
-                user_id = self.scrapeservice.dequeue('follow')
-                if not user_id:
-                    continue
-
-                logging.debug('Scraping followers for %d', int(user_id.decode('utf8')))
-                cursor = -1
-                while cursor <= 0:
-                    resp = self.rlapis[0].request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
-                    for follower in resp.get_iterator():
-                        if 'ids' not in follower:
-                            continue
-
-                        resp_follower_ids = []
-                        for follower_id in follower['ids']:
-                            resp_follower_ids.append(str(follower_id))
-
-                        self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
-                        cursor = follower['next_cursor']
-
-                self.scrapeservice.finished(user['id_str'], 'follow')
-
-        except Exception as err:
-            logging.exception('Caught error: %s' % (str(err)))
-
+        signal.signal(signal.SIGTERM, self.cleanup)
+        for rlapi in self.rlapis:
+            logging.debug('Starting follower worker')
+            thread = FollowerScraperWorker(rlapi, self.edgeservice, self.scrapeservice, self.evt)
+            self.threads.append(thread)
+            thread.start()
+    def cleanup(self):
+        logging.info('Got TERM signal, exiting gracefully...')
+        self.evt.set()
+        for thread in self.threads:
+            thread.join()

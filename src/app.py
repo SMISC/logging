@@ -98,22 +98,26 @@ class SMISC:
             return NeedsMetaScraper(tweetservice, userservice, scrapeservice, edgeservice)
         elif 'info' == which:
             clients = []
+            userservices = []
+            scrapeservices = []
             for i in range(3):
                 clients.append(self.getTwitterAPI())
-            userservice = self.getService('user')
-            scrapeservice = self.getService('scrape')
-            return InfoScraper(clients, userservice, scrapeservice)
+                userservices.append(self.getService('user'))
+                scrapeservices.append(self.getService('scrape'))
+            return InfoScraper(clients, userservices, scrapeservices)
         elif 'channel' == which:
             rlapi = self.getTwitterAPI()
             tweetservice = self.getService('tweet')
             return ChannelScraper(rlapi, tweetservice)
         elif 'followers' == which:
             clients = []
+            edgeservices = []
+            scrapeservices = []
             for i in range(10):
                 clients.append(self.getTwitterAPI())
-            edgeservice = self.getService('edge')
-            scrapeservice = self.getService('scrape')
-            return FollowersScraper(clients, edgeservice, scrapeservice)
+                edgeservices.append(self.getService('edge'))
+                scrapeservices.append(self.getService('scrape'))
+            return FollowersScraper(clients, edgeservices, scrapeservices)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
