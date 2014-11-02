@@ -36,8 +36,14 @@ class RateLimitedTwitterAPI:
 
     def request(self, resource, params=None, files=None):
         self.block_until_available(resource)
+        i = 1
         while True:
-            response = self.api.request(resource, params, files)
+            try:
+                response = self.api.request(resource, params, files)
+            except Exception:
+                time.sleep(i)
+                i = i * 2 # exponential backoff
+                continue
             if response.status_code == 429:
                 self.next(resource)
                 self.block_until_available(resource)

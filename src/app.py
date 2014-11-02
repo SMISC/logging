@@ -36,7 +36,7 @@ class SMISC:
         stdout_handler = logging.StreamHandler(sys.stdout)
         self.log.addHandler(stdout_handler)
 
-        self.log.setLevel(logging.INFO)
+        self.log.setLevel(logging.DEBUG)
 
         logging.getLogger('requests').setLevel(logging.ERROR)
 
