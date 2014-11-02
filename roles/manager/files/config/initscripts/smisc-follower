@@ -15,8 +15,8 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="SMISC Channel Scraper"
-NAME=smisc-follower
-DAEMON=/usr/local/bin/smisc-follower
+NAME=smisc-followers
+DAEMON=/usr/local/bin/smisc-followers
 DAEMON_ARGS=""
 PIDFILE=/var/local/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
