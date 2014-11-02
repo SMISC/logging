@@ -43,11 +43,6 @@
     - psycopg2
 
 
-- name: temporarily disable monitoring
-  command: monit unmonitor smisc-manager
-  tags:
-    - hot
-
 - name: Synchronize nginx site configuration
   synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
   notify: 
@@ -69,9 +64,11 @@
   notify:
     - restart redis
 
-# need more init scripts
-#- name: Synchronize channel scraper init script
-#  synchronize: src=config/initscripts/smisc-scraper-channel dest=/etc/init.d/smisc-scraper-channel
+- name: Synchronize binaries
+  synchronize: src=config/bins/ dest=/usr/local/bin/ delete=no
+
+- name: Synchronize init scripst
+  synchronize: src=config/initscripts/ dest=/etc/init.d/ delete=no
 
 # this changes every time. broken? archivce=no maybe it is changing permissions
 #- name: Synchronize php-fpm config
@@ -97,8 +94,6 @@
   synchronize: src=src/ dest=/usr/local/src/smisc/
   tags: 
     - hot
-  notify: 
-    - restart manager
 
 - name: Synchronize phpPgAdmin
   synchronize: src=pgsql/ dest=/usr/share/nginx/sql group=no owner=no perms=no recursive=yes
@@ -115,8 +110,6 @@
   synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
   tags: 
     - hot
-  notify:
-    - restart manager
 
 - name: Core services are running
   service: name={{ item }} state=started
@@ -125,10 +118,5 @@
     - nginx
     - php5-fpm
     - monit
-  tags:
-    - hot
-
-- name: re-enable monitoring
-  command: monit monitor smisc-manager
   tags:
     - hot

@@ -3,6 +3,8 @@ import re
 import time
 import logging
 
+from util import twittertime as twittertime
+
 class InfoScraperWorker(threading.Thread):
     def __init__(self, rlapi, userservice, scrapeservice, evt):
         threading.Thread.__init__(self)
@@ -19,15 +21,15 @@ class InfoScraperWorker(threading.Thread):
                 t = 15      # wait up to 15 seconds, otherwise we're behind on average
 
                 while len(user_ids) < 100 and t > 0:
-                    logging.debug('Accumulated %d users...' % (len(user_ids)))
-
                     user_id = self.scrapeservice.dequeue('info')
-                    if user_id and not self.scrapeservice.is_user_queued(user_id):
-                        self.scrapeservice.mark_queued(user_id)
+
+                    if user_id:
                         user_ids.append(user_id)
                     else:
                         time.sleep(1)
                         t = t - 1
+
+                logging.debug('Acquired %d users', len(user_ids))
 
                 if len(user_ids) == 0:
                     continue
@@ -57,6 +59,8 @@ class InfoScraperWorker(threading.Thread):
                         'bio': rg.sub('', user['description']),
                         'timestamp': twittertime(user['created_at'])
                     })
+
+                    self.scrapeservice.finished(user['id_str'], 'info')
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

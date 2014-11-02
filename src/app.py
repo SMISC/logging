@@ -14,7 +14,7 @@ from service.tweet import TweetService
 from service.user import UserService
 from service.edge import EdgeService
 
-from scraper.recenttweets import RecentTweetsScraper
+from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
 from scraper.info import InfoScraper
 from scraper.followers import FollowersScraper
@@ -90,11 +90,12 @@ class SMISC:
             return EdgeService(self.getDatabaseCursor())
 
     def getProgram(self, which):
-        if 'recenttweets' == which:
+        if 'needsmeta' == which:
             tweetservice = self.getService('tweet')
             userservice = self.getService('user')
             scrapeservice = self.getService('scrape')
-            return RecentTweetsScraper(tweetservice, userservice, scrapeservice)
+            edgeservice = self.getService('edge')
+            return NeedsMetaScraper(tweetservice, userservice, scrapeservice, edgeservice)
         elif 'info' == which:
             clients = []
             for i in range(3):
@@ -108,7 +109,7 @@ class SMISC:
             return ChannelScraper(rlapi, tweetservice)
         elif 'followers' == which:
             clients = []
-            for i in range(3):
+            for i in range(10):
                 clients.append(self.getTwitterAPI())
             edgeservice = self.getService('edge')
             scrapeservice = self.getService('scrape')

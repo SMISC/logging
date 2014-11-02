@@ -1,9 +1,8 @@
+import signal
 import threading
 import logging
 
 from .infoworker import InfoScraperWorker
-
-from util import twittertime as twittertime
 
 class InfoScraper:
     def __init__(self, rlapis, userservice, scrapeservice):
@@ -11,13 +10,16 @@ class InfoScraper:
         self.scrapeservice = scrapeservice
         self.userservice = userservice
         self.evt = threading.Event()
+        self.threads = []
     def main(self):
-        threads = []
+        signal.signal(signal.SIGTERM, self.cleanup)
         for rlapi in self.rlapis:
             logging.debug('Starting infoscraper worker')
-            thread = InfoScraperWorker(rlapi, self.scrapeservice, self.userservice, self.evt)
-            threads.append(thread)
+            thread = InfoScraperWorker(rlapi, self.userservice, self.scrapeservice, self.evt)
+            self.threads.append(thread)
             thread.start()
-
-        for thread in threads:
+    def cleanup(self):
+        logging.info('Got TERM signal, exiting gracefully...')
+        self.evt.set()
+        for thread in self.threads:
             thread.join()

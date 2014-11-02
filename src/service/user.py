@@ -1,4 +1,5 @@
 import logging
+import psycopg2
 
 class UserService:
     def __init__(self, db):
@@ -6,7 +7,11 @@ class UserService:
 
     def users_where(self, where, args = []):
         result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from tuser where ' + where, tuple(args))
-        results = self.db.fetchall()
+        try:
+            results = self.db.fetchall()
+        except psycopg2.ProgrammingError:
+            return []
+
         users = []
         if results is not None:
             for result in results:
@@ -21,6 +26,7 @@ class UserService:
                     "total_tweets": int(result[7])
                 })
             return users
+
         return []
 
     def create_user(self, user):

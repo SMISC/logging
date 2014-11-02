@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /usr/local/src/smisc
+python3 -m app info

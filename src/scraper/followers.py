@@ -15,7 +15,6 @@ class FollowersScraper:
                     continue
 
                 logging.debug('Scraping followers for %d', int(user_id.decode('utf8')))
-                self.scrapeservice.enqueue('info', user_id)
                 cursor = -1
                 while cursor <= 0:
                     resp = self.rlapis[0].request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
@@ -26,10 +25,11 @@ class FollowersScraper:
                         resp_follower_ids = []
                         for follower_id in follower['ids']:
                             resp_follower_ids.append(str(follower_id))
-                            self.scrapeservice.enqueue('info', follower_id)
 
                         self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
                         cursor = follower['next_cursor']
+
+                self.scrapeservice.finished(user['id_str'], 'follow')
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

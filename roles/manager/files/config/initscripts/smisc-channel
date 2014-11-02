@@ -14,10 +14,10 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="SMISC Manager"
-NAME=smisc-manager
-DAEMON=/usr/bin/python3
-DAEMON_ARGS="-m manager.main"
+DESC="SMISC Channel Scraper"
+NAME=smisc-channel
+DAEMON=/usr/local/bin/smisc-channel
+DAEMON_ARGS=""
 PIDFILE=/var/local/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 DIR="/usr/local/src/smisc"
@@ -48,8 +48,8 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec "/bin/bash" --chdir $DIR --background --make-pidfile -- \
-		-c "$DAEMON $DAEMON_ARGS 2>> $LOG" \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chdir $DIR --background --make-pidfile -- \
+		$DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
