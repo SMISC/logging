@@ -1,0 +1,11 @@
+server {
+	listen 80;
+	server_name smisc.jwgur.com www.smisc.jwgur.com monitor.smisc.jwgur.com;
+	root /usr/local/share/smisc.jwgur.com/www;
+	index index.php index.html;
+
+	location / {
+        include "fastcgi_params";
+		fastcgi_pass 127.0.0.1:9000;
+	}
+}

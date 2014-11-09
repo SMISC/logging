@@ -1,5 +1,0 @@
-check process smisc-needsmeta with pidfile /var/local/run/smisc-needsmeta.pid
-    every 10 cycles
-    start program = "/etc/init.d/smisc-needsmeta start"
-    stop  program = "/etc/init.d/smisc-needsmeta stop"
-

@@ -1,9 +1,22 @@
 ---
+- name: set our hostname to smisc
+  hostname: name={{ hostname }}
+
+- name: set our hostname to smisc
+  replace: dest=/etc/hostname regexp='(?!{{ fqdn }})' replace='{{ fqdn }}'
+
+- name: set our FQDN
+  lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} {{ hostname }}" dest=/etc/hosts
+  
 - name: ensure local directory structure is set up
   command: mkdir -p "{{ item }}" creates={{ item }}
   with_items:
     - /var/local/log 
     - /var/local/run
+    - /usr/local/share/nginx
+    - /usr/local/src/{{ fqdn }}
+    - /usr/local/src/{{ fqdn }}/dashboard
+    - /usr/local/src/{{ fqdn }}/sql
 
 - name: add base repositories
   apt_repository: repo='{{item}}' state=present
@@ -96,7 +109,10 @@
     - hot
 
 - name: Synchronize phpPgAdmin
-  synchronize: src=pgsql/ dest=/usr/share/nginx/sql group=no owner=no perms=no recursive=yes
+  synchronize: src=pgsql/ dest=/usr/local/src/{{ fqdn }}/sql group=no owner=no perms=no recursive=yes
+
+- name: Synchronize dashboard code
+  synchronize: src=dashboard/ dest=/usr/local/src/{{ fqdn }}/dashboard group=no owner=no perms=no recursive=yes
 
 - name: Add the pacsocial user to postgres
   sudo_user: postgres

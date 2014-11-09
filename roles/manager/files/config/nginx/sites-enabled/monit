@@ -1,6 +1,6 @@
 server {
 	listen 80;
-	server_name monit.pacocial.jwgur.com;
+	server_name monit.smisc.jwgur.com;
 
 	location / {
 		proxy_pass http://127.0.0.1:2812;

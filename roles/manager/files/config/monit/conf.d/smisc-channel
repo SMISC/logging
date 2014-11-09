@@ -1,5 +1,0 @@
-check process smisc-channel with pidfile /var/local/run/smisc-channel.pid
-    every 10 cycles
-    start program = "/etc/init.d/smisc-channel start"
-    stop  program = "/etc/init.d/smisc-channel stop"
-
