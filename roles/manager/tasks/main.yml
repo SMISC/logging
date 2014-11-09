@@ -56,8 +56,8 @@
     - psycopg2
 
 
-- name: Synchronize nginx site configuration
-  synchronize: src=config/nginx/sites-enabled/ dest=/etc/nginx/sites-enabled/
+- name: Synchronize nginx configuration
+  synchronize: src=config/nginx/ dest=/etc/nginx/ delete=yes
   notify: 
     - restart nginx
 
