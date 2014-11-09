@@ -60,6 +60,8 @@
   synchronize: src=config/nginx/ dest=/etc/nginx/ delete=yes
   notify: 
     - restart nginx
+  tags:
+    - nginx
 
 - name: Increase stock SHMMAX
   sysctl: name=kernel.shmmax value=8589934592 sysctl_set=yes
@@ -79,9 +81,13 @@
 
 - name: Synchronize binaries
   synchronize: src=config/bins/ dest=/usr/local/bin/ delete=no
+  tags:
+    - smisc
 
 - name: Synchronize init scripst
   synchronize: src=config/initscripts/ dest=/etc/init.d/ delete=no
+  tags:
+    - smisc
 
 # this changes every time. broken? archivce=no maybe it is changing permissions
 #- name: Synchronize php-fpm config
@@ -97,34 +103,49 @@
   synchronize: src=config/monit/ dest=/etc/monit/ group=no owner=no perms=no recursive=yes
   notify:
      - restart monit
+  tags:
+    - monit
 
 - name: Ensure files have the proper mode and owner
   file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }}
   with_items:
     - { src: "/etc/monit/monitrc" }
+  tags:
+    - monit
 
 - name: Deploy smisc code
   synchronize: src=src/ dest=/usr/local/src/smisc/
   tags: 
+    - smisc
     - hot
 
 - name: Synchronize phpPgAdmin
   synchronize: src=pgsql/ dest=/usr/local/src/{{ fqdn }}/sql group=no owner=no perms=no recursive=yes
+  tags:
+    - smisc
 
 - name: Synchronize dashboard code
   synchronize: src=dashboard/ dest=/usr/local/src/{{ fqdn }}/dashboard group=no owner=no perms=no recursive=yes
+  tags:
+    - smisc
+    - hot
 
 - name: Add the pacsocial user to postgres
   sudo_user: postgres
   postgresql_user: name=pacsocial state=present
+  tags:
+    - postgresql
 
 - name: Add the pacsocial database to postgres
   sudo_user: postgres
   postgresql_db: name=pacsocial state=present owner=pacsocial
+  tags:
+    - postgresql
 
 - name: Deploy smisc configuration
   synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
   tags: 
+    - smisc
     - hot
 
 - name: Core services are running
@@ -135,4 +156,9 @@
     - php5-fpm
     - monit
   tags:
+    - smisc
+    - nginx
+    - php
+    - monit
+    - postgresql
     - hot
