@@ -171,4 +171,4 @@
   cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py channel"
 
 - name: turn on the hourly backup job
-  cron: name="hourly backups" state=present minute="0" hour="*" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
+  cron: name="hourly backups" state=present minute="0" hour="*/3" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"

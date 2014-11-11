@@ -5,7 +5,7 @@ import os
 import tempfile
 import subprocess
 
-BACKUP_LEVEL = 5
+BACKUP_LEVEL = 12
 
 class RotatingFilenameHourly:
     def __init__(self, basepath):
@@ -62,9 +62,11 @@ class BackupManager:
 
             permissible_backups = set(rt.getLastN(BACKUP_LEVEL))
             existing_backups = os.walk(backup_dir)
-            for (_, _, backup) in existing_backups:
-                if backup not in permissible_backups:
-                    self._rm(os.path.join(backup_dir, backup))
+
+            for (_, _, backups) in existing_backups:
+                for backup in backups:
+                    if os.path.join(backup_dir, backup) not in permissible_backups:
+                        self._rm(os.path.join(backup_dir, backup))
 
 if __name__ == "__main__":
     backer = BackupManager()
