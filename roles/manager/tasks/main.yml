@@ -13,6 +13,8 @@
   with_items:
     - /var/local/log 
     - /var/local/run
+    - /var/local/backups
+    - /var/local/backups/postgresql
     - /usr/local/share/nginx
     - /usr/local/src/{{ fqdn }}
     - /usr/local/src/{{ fqdn }}/dashboard
@@ -79,8 +81,8 @@
   notify:
     - restart redis
 
-- name: Synchronize binaries
-  synchronize: src=config/bins/ dest=/usr/local/bin/ delete=no
+- name: Synchronize backup script
+  synchronize: src=scripts/backup.py dest=/usr/local/bin/smisc-backup.py
   tags:
     - smisc
 
@@ -164,3 +166,9 @@
     - monit
     - postgresql
     - hot
+
+- name: turn on the channel scraper job
+  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py channel"
+
+- name: turn on the hourly backup job
+  cron: name="hourly backups" state=present minute="0" hour="*" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"

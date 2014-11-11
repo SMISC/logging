@@ -118,10 +118,12 @@ class SMISC:
                 edgeservices.append(self.getService('edge'))
                 scrapeservices.append(self.getService('scrape'))
             return FollowersScraper(clients, edgeservices, scrapeservices)
+        elif 'clean' == which:
+            pass
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: python3 -m app [recenttweets | info | channel | followers]')
+        print('Usage: python3 -m app [recenttweets | info | channel | followers | clean]')
         sys.exit(1)
 
     smisc = SMISC()
