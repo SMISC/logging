@@ -13,9 +13,9 @@ class LockService:
 
         if not rv:
             time_started = self.inspect(what)
-            logging.debug('%s locked (since %.0f minutes ago).', what, (time.time() - time_started) / 60)
+            logging.info('%s locked (since %.0f minutes ago).', what, (time.time() - time_started) / 60)
         else:
-            logging.debug('%s acquired and now locked', what)
+            logging.info('%s acquired and now locked', what)
 
         return rv
 
