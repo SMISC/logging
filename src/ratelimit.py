@@ -30,6 +30,8 @@ class RateLimitedTwitterAPI:
                     try:
                         logging.debug("Requesting %s using the %dth client", resource, i)
                         response = api.request(resource, params, files)
+                        quota = response.get_rest_quota()
+                        logging.debug("Remaining: %d\t\tReset: %d seconds from now", quota['remaining'], int(quota['reset']) - time.time())
                     except Exception as e:
                         logging.debug('Sleeping %d (because %s)', sleep_time, e)
                         time.sleep(sleep_time)

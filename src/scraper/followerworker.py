@@ -22,9 +22,11 @@ class FollowersScraperWorker(threading.Thread):
                 except queue.Empty:
                     continue
 
-                logging.debug('Scraping followers for %d', int(user_id))
                 cursor = -1
+                pagen = 0
                 while cursor <= 0:
+                    logging.info('Getting %dth page of followers for %d', pagen, user_id)
+                    pagen += 1
                     resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
                     for follower in resp.get_iterator():
                         if 'ids' not in follower:
