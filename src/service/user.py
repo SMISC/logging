@@ -5,17 +5,8 @@ class UserService:
     def __init__(self, db):
         self.db = db
 
-    def users_where(self, where, args = [], order_by = None, lim = None, offset = None):
-        query = 'select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from tuser where ' + where
-        if order_by is not None:
-            query += ' order by ' + order_by
-        if lim is not None:
-            query += ' limit %s' % (lim,)
-
-            if offset is not None:
-                query += ' offset %d' % (offset,)
-
-        result = self.db.execute(query, tuple(args))
+    def users_where(self, where, args = []):
+        result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets from tuser where ' + where, tuple(args))
         try:
             results = self.db.fetchall()
         except psycopg2.ProgrammingError:

@@ -9,10 +9,10 @@ from .followerworker import FollowersScraperWorker
 class FollowersScraper:
     LOCK_KEY = 'follower_scraper'
 
-    def __init__(self, rlapis, edgeservices, userservice, lockservice):
+    def __init__(self, rlapis, edgeservices, db, lockservice):
         self.rlapis = rlapis
         self.edgeservices = edgeservices
-        self.userservice = userservice
+        self.db = db
         self.lockservice = lockservice
         self.evt = threading.Event()
         self.threads = []
@@ -41,12 +41,32 @@ class FollowersScraper:
         users = []
 
         while page == 0 or len(users) is not 0:
-            users = self.userservice.users_where('interesting=True', [], 'id asc', pagesize, page*pagesize)
-            logging.info("Got %d users on page %d", len(users), page)
+            self.db.execute('select distinct on (user_id) id, user_id from tuser where interesting=True order by user_id, id asc limit %d offset %d' % (pagesize, pagesize*page))
+
+            users = []
+
+            try:
+                users_results = self.db.fetchall()
+            except psycopg2.ProgrammingError:
+                users_results = []
+
+            if users_results is None:
+                users_results = []
+
+            for user_result in users_results:
+                user_id = user_result[1]
+                q.put(str(user_id))
+
             page = page + 1
+
+        while not q.empty():
+            logging.info('%d users remaining', q.qsize())
+
+        self.lockservice.release(self.LOCK_KEY)
 
     def cleanup(self):
         logging.info('Got TERM signal, exiting gracefully...')
         self.evt.set()
         for thread in self.threads:
             thread.join()
+        self.lockservice.release(self.LOCK_KEY)

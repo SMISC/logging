@@ -88,12 +88,12 @@ class SMISC:
         elif 'followers' == which:
             clients = []
             edgeservices = []
-            userservice = self.getService('user')
+            db = self.getDatabaseCursor()
             lockservice = self.getService('lock')
-            for i in range(10):
+            for i in range(8):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
-            return FollowersScraper(clients, edgeservices, userservice, lockservice)
+            return FollowersScraper(clients, edgeservices, db, lockservice)
         elif 'clean' == which:
             pass
 
