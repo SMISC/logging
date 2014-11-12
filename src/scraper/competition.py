@@ -30,7 +30,7 @@ class CompetitionScraper:
         logging.info('Done!')
         self.cleanup()
 
-    def sigterm(self):
+    def sigterm(self, _, _, _):
         logging.info('Got TERM signal, exiting gracefully...')
         self.cleanup()
 

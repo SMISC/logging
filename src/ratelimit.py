@@ -1,5 +1,6 @@
 from TwitterAPI import TwitterAPI
 
+import traceback
 import time
 import logging
 import re
@@ -41,10 +42,9 @@ class RateLimitedTwitterAPI:
 
                 while not overlimits:
                     try:
-                        logging.debug("Requesting %s using the %dth client", resource, i)
                         response = api.request(resource, params, files)
                     except Exception as e:
-                        logging.debug('Sleeping %d (because %s)', sleep_time, e)
+                        logging.warn('Sleeping through Exception %d (because %s around %s)', sleep_time, e, traceback.format_exc())
                         time.sleep(sleep_time)
                         sleep_time = sleep_time * 2 # exponential backoff
                         continue
