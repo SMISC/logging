@@ -33,11 +33,10 @@ class FollowersScraper:
             thread.start()
 
         page = 0
-        pagesize = 5
+        pagesize = 1000
         users = 0
 
-        while page < 1:
-        # while page is 0 or users is not 0:
+        while page is 0 or users is not 0:
             self.db.execute('select distinct on (user_id) id, user_id from tuser where interesting=True order by user_id, id asc limit %d offset %d' % (pagesize, pagesize*page))
 
             users = 0
