@@ -4,10 +4,13 @@ import time
 import logging
 import re
 
+from util import twittertime 
+
 class RateLimitedTwitterAPI:
     def __init__(self, credentials):
         self.api_per_key = dict()
         self.credentials = credentials
+        self.api_numbers_per_endpoint = dict()
 
     def _getIthClientLazily(self, i):
         (key, secret) = self.credentials[i]
@@ -20,8 +23,18 @@ class RateLimitedTwitterAPI:
         cycle_sleep_base = 30
         cycle_sleep = cycle_sleep_base
 
+        ''' TECHNICALLY WON'T WORK FOR RESOURCES WITH PLACEHOLDERS BUT WORKS FINE NOW'''
+        if resource in self.api_numbers_per_endpoint:
+            start_i = self.api_numbers_per_endpoint[resource]
+        else:
+            start_i = 0
+
+        sequence = list(range(start_i, len(self.credentials)))
+        sequence.extend(list(range(0, start_i)))
+
         while True:
-            for i in range(len(self.credentials)):
+            for j in range(len(sequence)):
+                i = sequence[j]
                 api = self._getIthClientLazily(i)
                 overlimits = False
                 sleep_time = 1
@@ -30,8 +43,6 @@ class RateLimitedTwitterAPI:
                     try:
                         logging.debug("Requesting %s using the %dth client", resource, i)
                         response = api.request(resource, params, files)
-                        quota = response.get_rest_quota()
-                        logging.debug("Remaining: %d\t\tReset: %d seconds from now", quota['remaining'], int(quota['reset']) - time.time())
                     except Exception as e:
                         logging.debug('Sleeping %d (because %s)', sleep_time, e)
                         time.sleep(sleep_time)
@@ -47,6 +58,7 @@ class RateLimitedTwitterAPI:
                         time.sleep(sleep_time)
                         sleep_time = sleep_time * 2 # exponential backoff
                     elif response.status_code == 200:
+                        self.api_numbers_per_endpoint[resource] = i
                         return response
 
             logging.info('All clients over limits. Sleeping for %d', cycle_sleep)
