@@ -38,12 +38,11 @@ class FollowersScraper:
 
         page = 0
         pagesize = 1000
-        users = []
 
-        while page == 0 or len(users) is not 0:
+        while page == 0 or users is not 0:
             self.db.execute('select distinct on (user_id) id, user_id from tuser where interesting=True order by user_id, id asc limit %d offset %d' % (pagesize, pagesize*page))
 
-            users = []
+            users = 0
 
             try:
                 users_results = self.db.fetchall()
@@ -55,12 +54,14 @@ class FollowersScraper:
 
             for user_result in users_results:
                 user_id = user_result[1]
+                users += 1
                 q.put(str(user_id))
 
             page = page + 1
 
         while not q.empty():
             logging.info('%d users remaining', q.qsize())
+            time.sleep(10)
 
         self.lockservice.release(self.LOCK_KEY)
 
