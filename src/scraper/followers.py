@@ -18,16 +18,12 @@ class FollowersScraper:
         self.threads = []
 
     def main(self):
-        signal.signal(signal.SIGTERM, self.cleanup)
-        acquired = self.lockservice.acquire(self.LOCK_KEY)
-
-        if not acquired:
-            time_started = self.lockservice.inspect(self.LOCK_KEY)
-            logging.info('Follower scraper locked (since %.0f minutes ago). Quitting...', (time.time() - time_started) / 60)
+        if not self.lockservice.acquire(self.LOCK_KEY):
             return
 
         logging.info('Follower scraper started')
 
+        signal.signal(signal.SIGTERM, self.sigterm)
         q = queue.Queue()
 
         for i in range(len(self.rlapis)):
@@ -37,9 +33,11 @@ class FollowersScraper:
             thread.start()
 
         page = 0
-        pagesize = 1000
+        pagesize = 5
+        users = 0
 
-        while page == 0 or users is not 0:
+        while page < 1:
+        # while page is 0 or users is not 0:
             self.db.execute('select distinct on (user_id) id, user_id from tuser where interesting=True order by user_id, id asc limit %d offset %d' % (pagesize, pagesize*page))
 
             users = 0
@@ -63,11 +61,14 @@ class FollowersScraper:
             logging.info('%d users remaining', q.qsize())
             time.sleep(10)
 
-        self.lockservice.release(self.LOCK_KEY)
+        logging.info('Done!')
+        self.cleanup()
+
+    def sigterm(self):
+        logging.info('Got TERM signal, exiting gracefully...')
+        self.cleanup()
 
     def cleanup(self):
-        logging.info('Got TERM signal, exiting gracefully...')
-        self.evt.set()
-        for thread in self.threads:
-            thread.join()
+        logging.info('Cleaning up...')
         self.lockservice.release(self.LOCK_KEY)
+        self.evt.set()

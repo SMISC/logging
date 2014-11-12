@@ -21,14 +21,14 @@ from scraper.info import InfoScraper
 from scraper.followers import FollowersScraper
 
 class SMISC:
-    def __init__(self):
+    def __init__(self, app):
         self.config = configparser.ConfigParser()
         self.config.read('/usr/local/share/smisc.ini')
         self.log = logging.getLogger(None)
         self.rds = None
         self.dbc = None
 
-    def setupLogging(self):
+    def setupLogging(self, level):
         handler = logging.handlers.RotatingFileHandler(self.config['smisc']['log'], maxBytes=1024*1024*10, backupCount=5)
         formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
         handler.setFormatter(formatter)
@@ -37,7 +37,7 @@ class SMISC:
         stdout_handler = logging.StreamHandler(sys.stdout)
         self.log.addHandler(stdout_handler)
 
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(level)
 
         logging.getLogger('requests').setLevel(logging.ERROR)
 
@@ -63,7 +63,10 @@ class SMISC:
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
         apis = []
+        i = 0
         for (key, secret) in zip(keys, secrets):
+            i += 1
+            logging.debug('Creating Twitter API %d', i)
             api = TwitterAPI(key, secret, auth_type='oAuth2')
             apis.append(api)
         return RateLimitedTwitterAPI(apis)
@@ -84,7 +87,8 @@ class SMISC:
         if 'channel' == which:
             rlapi = self.getTwitterAPI()
             tweetservice = self.getService('tweet')
-            return ChannelScraper(rlapi, tweetservice)
+            lockservice = self.getService('lock')
+            return ChannelScraper(rlapi, tweetservice, lockservice)
         elif 'followers' == which:
             clients = []
             edgeservices = []
@@ -102,12 +106,14 @@ if __name__ == '__main__':
         print('Usage: python3 -m app [channel | followers | clean]')
         sys.exit(1)
 
-    smisc = SMISC()
-    smisc.setupLogging()
+    app_name = sys.argv[1]
 
-    app = smisc.getProgram(sys.argv[1])
+    smisc = SMISC(app_name)
+    smisc.setupLogging(logging.INFO)
+
+    app = smisc.getProgram(app_name)
     if app is None:
-        logging.error('Invalid application "%s"' % (sys.argv[1]))
+        logging.error('Invalid application "%s"' % (app_name))
     else:
         try:
             app.main()

@@ -1,6 +1,7 @@
 import time
 import threading
 import logging
+import queue
 
 class FollowersScraperWorker(threading.Thread):
     def __init__(self, q, rlapi, edgeservice, evt):
@@ -16,7 +17,11 @@ class FollowersScraperWorker(threading.Thread):
             i = 0
             while not self.evt.is_set():
                 time.sleep(1)
-                user_id = self.q.get()
+                try:
+                    user_id = self.q.get(block=False)
+                except queue.Empty:
+                    continue
+
                 logging.debug('Scraping followers for %d', int(user_id))
                 cursor = -1
                 while cursor <= 0:

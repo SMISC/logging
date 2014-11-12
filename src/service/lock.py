@@ -1,3 +1,4 @@
+import logging
 import time
 
 class LockService:
@@ -8,7 +9,15 @@ class LockService:
         return 'lock_%s' % (what)
 
     def acquire(self, what):
-        return self.rds.setnx(self._getKey(what), time.time())
+        rv = self.rds.setnx(self._getKey(what), time.time())
+
+        if not rv:
+            time_started = self.inspect(what)
+            logging.debug('%s locked (since %.0f minutes ago).', what, (time.time() - time_started) / 60)
+        else:
+            logging.debug('%s acquired and now locked', what)
+
+        return rv
 
     def inspect(self, what):
         val = self.rds.get(self._getKey(what))
@@ -17,4 +26,5 @@ class LockService:
         return None
 
     def release(self, what):
+        logging.debug('%s released', what)
         self.rds.delete(self._getKey(what))

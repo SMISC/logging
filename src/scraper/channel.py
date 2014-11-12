@@ -2,11 +2,17 @@ import logging
 import time
 
 class ChannelScraper:
-    def __init__(self, rlapi, tweetservice):
+    LOCK_KEY = 'channel_scraper'
+
+    def __init__(self, rlapi, tweetservice, lockservice):
         self.rlapi = rlapi
         self.tweetservice = tweetservice
+        self.lockservice = lockservice
 
     def main(self):
+        if not self.lockservice.acquire(self.LOCK_KEY):
+            return
+
         query = '#antivax OR #vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower OR #parentsdothework OR #saynotovaccines OR #vaccineeducated'
         max_id = None
         since_id = self.tweetservice.get_latest_tweet_id()
@@ -55,7 +61,7 @@ class ChannelScraper:
 
             self.tweetservice.commit()
 
-            logging.debug('Found %d tweets', n_tweets)
+            logging.info('Found %d tweets', n_tweets)
 
             if n_tweets < 100:
                 break
@@ -68,3 +74,4 @@ class ChannelScraper:
 
             time.sleep(1)
 
+        self.lockservice.release(self.LOCK_KEY)
