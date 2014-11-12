@@ -13,6 +13,7 @@ from service.scrape import ScrapeService
 from service.tweet import TweetService
 from service.user import UserService
 from service.edge import EdgeService
+from service.lock import LockService
 
 from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
@@ -59,25 +60,13 @@ class SMISC:
         return dbc.cursor()
     
     def getTwitterAPI(self):
-        rds = self.getRedis()
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
+        apis = []
         for (key, secret) in zip(keys, secrets):
-            inuse_key = 'client_id_%s' % (key)
-            try:
-                with self.rds.pipeline() as pipe:
-                    pipe.watch(inuse_key)
-                    ttl = int(pipe.ttl(inuse_key))
-                    if ttl <= 0:
-                        pipe.multi()
-                        pipe.setex(inuse_key, 30, '1')
-                        pipe.execute()
-                        api = TwitterAPI(key, secret, auth_type='oAuth2')
-                        return RateLimitedTwitterAPI.fromUnlimited(api)
-            except redis.WatchError:
-                continue
-
-        raise Exception('No keys left!')
+            api = TwitterAPI(key, secret, auth_type='oAuth2')
+            apis.append(api)
+        return RateLimitedTwitterAPI(apis)
 
     def getService(self, which):
         if 'tweet' == which:
@@ -88,42 +77,29 @@ class SMISC:
             return ScrapeService(self.getRedis())
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
+        elif 'lock' == which:
+            return LockService(self.getRedis())
 
     def getProgram(self, which):
-        if 'needsmeta' == which:
-            tweetservice = self.getService('tweet')
-            userservice = self.getService('user')
-            scrapeservice = self.getService('scrape')
-            edgeservice = self.getService('edge')
-            return NeedsMetaScraper(tweetservice, userservice, scrapeservice, edgeservice)
-        elif 'info' == which:
-            clients = []
-            userservices = []
-            scrapeservices = []
-            for i in range(3):
-                clients.append(self.getTwitterAPI())
-                userservices.append(self.getService('user'))
-                scrapeservices.append(self.getService('scrape'))
-            return InfoScraper(clients, userservices, scrapeservices)
-        elif 'channel' == which:
+        if 'channel' == which:
             rlapi = self.getTwitterAPI()
             tweetservice = self.getService('tweet')
             return ChannelScraper(rlapi, tweetservice)
         elif 'followers' == which:
             clients = []
             edgeservices = []
-            scrapeservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock')
             for i in range(10):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
-                scrapeservices.append(self.getService('scrape'))
-            return FollowersScraper(clients, edgeservices, scrapeservices)
+            return FollowersScraper(clients, edgeservices, userservice, lockservice)
         elif 'clean' == which:
             pass
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: python3 -m app [recenttweets | info | channel | followers | clean]')
+        print('Usage: python3 -m app [channel | followers | clean]')
         sys.exit(1)
 
     smisc = SMISC()

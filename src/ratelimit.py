@@ -3,85 +3,30 @@ import logging
 import re
 
 class RateLimitedTwitterAPI:
-    @staticmethod
-    def fromUnlimited(api):
-        rate_limits = RateLimitedTwitterAPI.flatten(api.request('application/rate_limit_status'))
-        return RateLimitedTwitterAPI(api, rate_limits)
-
-    @staticmethod
-    def flatten(response):
-        limits_flattened = {}
-        for limits in response.get_iterator():
-            for (category, items) in limits['resources'].items():
-                for (uri, limit) in items.items():
-                    uri_parts = uri.split('/')
-                    re_parts = []
-                    for part in uri_parts:
-                        if 0 == len(part):
-                            continue
-                        if part[0] == ':':
-                            re_parts.append('.*')
-                        else:
-                            re_parts.append(part)
-                    re_text = '^' + ('/'.join(re_parts)) + '$'
-                    limits_flattened[uri] = {
-                        'limit': limit,
-                        'regex': re.compile(re_text)
-                    }
-        return limits_flattened
-
-    def __init__(self, api, limits):
-        self.api = api
-        self.limits = limits
+    def __init__(self, apis):
+        if len(apis) == 0:
+            raise Exception("Can't make a rate limited api from zero apis")
+        self.apis = apis
 
     def request(self, resource, params=None, files=None):
-        self.block_until_available(resource)
-        i = 1
         while True:
-            try:
-                response = self.api.request(resource, params, files)
-            except Exception:
-                time.sleep(i)
-                i = i * 2 # exponential backoff
-                continue
-            if response.status_code == 429:
-                self.next(resource)
-                self.block_until_available(resource)
-            elif response.status_code == 200:
-                return response
+            for i in range(len(self.apis)):
+                api = self.apis[i]
+                overlimits = False
+                sleep_time = 1
 
-
-    def _get_uri_pattern(self, uri):
-        for (uri_pattern, limit_mask) in self.limits.items():
-            if limit_mask['regex'].match(uri):
-                return uri_pattern
-
-    def decrement(self, uri):
-        uri_pattern = self._get_uri_pattern(uri)
-        self.limits[uri_pattern]['limit']['remaining'] -= 1
-
-    def update(self):
-        rate_limits = self.api.request('application/rate_limit_status')
-        self.limits = self.flatten(rate_limits)
-
-    def next(self, uri):
-        uri_pattern = self._get_uri_pattern(uri)
-        self.limits[uri_pattern]['limit']['remaining'] = 0
-        self.limits[uri_pattern]['limit']['reset'] += 15*60
-
-    def get_limit_info(self, uri):
-        uri_pattern = self._get_uri_pattern(uri)
-        return self.limits[uri_pattern]['limit']
-
-    def block_until_available(self, uri):
-        while True:
-            limit = self.get_limit_info(uri)
-            now = int(time.time())
-            if limit['remaining'] > 0 or limit['reset'] <= (now+10): #+10 to give some padding on clocks
-                break
-            while limit['remaining'] == 0 and limit['reset'] > (now+10):
-                time_to_sleep = limit['reset'] - now
-                logging.debug('%d seconds left on %s rate limit' % (time_to_sleep, uri))
-                time.sleep(min(10, time_to_sleep))
-                now = int(time.time())
-            self.update()
+                while not overlimits:
+                    try:
+                        response = api.request(resource, params, files)
+                    except Exception as e:
+                        time.sleep(sleep_time)
+                        sleep_time = sleep_time * 2 # exponential backoff
+                        continue
+                    if response.status_code == 429:
+                        overlimits = True
+                        continue
+                    elif response.status_code >= 500:
+                        time.sleep(sleep_time)
+                        sleep_time = sleep_time * 2 # exponential backoff
+                    elif response.status_code == 200:
+                        return response
