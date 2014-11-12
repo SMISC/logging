@@ -5,8 +5,6 @@ import logging
 import logging.handlers
 import configparser
 
-from TwitterAPI import TwitterAPI
-
 from ratelimit import RateLimitedTwitterAPI
 
 from service.scrape import ScrapeService
@@ -19,6 +17,7 @@ from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
 from scraper.info import InfoScraper
 from scraper.followers import FollowersScraper
+from scraper.competitiontweets import CompetitionTweetsScraper
 
 class SMISC:
     def __init__(self, app):
@@ -62,14 +61,7 @@ class SMISC:
     def getTwitterAPI(self):
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
-        apis = []
-        i = 0
-        for (key, secret) in zip(keys, secrets):
-            i += 1
-            logging.debug('Creating Twitter API %d', i)
-            api = TwitterAPI(key, secret, auth_type='oAuth2')
-            apis.append(api)
-        return RateLimitedTwitterAPI(apis)
+        return RateLimitedTwitterAPI(list(zip(keys, secrets)))
 
     def getService(self, which):
         if 'tweet' == which:
@@ -89,27 +81,39 @@ class SMISC:
             tweetservice = self.getService('tweet')
             lockservice = self.getService('lock')
             return ChannelScraper(rlapi, tweetservice, lockservice)
+
         elif 'followers' == which:
             clients = []
             edgeservices = []
-            db = self.getDatabaseCursor()
+            userservice = self.getService('user')
             lockservice = self.getService('lock')
             for i in range(8):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
-            return FollowersScraper(clients, edgeservices, db, lockservice)
+            return FollowersScraper(clients, edgeservices, userservice, lockservice)
+
+        elif 'competition-tweets':
+            clients = []
+            tweetservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock')
+            for i in range(8):
+                clients.append(self.getTwitterAPI())
+                tweetservices.append(self.getService('tweet'))
+            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice)
+
         elif 'clean' == which:
             pass
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: python3 -m app [channel | followers | clean]')
+        print('Usage: python3 -m app [channel | followers | competition-tweets]')
         sys.exit(1)
 
     app_name = sys.argv[1]
 
     smisc = SMISC(app_name)
-    smisc.setupLogging(logging.INFO)
+    smisc.setupLogging(logging.DEBUG)
 
     app = smisc.getProgram(app_name)
     if app is None:
