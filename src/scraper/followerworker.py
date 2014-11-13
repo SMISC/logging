@@ -12,7 +12,6 @@ class FollowersScraperWorker(threading.Thread):
 
     def run(self):
         try:
-            i = 0
             user_id = self.scrapeservice.dequeue()
             if user_id is None:
                 return
@@ -31,6 +30,7 @@ class FollowersScraperWorker(threading.Thread):
 
                 self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
                 cursor = resp['next_cursor']
+                time.sleep(5)
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

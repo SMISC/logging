@@ -4,39 +4,42 @@ import logging
 import queue
 
 class CompetitionTweetsScraperWorker(threading.Thread):
-    def __init__(self, q, rlapi, edgeservice, evt):
+    def __init__(self, scrapeservice, rlapi, tweetservice):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.tweetservice = tweetservice
-        self.q = q
-        self.evt = evt
+        self.scrapeservice = scrapeservice
 
     def run(self):
         try:
-            while not self.evt.is_set():
-                time.sleep(1)
-                try:
-                    user_id = self.q.get(block=False)
-                except queue.Empty:
-                    continue
+            user_id = self.scrapeservice.dequeue()
+            if user_id is None:
+                return
 
-                logging.debug('Scraping recent tweets for %d', int(user_id))
-                cursor = -1
-                while cursor <= 0:
-                    resp = self.rlapi.request('search/tweets', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
-                    for follower in resp.get_iterator():
-                        if 'ids' not in follower:
-                            continue
+            last_tweets = self.tweetservice.tweets_where('user_id = %s', [user_id], 1, 'tweet_id desc')
 
-                        resp_follower_ids = []
-                        for follower_id in follower['ids']:
-                            resp_follower_ids.append(str(follower_id))
-                            edges += 1
+            last_tweet_id = 0
 
-                        self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
-                        cursor = follower['next_cursor']
+            if len(last_tweets):
+                last_tweet_id = last_tweets[0]['tweet_id']
 
-                logging.debug('Recorded %d edges.', edges)
+            pagen = 0
+            tweets = 0
+            since_id = last_tweet_id
+
+            while tweets > 0 or pagen is 0:
+                logging.info('Getting %dth page of tweets for %s, starting with %d', pagen, user_id, since_id)
+                pagen += 1
+
+                resp = self.rlapi.request('statuses/user_timeline', {'since_id': since_id, 'user_id': user_id, 'count': 200})
+                for tweet in resp:
+                    self.tweetservice.queue_tweet(tweet, False)
+                    since_id = max(since_id, tweet['id'])
+
+                tweets = len(resp)
+                logging.info('Got %d tweets' % (tweets))
+                self.tweetservice.commit()
+                time.sleep(5)
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

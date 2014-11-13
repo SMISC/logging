@@ -41,7 +41,7 @@ class ChannelScraper:
             for status in results['statuses']:
                 tweet_id = int(status['id'])
 
-                self.tweetservice.queue_tweet(status)
+                self.tweetservice.queue_tweet(status, True)
 
                 if min_tweet_id is None:
                     min_tweet_id = tweet_id

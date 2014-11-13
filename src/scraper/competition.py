@@ -10,6 +10,7 @@ class CompetitionScraper:
         self.lockservice = lockservice
         self.scrapeservices = scrapeservices[1:]
         self.myscrapeservice = scrapeservices[0]
+        self.threads = []
 
     def main(self):
         if not self.lockservice.acquire(self.LOCK_KEY):
@@ -25,5 +26,11 @@ class CompetitionScraper:
 
         queue_length = self.myscrapeservice.length()
         logging.info('%d users remaining', queue_length)
+
+        for thread in self.threads:
+            thread.start()
+        
+        for thread in self.threads:
+            thread.join()
 
         self.lockservice.release(self.LOCK_KEY)

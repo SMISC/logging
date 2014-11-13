@@ -19,12 +19,7 @@ class FollowersScraper(CompetitionScraper):
         logging.info('Follower scraper started')
 
         n_threads = len(self.rlapis)
-        threads = []
 
         for i in range(n_threads):
             thread = FollowersScraperWorker(self.scrapeservices[i], self.rlapis[i], self.edgeservices[i])
-            threads.append(thread)
-            thread.start()
-
-        for i in range(len(threads)):
-            thread.join()
+            self.threads.append(thread)

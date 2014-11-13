@@ -12,9 +12,9 @@ class TweetService:
             return int(rslt[0])
         return None
 
-    def tweets_where(self, where, args = [], limit = 100):
+    def tweets_where(self, where, args = [], limit = 100, order_by = 'tweet_id asc'):
         args = args + [limit]
-        result = self.db.execute('select tweet_id, user_id, text, timestamp from "tweet" where ' + where + ' order by tweet_id asc limit %s', tuple(args))
+        result = self.db.execute('select tweet_id, user_id, text, timestamp from "tweet" where ' + where + ' order by ' + order_by + ' limit %s', tuple(args))
         results = self.db.fetchall()
         tweets = []
         if results is not None:
@@ -28,13 +28,13 @@ class TweetService:
             return tweets
         return []
 
-    def queue_tweet(self, status):
+    def queue_tweet(self, status, interesting):
         tweet_id = int(status["id"])
         text = status["text"]
         timestamp = twittertime(status['created_at'])
         user = status["user"]
         user_id = user["id_str"]
-        self.tweets.append((tweet_id, user_id, text, timestamp))
+        self.tweets.append((tweet_id, user_id, text, timestamp, interesting))
 
         if "urls" in status["entities"] and len(status["entities"]["urls"]) > 0:
             for url in status["entities"]["urls"]:
@@ -53,7 +53,7 @@ class TweetService:
 
     def commit(self):
         if len(self.tweets) > 0:
-            self.db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp) VALUES(%s, %s, %s, %s)', self.tweets)
+            self.db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp, interesting) VALUES(%s, %s, %s, %s, %s)', self.tweets)
         if len(self.entities) > 0:
             self.db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', self.entities)
 

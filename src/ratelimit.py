@@ -39,15 +39,14 @@ class RateLimitedTwitterAPI:
                 i = sequence[j]
                 api = self._getIthClientLazily(i)
                 overlimits = False
-                sleep_time = 1
+                sleep_time = 2
 
                 while not overlimits:
                     try:
                         response = api.request(resource, params, files)
                     except Exception as e:
                         logging.warn('Sleeping through Exception %d (because %s around %s)', sleep_time, e, traceback.format_exc())
-                        time.sleep(sleep_time)
-                        sleep_time = sleep_time * 2 # exponential backoff
+                        sleep_time = sleep_time * sleep_time # exponential backoff
                         continue
 
                     logging.debug('status code %d', response.status_code)
@@ -55,12 +54,16 @@ class RateLimitedTwitterAPI:
                     if response.status_code == 429:
                         overlimits = True
                         continue
+                    elif response.status_code >= 400 and response.status_code < 500:
+                        logging.warn('Got 4xx error when requesting %s (%s)\n\n%s', resource, params, str(response))
+                        sleep_time = sleep_time + cycle_sleep_base
                     elif response.status_code >= 500:
-                        time.sleep(sleep_time)
-                        sleep_time = sleep_time * 2 # exponential backoff
+                        sleep_time = sleep_time * 2 # linear backoff
                     elif response.status_code == 200:
                         self.api_numbers_per_endpoint[resource] = i
                         return json.loads(response.text)
+
+                    time.sleep(sleep_time)
 
             logging.info('All clients over limits. Sleeping for %d', cycle_sleep)
             time.sleep(cycle_sleep)

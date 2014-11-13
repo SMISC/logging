@@ -97,16 +97,19 @@ class SMISC:
             return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices)
 
         elif 'competition-tweets':
-            '''
             clients = []
             tweetservices = []
+            scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock')
-            for i in range(8):
+            for i in range(1):
                 clients.append(self.getTwitterAPI())
                 tweetservices.append(self.getService('tweet'))
-            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice)
-            '''
+                scrapeservices.append(self.getService('scrape', 'tweets'))
+
+            scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
+
+            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices)
 
         elif 'clean' == which:
             pass
