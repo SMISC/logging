@@ -15,7 +15,7 @@ class LockService:
             time_started = self.inspect(what)
             logging.info('%s locked (since %.0f minutes ago).', what, (time.time() - time_started) / 60)
         else:
-            self.redis.expire(self._getKey(what), 3600)
+            self.rds.expire(self._getKey(what), 3600)
             logging.info('%s acquired and now locked', what)
 
         return rv
