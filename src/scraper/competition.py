@@ -25,3 +25,5 @@ class CompetitionScraper:
 
         queue_length = self.myscrapeservice.length()
         logging.info('%d users remaining', queue_length)
+
+        self.lockservice.release(self.LOCK_KEY)
