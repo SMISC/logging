@@ -2,14 +2,15 @@ import logging
 import time
 
 class LockService:
-    def __init__(self, rds):
+    def __init__(self, rds, expire_time = 3600):
         self.rds = rds
+        self.expire_time = expire_time
 
     def _getKey(self, what):
         return 'lock_%s' % (what)
 
     def acquire(self, what):
-        rv = self.rds.setnx(self._getKey(what), time.time())
+        rv = self.rds.execute_command('SET %s %d EX %d NX' % (self._getKey(what), int(time.time()), self.expire_time))
 
         if not rv:
             time_started = self.inspect(what)
