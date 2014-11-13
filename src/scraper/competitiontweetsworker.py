@@ -31,7 +31,12 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                 logging.info('Getting %dth page of tweets for %s, starting with %d', pagen, user_id, since_id)
                 pagen += 1
 
-                resp = self.rlapi.request('statuses/user_timeline', {'since_id': since_id, 'user_id': user_id, 'count': 200})
+                params = {'user_id': user_id, 'count': 200}
+
+                if since_id > 0:
+                    params['since_id'] = since_id
+
+                resp = self.rlapi.request('statuses/user_timeline', params)
                 for tweet in resp:
                     self.tweetservice.queue_tweet(tweet, False)
                     since_id = max(since_id, tweet['id'])
