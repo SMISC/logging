@@ -4,6 +4,7 @@ import traceback
 import time
 import logging
 import re
+import json
 
 from util import twittertime 
 
@@ -59,7 +60,7 @@ class RateLimitedTwitterAPI:
                         sleep_time = sleep_time * 2 # exponential backoff
                     elif response.status_code == 200:
                         self.api_numbers_per_endpoint[resource] = i
-                        return response
+                        return json.loads(response.text)
 
             logging.info('All clients over limits. Sleeping for %d', cycle_sleep)
             time.sleep(cycle_sleep)

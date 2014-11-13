@@ -38,7 +38,7 @@ class ChannelScraper:
             min_dt = ''
             max_dt = ''
 
-            for status in results.get_iterator():
+            for status in results['statuses']:
                 tweet_id = int(status['id'])
 
                 self.tweetservice.queue_tweet(status)

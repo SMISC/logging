@@ -63,13 +63,13 @@ class SMISC:
         secrets = self.config['twitter']['secrets'].split("\n")
         return RateLimitedTwitterAPI(list(zip(keys, secrets)))
 
-    def getService(self, which):
+    def getService(self, which, *args):
         if 'tweet' == which:
             return TweetService(self.getDatabaseCursor())
         elif 'user' == which:
             return UserService(self.getDatabaseCursor())
         elif 'scrape' == which:
-            return ScrapeService(self.getRedis())
+            return ScrapeService(self.getRedis(), args[0])
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
         elif 'lock' == which:
@@ -85,14 +85,19 @@ class SMISC:
         elif 'followers' == which:
             clients = []
             edgeservices = []
+            scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock')
-            for i in range(8):
+            for i in range(1):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
-            return FollowersScraper(clients, edgeservices, userservice, lockservice)
+                scrapeservices.append(self.getService('scrape', 'followers'))
+
+            scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
+            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices)
 
         elif 'competition-tweets':
+            '''
             clients = []
             tweetservices = []
             userservice = self.getService('user')
@@ -101,6 +106,7 @@ class SMISC:
                 clients.append(self.getTwitterAPI())
                 tweetservices.append(self.getService('tweet'))
             return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice)
+            '''
 
         elif 'clean' == which:
             pass
