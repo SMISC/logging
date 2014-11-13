@@ -8,8 +8,6 @@ from .competition import CompetitionScraper
 from .followerworker import FollowersScraperWorker
 
 class FollowersScraper(CompetitionScraper):
-    LOCK_KEY = 'follower_scraper'
-
     def __init__(self, rlapis, edgeservices, userservice, lockservice, scrapeservices):
         CompetitionScraper.__init__(self, userservice, lockservice, scrapeservices)
         self.rlapis = rlapis

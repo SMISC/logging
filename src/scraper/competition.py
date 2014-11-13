@@ -13,7 +13,7 @@ class CompetitionScraper:
         self.threads = []
 
     def main(self):
-        if not self.lockservice.acquire(self.LOCK_KEY):
+        if not self.lockservice.acquire():
             return
 
         if self.myscrapeservice.length() == 0:
@@ -32,5 +32,3 @@ class CompetitionScraper:
         
         for thread in self.threads:
             thread.join()
-
-        self.lockservice.release(self.LOCK_KEY)

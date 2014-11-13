@@ -2,15 +2,13 @@ import logging
 import time
 
 class ChannelScraper:
-    LOCK_KEY = 'channel_scraper'
-
     def __init__(self, rlapi, tweetservice, lockservice):
         self.rlapi = rlapi
         self.tweetservice = tweetservice
         self.lockservice = lockservice
 
     def main(self):
-        if not self.lockservice.acquire(self.LOCK_KEY):
+        if not self.lockservice.acquire():
             return
 
         query = '#antivax OR #vaxtruth OR #vaccinedebate OR #hearthiswell OR #cdcfraud OR #vaccinescauseautism OR #cdcfraudexposed OR #cdccoverup OR #cdcwhistleblower OR #parentsdothework OR #saynotovaccines OR #vaccineeducated'
@@ -73,5 +71,3 @@ class ChannelScraper:
                 max_dt = min_dt
 
             time.sleep(1)
-
-        self.lockservice.release(self.LOCK_KEY)

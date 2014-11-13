@@ -26,6 +26,7 @@ class SMISC:
         self.log = logging.getLogger(None)
         self.rds = None
         self.dbc = None
+        self.locks = []
 
     def setupLogging(self, level):
         handler = logging.handlers.RotatingFileHandler(self.config['smisc']['log'], maxBytes=1024*1024*10, backupCount=5)
@@ -73,7 +74,9 @@ class SMISC:
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
         elif 'lock' == which:
-            return LockService(self.getRedis())
+            service = LockService(self.getRedis(), args[0])
+            self.locks.append(service)
+            return service
 
     def getProgram(self, which):
         if 'channel' == which:
@@ -87,7 +90,7 @@ class SMISC:
             edgeservices = []
             scrapeservices = []
             userservice = self.getService('user')
-            lockservice = self.getService('lock')
+            lockservice = self.getService('lock', which)
             for i in range(15):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
@@ -96,12 +99,12 @@ class SMISC:
             scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
             return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices)
 
-        elif 'competition-tweets':
+        elif 'competition-tweets' == which:
             clients = []
             tweetservices = []
             scrapeservices = []
             userservice = self.getService('user')
-            lockservice = self.getService('lock')
+            lockservice = self.getService('lock', which)
             for i in range(15):
                 clients.append(self.getTwitterAPI())
                 tweetservices.append(self.getService('tweet'))
@@ -132,3 +135,9 @@ if __name__ == '__main__':
             app.main()
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
+        finally:
+            for lock in self.locks:
+                if lock.get_did_acquire():
+                    lock.release()
+            
+
