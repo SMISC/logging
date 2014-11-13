@@ -136,7 +136,7 @@ if __name__ == '__main__':
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
         finally:
-            for lock in self.locks:
+            for lock in smisc.locks:
                 if lock.get_did_acquire():
                     lock.release()
             

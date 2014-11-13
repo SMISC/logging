@@ -60,6 +60,9 @@ class RateLimitedTwitterAPI:
                     if response.status_code == 429:
                         overlimits = True
                         continue
+                    elif response.status_code == 401:
+                        # tried to get protected resource
+                        raise ProtectedException()
                     elif response.status_code >= 400 and response.status_code < 500:
                         logging.warn('Got 4xx error with client %d (client-id %s) when requesting %s (%s)\n\n%s\n\n%s', i, self.credentials[i][0], resource, params, str(response.headers), str(response.text))
                         sleep_time = sleep_time + cycle_sleep_base
@@ -74,3 +77,7 @@ class RateLimitedTwitterAPI:
             logging.info('All clients over limits. Sleeping for %d', cycle_sleep)
             time.sleep(cycle_sleep)
             cycle_sleep += cycle_sleep_base # linear backoff
+
+class ProtectedException(Exception):
+    def __init__(self):
+        self.msg = "User is protected."

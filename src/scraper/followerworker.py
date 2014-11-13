@@ -1,3 +1,5 @@
+from ratelimit import ProtectedException
+
 import time
 import threading
 import logging
@@ -21,7 +23,12 @@ class FollowersScraperWorker(threading.Thread):
             while cursor != 0:
                 logging.info('Getting %dth page of followers for %s', pagen, user_id)
                 pagen += 1
-                resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
+
+                try:
+                    resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
+                except ProtectedException as e:
+                    logging.info('%d is protected.', user_id)
+                    break
 
                 resp_follower_ids = []
 

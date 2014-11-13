@@ -1,3 +1,5 @@
+from ratelimit import ProtectedException
+
 import time
 import threading
 import logging
@@ -36,7 +38,12 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                 if since_id > 0:
                     params['since_id'] = since_id
 
-                resp = self.rlapi.request('statuses/user_timeline', params)
+                try:
+                    resp = self.rlapi.request('statuses/user_timeline', params)
+                except ProtectedException as e:
+                    logging.info('%d is protected', user_id)
+                    break
+
                 for tweet in resp:
                     self.tweetservice.queue_tweet(tweet, False)
                     since_id = max(since_id, tweet['id'])
