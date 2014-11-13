@@ -18,6 +18,7 @@ class RateLimitedTwitterAPI:
         (key, secret) = self.credentials[i]
         if key not in self.api_per_key:
             self.api_per_key[key] = TwitterAPI(key, secret, auth_type='oAuth2')
+            
 
         return self.api_per_key[key]
         
@@ -37,7 +38,12 @@ class RateLimitedTwitterAPI:
         while True:
             for j in range(len(sequence)):
                 i = sequence[j]
-                api = self._getIthClientLazily(i)
+                try:
+                    api = self._getIthClientLazily(i)
+                except Exception as e:
+                    logging.warn('Skipping %dth client (client-id: %s) that had an exception: %s', i, self.credentials[i][0], str(e))
+                    continue
+
                 overlimits = False
                 sleep_time = 2
 
