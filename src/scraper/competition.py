@@ -20,8 +20,7 @@ class CompetitionScraper:
             logging.info('Queue %s is empty. Beginning anew...', type(self))
             competition_users = self.userservice.get_competition_users()
 
-            for user_id in competition_users:
-                self.myscrapeservice.enqueue(user_id)
+            self._generate_queue(competition_users)
 
         self._run_user_queue()
 

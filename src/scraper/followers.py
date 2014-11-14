@@ -13,6 +13,13 @@ class FollowersScraper(CompetitionScraper):
         self.rlapis = rlapis
         self.edgeservices = edgeservices
 
+    def _generate_queue(self, users):
+        for user_id in users:
+            self.myscrapeservice.enqueue({
+                "user_id": user_id,
+                "cursor": -1
+            })
+
     def _run_user_queue(self):
         logging.info('Follower scraper started')
 

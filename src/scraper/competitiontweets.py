@@ -13,6 +13,13 @@ class CompetitionTweetsScraper(CompetitionScraper):
         self.rlapis = rlapis
         self.tweetservices = tweetservices
 
+    def _generate_queue(self, users):
+        for user_id in users:
+            self.myscrapeservice.enqueue({
+                "user_id": user_id,
+                "since_id": None
+            })
+
     def _run_user_queue(self):
         logging.info('Competition tweet scraper started')
 

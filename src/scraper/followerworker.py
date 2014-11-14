@@ -14,30 +14,33 @@ class FollowersScraperWorker(threading.Thread):
 
     def run(self):
         try:
-            user_id = self.scrapeservice.dequeue()
-            if user_id is None:
+            job = self.scrapeservice.dequeue()
+            if job is None:
                 return
 
-            cursor = -1
-            pagen = 0
-            while cursor != 0:
-                logging.info('Getting %dth page of followers for %s', pagen, user_id)
-                pagen += 1
+            (user_id, cursor) = (job["user_id"], job["cursor"])
 
-                try:
-                    resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
-                except ProtectedException as e:
-                    logging.info('%d is protected.', user_id)
-                    break
+            logging.info('Getting followers for %s with cursor %d', user_id, cursor)
 
-                resp_follower_ids = []
+            try:
+                resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
+            except ProtectedException as e:
+                logging.info('%d is protected.', user_id)
+                return
 
-                for fid in resp['ids']:
-                    resp_follower_ids.append(str(fid))
+            resp_follower_ids = []
 
-                self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
-                cursor = resp['next_cursor']
-                time.sleep(5)
+            for fid in resp['ids']:
+                resp_follower_ids.append(str(fid))
+
+            self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
+            next_cursor = resp['next_cursor']
+
+            if next_cursor != 0:
+                self.scrapeservice.enqueue({
+                    "user_id": user_id,
+                    "cursor": next_cursor
+                })
 
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))

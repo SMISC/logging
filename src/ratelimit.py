@@ -65,8 +65,6 @@ class RateLimitedTwitterAPI:
                     self.api_numbers_per_endpoint[resource] = i
                     return json.loads(response.text)
 
-                time.sleep(attempts * 5)
-
         logging.warn('Raising because no clients worked.')
         raise Exception('All clients over limits')
 

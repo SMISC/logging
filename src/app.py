@@ -133,6 +133,7 @@ if __name__ == '__main__':
     else:
         try:
             app.main()
+            logging.info('%s completed successfully.', app_name)
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
         finally:
