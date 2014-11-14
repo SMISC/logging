@@ -17,6 +17,7 @@ class CompetitionScraper:
             return
 
         if self.myscrapeservice.length() == 0:
+            logging.info('Queue %s is empty. Beginning anew...', type(self))
             competition_users = self.userservice.get_competition_users()
 
             for user_id in competition_users:
@@ -25,7 +26,7 @@ class CompetitionScraper:
         self._run_user_queue()
 
         queue_length = self.myscrapeservice.length()
-        logging.info('%d users remaining', queue_length)
+        logging.info('%d users remaining for %s', queue_length, type(self))
 
         for thread in self.threads:
             thread.start()

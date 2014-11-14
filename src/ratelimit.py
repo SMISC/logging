@@ -23,9 +23,6 @@ class RateLimitedTwitterAPI:
         return self.api_per_key[key]
         
     def request(self, resource, params=None, files=None):
-        cycle_sleep_base = 30
-        cycle_sleep = cycle_sleep_base
-
         ''' TECHNICALLY WON'T WORK FOR RESOURCES WITH PLACEHOLDERS BUT WORKS FINE NOW'''
         if resource in self.api_numbers_per_endpoint:
             start_i = self.api_numbers_per_endpoint[resource]
@@ -35,48 +32,45 @@ class RateLimitedTwitterAPI:
         sequence = list(range(start_i, len(self.credentials)))
         sequence.extend(list(range(0, start_i)))
 
-        while True:
-            for j in range(len(sequence)):
-                i = sequence[j]
+        for j in range(len(sequence)):
+            i = sequence[j]
+            try:
+                api = self._getIthClientLazily(i)
+            except Exception as e:
+                logging.warn('Skipping %dth client (client-id: %s) that had an exception: %s', i, self.credentials[i][0], str(e))
+                continue
+
+            overlimits = False
+            attempts = 0
+
+            while not overlimits and attempts <= 3:
+                attempts = attempts + 1
                 try:
-                    api = self._getIthClientLazily(i)
+                    response = api.request(resource, params, files)
                 except Exception as e:
-                    logging.warn('Skipping %dth client (client-id: %s) that had an exception: %s', i, self.credentials[i][0], str(e))
+                    logging.warn('Sleeping through Exception (because %s around %s)', e, traceback.format_exc())
                     continue
 
-                overlimits = False
-                sleep_time = 2
+                logging.debug('status code %d', response.status_code)
 
-                while not overlimits:
-                    try:
-                        response = api.request(resource, params, files)
-                    except Exception as e:
-                        logging.warn('Sleeping through Exception %d (because %s around %s)', sleep_time, e, traceback.format_exc())
-                        sleep_time = sleep_time * sleep_time # exponential backoff
-                        continue
+                if response.status_code == 429:
+                    overlimits = True
+                    continue
+                elif response.status_code == 401:
+                    # tried to get protected resource
+                    raise ProtectedException()
+                elif response.status_code >= 400 and response.status_code < 500:
+                    logging.warn('Got 4xx error with client %d (client-id %s) when requesting %s (%s)\n\n%s\n\n%s', i, self.credentials[i][0], resource, params, str(response.headers), str(response.text))
+                elif response.status_code == 200:
+                    self.api_numbers_per_endpoint[resource] = i
+                    return json.loads(response.text)
 
-                    logging.debug('status code %d', response.status_code)
+                time.sleep(attempts * 5)
 
-                    if response.status_code == 429:
-                        overlimits = True
-                        continue
-                    elif response.status_code == 401:
-                        # tried to get protected resource
-                        raise ProtectedException()
-                    elif response.status_code >= 400 and response.status_code < 500:
-                        logging.warn('Got 4xx error with client %d (client-id %s) when requesting %s (%s)\n\n%s\n\n%s', i, self.credentials[i][0], resource, params, str(response.headers), str(response.text))
-                        sleep_time = sleep_time + cycle_sleep_base
-                    elif response.status_code >= 500:
-                        sleep_time = sleep_time * 2 # linear backoff
-                    elif response.status_code == 200:
-                        self.api_numbers_per_endpoint[resource] = i
-                        return json.loads(response.text)
+        logging.warn('Raising because no clients worked.')
+        raise Exception('All clients over limits')
 
-                    time.sleep(sleep_time)
-
-            logging.info('All clients over limits. Sleeping for %d', cycle_sleep)
-            time.sleep(cycle_sleep)
-            cycle_sleep += cycle_sleep_base # linear backoff
+            
 
 class ProtectedException(Exception):
     def __init__(self):

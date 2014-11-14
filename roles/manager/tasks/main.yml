@@ -168,13 +168,13 @@
     - hot
 
 - name: turn on the channel scraper job
-  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py channel"
+  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py channel"
 
 - name: turn on the follower scraper job
-  cron: name="follower scraper" state=present minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py followers"
+  cron: name="follower scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py followers"
 
 - name: turn on the competition tweets scraper scraper job
-  cron: name="competition tweets scraper" state=present minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py competition-tweets"
+  cron: name="competition tweets scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py competition-tweets"
 
 - name: turn on the hourly backup job
   cron: name="hourly backups" state=present minute="0" hour="*/3" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
