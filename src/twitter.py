@@ -156,7 +156,11 @@ class Twitter:
             data = params
             params = None
 
-        return self.session.request(method, 'https://api.twitter.com/1.1/%s.json' % (resource), data=data, params=params, timeout=self.TIMEOUT)
+        response = self.session.request(method, 'https://api.twitter.com/1.1/%s.json' % (resource), data=data, params=params, timeout=self.TIMEOUT)
+
+        apiresponse = TwitterAPIResponse(response)
+
+        return apiresponse
 
 class OAuth2TokenInjector(requests.auth.AuthBase):
     def __init__(self, access_token):
@@ -165,33 +169,94 @@ class OAuth2TokenInjector(requests.auth.AuthBase):
         request.headers['Authorization'] = 'Bearer %s' % (self.access_token,)
         return request
 
-def twitter_from_credentials(key, secret):
-    token_url = 'https://api.twitter.com/oauth2/token'
-    auth_step_one = key + ':' + secret
-    auth_step_two = base64.b64encode(auth_step_one.encode('utf8'))
-    auth_step_three = auth_step_two.decode('utf8')
-    params = dict()
-    params['grant_type'] = 'client_credentials'
+class TwitterAPIResponse:
+    def __init__(self, response):
+        self.status_code = response.status_code
+        self.headers = response.headers
+        self.json = json.loads(response.text)
 
-    headers = dict()
-    headers['User-Agent'] = 'Jacob Greenleaf <greenleaf.jacob@gmail.com> TwitterAPI 1.0'
-    headers['Authorization'] = 'Basic ' + auth_step_three
-    headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
+class AccessTokenRefresher:
+    def __init__(self, key, secret):
+        self.key = key
+        self.secret = secret
 
-    response = requests.post(token_url, params=params, headers=headers)
-    response_json = json.loads(response.text)
+    def grant_injector(self):
+        token_url = 'https://api.twitter.com/oauth2/token'
+        auth_step_one = self.key + ':' + self.secret
+        auth_step_two = base64.b64encode(auth_step_one.encode('utf8'))
+        auth_step_three = auth_step_two.decode('utf8')
+        params = dict()
+        params['grant_type'] = 'client_credentials'
 
-    if 'access_token' in response_json:
-        access_token = response_json['access_token']
-        return twitter_from_token(access_token)
+        headers = dict()
+        headers['User-Agent'] = 'Jacob Greenleaf <greenleaf.jacob@gmail.com> TwitterAPI 1.0'
+        headers['Authorization'] = 'Basic ' + auth_step_three
+        headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
+
+        response = requests.post(token_url, params=params, headers=headers)
+        response_json = json.loads(response.text)
+
+        if 'access_token' in response_json:
+            access_token = response_json['access_token']
+            return OAuth2TokenInjector(access_token)
+        else:
+            logging.exception("Got HTTP %d when trying to grab access token but no access token found. Body: %s", response.status_code, response.text)
+            raise Exception("Erorr getting access token. HTTP %d" % (response.status_code,))
+
+class StatefulTwitter:
+    def __init__(self, state, refresher):
+        self.state = state
+        self.refresher = refresher
+
+    def get_refresher(self):
+        return self.refresher
+
+    def set_state(self, state):
+        self.state = state
+
+    def request(self, *args, **kwargs):
+        response = None
+
+        while response is None:
+            response = self.state.request(self, *args, **kwargs)
+
+        return response
+
+class StatefulTwitterUnauthorized:
+    def request(self, stateful, *args, **kwargs):
+        refresher = stateful.get_refresher()
+        injector = refresher.grant_injector()
+        session = requests.Session()
+        session.auth = injector
+        twitter = Twitter(session)
+        stateful.set_state(StatefulTwitterAuthorized(twitter))
+        return twitter.request(*args, **kwargs)
+
+class StatefulTwitterAuthorized:
+    ERROR_CODE_EXPIRED_TOKEN = 89
+
+    def __init__(self, twitter):
+        self.twitter = twitter
+
+    def request(self, stateful, *args, **kwargs):
+        response = self.twitter.request(*args, **kwargs)
+        if response.status_code == 429:
+            error_code = response.json['errors'][0]['code']
+            if error_code == self.ERROR_CODE_EXPIRED_TOKEN:
+                stateful.set_state(StatefulTwitterUnauthorized())
+                return None
+
+        return response
+
+
+def twitter_from_credentials(key, secret, access_token = None):
+    refresher = AccessTokenRefresher(key, secret)
+    if access_token is None:
+        state = StatefulTwitterUnauthorized()
     else:
-        logging.exception("Got HTTP %d when trying to grab access token but no access token found. Body: %s", response.status_code, response.text)
-        raise Exception("Erorr getting access token. HTTP %d" % (response.status_code,))
+        session = requests.Session()
+        session.auth = OAuth2TokenInjector(access_token)
+        twitter = Twitter(session)
+        state = StatefulTwitterAuthorized(twitter)
 
-
-def twitter_from_token(access_token):
-    tokeninjector = OAuth2TokenInjector(access_token)
-    session = requests.Session()
-    session.auth = tokeninjector
-    return Twitter(session)
-
+    return StatefulTwitter(state, refresher)

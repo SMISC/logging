@@ -5,7 +5,7 @@ import re
 import json
 
 from util import twittertime 
-from twitter import Twitter
+
 from twitter import twitter_from_credentials
 
 class RateLimitedTwitterAPI:
@@ -21,9 +21,10 @@ class RateLimitedTwitterAPI:
             access_key = self.rds.get('access_key_%s' % (key))
 
             if access_key is None:
-                self.api_per_key[key] = twitter_from_credentials(key, secret)
+                (self.api_per_key[key], access_key) = twitter_from_credentials(key, secret, access_key)
+                self.rds.setex('access_key_%s' % (key), 3600, access_key)
             else:
-                self.api_per_key[key] = Twitter(access_key)
+                self.api_per_key[key] = twitter_from_credentials(key, secret)
 
         return self.api_per_key[key]
         
@@ -56,19 +57,16 @@ class RateLimitedTwitterAPI:
                     logging.warn('Sleeping through Exception (because %s around %s)', e, traceback.format_exc())
                     continue
 
-                logging.debug('status code %d', response.status_code)
-
                 if response.status_code == 429:
                     overlimits = True
                     continue
                 elif response.status_code == 401:
-                    # tried to get protected resource
                     raise ProtectedException()
                 elif response.status_code >= 400 and response.status_code < 500:
                     logging.warn('Got 4xx error with client %d (client-id %s) when requesting %s (%s)\n\n%s\n\n%s', i, self.credentials[i][0], resource, params, str(response.headers), str(response.text))
                 elif response.status_code == 200:
                     self.api_numbers_per_endpoint[resource] = i
-                    return json.loads(response.text)
+                    return response.json
 
         logging.warn('Raising because no clients worked.')
         raise Exception('All clients over limits')

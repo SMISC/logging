@@ -4,11 +4,10 @@ Requirements:
     Redis
     pip
     python >= 3
-        TwitterAPI          MIT
         redis               ? (looks permissive / BSD)
         psycopg2            LGPL 3
 
 Installation:
 
-    pip install TwitterAPI redis psycopg2
+    pip install redis psycopg2
 
