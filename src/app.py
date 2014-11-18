@@ -13,6 +13,10 @@ from service.user import UserService
 from service.edge import EdgeService
 from service.lock import LockService
 
+from service.scan.info import InfoScanService
+from service.scan.tweet import TweetScanService
+from service.scan.edge import EdgeScanService
+
 from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
 from scraper.info import InfoScraper
@@ -73,19 +77,24 @@ class SMISC:
             return ScrapeService(self.getRedis(), args[0])
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
+        elif 'scan' == which:
+            backend = args[0]
+            if 'info' == backend:
+                return InfoScanService(self.getDatabaseCursor(), backend)
+            elif 'tweets' == backend:
+                return TweetScanService(self.getDatabaseCursor(), backend)
+            elif 'followers' == backend:
+                return EdgeScanService(self.getDatabaseCursor(), backend)
+
+            raise Exception("Backend for %s not found" % (backend,))
+
         elif 'lock' == which:
             service = LockService(self.getRedis(), args[0])
             self.locks.append(service)
             return service
 
     def getProgram(self, which):
-        if 'channel' == which:
-            rlapi = self.getTwitterAPI()
-            tweetservice = self.getService('tweet')
-            lockservice = self.getService('lock')
-            return ChannelScraper(rlapi, tweetservice, lockservice)
-
-        elif 'info' == which:
+        if 'info' == which:
             clients = []
             scrapeservices = []
             userservices = []
@@ -97,7 +106,10 @@ class SMISC:
                 scrapeservices.append(self.getService('scrape', 'info'))
 
             scrapeservices.append(self.getService('scrape', 'info')) # append an extra for main thread 
-            return InfoScraper(clients, userservices, myuserservice, lockservice, scrapeservices)
+
+            scanservice = self.getService('scan', 'info')
+
+            return InfoScraper(clients, userservices, myuserservice, lockservice, scrapeservices, scanservice)
 
         elif 'followers' == which:
             clients = []
@@ -111,7 +123,10 @@ class SMISC:
                 scrapeservices.append(self.getService('scrape', 'followers'))
 
             scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
-            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices)
+
+            scanservice = self.getService('scan', 'followers')
+
+            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'competition-tweets' == which:
             clients = []
@@ -124,9 +139,11 @@ class SMISC:
                 tweetservices.append(self.getService('tweet'))
                 scrapeservices.append(self.getService('scrape', 'tweets'))
 
-            scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
+            scrapeservices.append(self.getService('scrape', 'tweets')) # append an extra for main thread 
 
-            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices)
+            scanservice = self.getService('scan', 'tweets')
+
+            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'clean' == which:
             pass

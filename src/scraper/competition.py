@@ -5,11 +5,12 @@ import threading
 import logging
 
 class CompetitionScraper:
-    def __init__(self, userservice, lockservice, scrapeservices):
+    def __init__(self, userservice, lockservice, scrapeservices, scanservice):
         self.userservice = userservice
         self.lockservice = lockservice
         self.scrapeservices = scrapeservices[1:]
         self.myscrapeservice = scrapeservices[0]
+        self.scanservice = scanservice
         self.threads = []
 
     def main(self):
@@ -18,6 +19,7 @@ class CompetitionScraper:
 
         if self.myscrapeservice.length() == 0:
             logging.info('Queue %s is empty. Beginning anew...', type(self))
+            self.scanservice.begin_anew()
             competition_users = self.userservice.get_competition_users()
 
             self._generate_queue(competition_users)

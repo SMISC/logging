@@ -6,8 +6,8 @@ from .competition import CompetitionScraper
 from .infoworker import InfoScraperWorker
 
 class InfoScraper(CompetitionScraper):
-    def __init__(self, rlapis, userservices, myuserservice, lockservice, scrapeservices):
-        CompetitionScraper.__init__(self, myuserservice, lockservice, scrapeservices)
+    def __init__(self, rlapis, userservices, myuserservice, lockservice, scrapeservices, scanservice):
+        CompetitionScraper.__init__(self, myuserservice, lockservice, scrapeservices, scanservice)
         self.rlapis = rlapis
         self.userservices = userservices
 
@@ -16,8 +16,6 @@ class InfoScraper(CompetitionScraper):
             self.myscrapeservice.enqueue(user_id)
 
     def _run_user_queue(self):
-        logging.info('Info scraper started')
-
         n_threads = len(self.rlapis)
 
         for i in range(n_threads):

@@ -8,8 +8,8 @@ from .competition import CompetitionScraper
 from .followerworker import FollowersScraperWorker
 
 class FollowersScraper(CompetitionScraper):
-    def __init__(self, rlapis, edgeservices, userservice, lockservice, scrapeservices):
-        CompetitionScraper.__init__(self, userservice, lockservice, scrapeservices)
+    def __init__(self, rlapis, edgeservices, userservice, lockservice, scrapeservices, scanservice):
+        CompetitionScraper.__init__(self, userservice, lockservice, scrapeservices, scanservice)
         self.rlapis = rlapis
         self.edgeservices = edgeservices
 
@@ -21,8 +21,6 @@ class FollowersScraper(CompetitionScraper):
             })
 
     def _run_user_queue(self):
-        logging.info('Follower scraper started')
-
         n_threads = len(self.rlapis)
 
         for i in range(n_threads):

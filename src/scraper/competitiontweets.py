@@ -7,9 +7,8 @@ from .competitiontweetsworker import CompetitionTweetsScraperWorker
 from .competition import CompetitionScraper
 
 class CompetitionTweetsScraper(CompetitionScraper):
-    LOCK_KEY = 'competition_tweets_scraper'
-    def __init__(self, rlapis, tweetservices, userservice, lockservice, scrapeservices):
-        CompetitionScraper.__init__(self, userservice, lockservice, scrapeservices)
+    def __init__(self, rlapis, tweetservices, userservice, lockservice, scrapeservices, scanservice):
+        CompetitionScraper.__init__(self, userservice, lockservice, scrapeservices, scanservice)
         self.rlapis = rlapis
         self.tweetservices = tweetservices
 
@@ -21,8 +20,6 @@ class CompetitionTweetsScraper(CompetitionScraper):
             })
 
     def _run_user_queue(self):
-        logging.info('Competition tweet scraper started')
-
         n_threads = len(self.rlapis)
 
         for i in range(n_threads):
