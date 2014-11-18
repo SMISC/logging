@@ -1,8 +1,15 @@
 ---
-- name: stop scraper or manager services
+- name: stop cron jobs and stop running services
   hosts: all
+  sudo: yes
   tasks:
-    - name: disable monit
-      command: monit unmonitor smisc-
     - name: stop the service
-      service: name={{ primary }} state=stopped
+      cron: name="{{ item }}" state=absent
+      with_items: 
+        - channel scraper
+        - follower scraper
+        - competition tweets scraper
+        - info scraper
+
+    - name: kill all running services
+      shell: killall python3

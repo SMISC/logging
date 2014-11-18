@@ -85,6 +85,20 @@ class SMISC:
             lockservice = self.getService('lock')
             return ChannelScraper(rlapi, tweetservice, lockservice)
 
+        elif 'info' == which:
+            clients = []
+            scrapeservices = []
+            userservices = []
+            myuserservice = self.getService('user')
+            lockservice = self.getService('lock', which)
+            for i in range(15):
+                clients.append(self.getTwitterAPI())
+                userservices.append(self.getService('user'))
+                scrapeservices.append(self.getService('scrape', 'info'))
+
+            scrapeservices.append(self.getService('scrape', 'info')) # append an extra for main thread 
+            return InfoScraper(clients, userservices, myuserservice, lockservice, scrapeservices)
+
         elif 'followers' == which:
             clients = []
             edgeservices = []

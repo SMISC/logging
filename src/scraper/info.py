@@ -2,24 +2,24 @@ import signal
 import threading
 import logging
 
+from .competition import CompetitionScraper
 from .infoworker import InfoScraperWorker
 
-class InfoScraper:
-    def __init__(self, rlapis, userservices, scrapeservices):
+class InfoScraper(CompetitionScraper):
+    def __init__(self, rlapis, userservices, myuserservice, lockservice, scrapeservices):
+        CompetitionScraper.__init__(self, myuserservice, lockservice, scrapeservices)
         self.rlapis = rlapis
-        self.scrapeservices = scrapeservices
         self.userservices = userservices
-        self.evt = threading.Event()
-        self.threads = []
-    def main(self):
-        signal.signal(signal.SIGTERM, self.cleanup)
-        for i in range(len(self.rlapis)):
-            logging.debug('Starting infoscraper worker')
-            thread = InfoScraperWorker(self.rlapis[i], self.userservices[i], self.scrapeservices[i], self.evt)
+
+    def _generate_queue(self, users):
+        for user_id in users:
+            self.myscrapeservice.enqueue(user_id)
+
+    def _run_user_queue(self):
+        logging.info('Info scraper started')
+
+        n_threads = len(self.rlapis)
+
+        for i in range(n_threads):
+            thread = InfoScraperWorker(self.rlapis[i], self.userservices[i], self.scrapeservices[i])
             self.threads.append(thread)
-            thread.start()
-    def cleanup(self):
-        logging.info('Got TERM signal, exiting gracefully...')
-        self.evt.set()
-        for thread in self.threads:
-            thread.join()

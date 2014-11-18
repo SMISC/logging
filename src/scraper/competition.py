@@ -32,3 +32,6 @@ class CompetitionScraper:
         
         for thread in self.threads:
             thread.join()
+
+        queue_length = self.myscrapeservice.length()
+        logging.info('%d users remaining for %s', queue_length, type(self))
