@@ -167,8 +167,8 @@
     - postgresql
     - hot
 
-- name: turn on the channel scraper job
-  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py channel"
+#- name: turn on the channel scraper job
+#  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py channel"
 
 - name: turn on the follower scraper job
   cron: name="follower scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py followers"

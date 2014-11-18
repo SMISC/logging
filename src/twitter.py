@@ -2,6 +2,7 @@ import logging
 import base64
 import json
 import requests
+import time
 
 from datetime import datetime
 
@@ -165,6 +166,7 @@ class Twitter:
 class OAuth2TokenInjector(requests.auth.AuthBase):
     def __init__(self, access_token):
         self.access_token = access_token
+
     def __call__(self, request):
         request.headers['Authorization'] = 'Bearer %s' % (self.access_token,)
         return request
@@ -179,6 +181,10 @@ class AccessTokenRefresher:
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
+        self.last_token = None
+
+    def get_last_token_granted(self):
+        return self.last_token
 
     def grant_injector(self):
         token_url = 'https://api.twitter.com/oauth2/token'
@@ -198,6 +204,7 @@ class AccessTokenRefresher:
 
         if 'access_token' in response_json:
             access_token = response_json['access_token']
+            self.last_token = access_token
             return OAuth2TokenInjector(access_token)
         else:
             logging.exception("Got HTTP %d when trying to grab access token but no access token found. Body: %s", response.status_code, response.text)
@@ -216,20 +223,30 @@ class StatefulTwitter:
 
     def request(self, *args, **kwargs):
         response = None
+        sleep_time = 2
 
         while response is None:
             response = self.state.request(self, *args, **kwargs)
+            time.sleep(sleep_time)
+            sleep_time = min(64, sleep_time * 2)
 
         return response
 
 class StatefulTwitterUnauthorized:
-    def request(self, stateful, *args, **kwargs):
+    def _get_refreshed_twitter(self, stateful):
         refresher = stateful.get_refresher()
         injector = refresher.grant_injector()
         session = requests.Session()
         session.auth = injector
         twitter = Twitter(session)
         stateful.set_state(StatefulTwitterAuthorized(twitter))
+        return twitter
+
+    def force_transition(self, stateful):
+        self._get_refreshed_twitter(stateful) # attempt a refresh
+
+    def request(self, stateful, *args, **kwargs):
+        twitter = self._get_refreshed_twitter(stateful)
         return twitter.request(*args, **kwargs)
 
 class StatefulTwitterAuthorized:
@@ -249,14 +266,19 @@ class StatefulTwitterAuthorized:
         return response
 
 
-def twitter_from_credentials(key, secret, access_token = None):
+def twitter_from_credentials(key, secret, access_token = None, force_authorized = False):
     refresher = AccessTokenRefresher(key, secret)
+
     if access_token is None:
         state = StatefulTwitterUnauthorized()
+        twitter = StatefulTwitter(state, refresher)
+        if force_authorized:
+            state.force_transition(twitter)
     else:
         session = requests.Session()
         session.auth = OAuth2TokenInjector(access_token)
         twitter = Twitter(session)
         state = StatefulTwitterAuthorized(twitter)
+        twitter = StatefulTwitter(state, refresher)
 
-    return StatefulTwitter(state, refresher)
+    return twitter

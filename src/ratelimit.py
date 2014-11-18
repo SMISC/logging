@@ -21,10 +21,13 @@ class RateLimitedTwitterAPI:
             access_key = self.rds.get('access_key_%s' % (key))
 
             if access_key is None:
-                (self.api_per_key[key], access_key) = twitter_from_credentials(key, secret, access_key)
+                self.api_per_key[key] = twitter_from_credentials(key, secret, force_authorized=True)
+                refresher = self.api_per_key[key].get_refresher()
+                access_key = refresher.get_last_token_granted()
+
                 self.rds.setex('access_key_%s' % (key), 3600, access_key)
             else:
-                self.api_per_key[key] = twitter_from_credentials(key, secret)
+                self.api_per_key[key] = twitter_from_credentials(key, secret, access_key)
 
         return self.api_per_key[key]
         
@@ -43,7 +46,7 @@ class RateLimitedTwitterAPI:
             try:
                 api = self._getIthClientLazily(i)
             except Exception as e:
-                logging.warn('Skipping %dth client (client-id: %s) that had an exception: %s', i, self.credentials[i][0], str(e))
+                logging.warn('Skipping %dth client (client-id: %s) that had an exception: %s around %s', i, self.credentials[i][0], str(e), traceback.format_exc())
                 continue
 
             overlimits = False
