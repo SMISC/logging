@@ -1,5 +1,3 @@
-from TwitterAPI import TwitterAPI
-
 import traceback
 import time
 import logging
@@ -7,22 +5,29 @@ import re
 import json
 
 from util import twittertime 
+from twitter import Twitter
+from twitter import twitter_from_credentials
 
 class RateLimitedTwitterAPI:
-    def __init__(self, credentials):
+    def __init__(self, rds, credentials):
         self.api_per_key = dict()
         self.credentials = credentials
+        self.rds = rds
         self.api_numbers_per_endpoint = dict()
 
     def _getIthClientLazily(self, i):
         (key, secret) = self.credentials[i]
         if key not in self.api_per_key:
-            self.api_per_key[key] = TwitterAPI(key, secret, auth_type='oAuth2')
-            
+            access_key = self.rds.get('access_key_%s' % (key))
+
+            if access_key is None:
+                self.api_per_key[key] = twitter_from_credentials(key, secret)
+            else:
+                self.api_per_key[key] = Twitter(access_key)
 
         return self.api_per_key[key]
         
-    def request(self, resource, params=None, files=None):
+    def request(self, resource, params=None):
         ''' TECHNICALLY WON'T WORK FOR RESOURCES WITH PLACEHOLDERS BUT WORKS FINE NOW'''
         if resource in self.api_numbers_per_endpoint:
             start_i = self.api_numbers_per_endpoint[resource]
@@ -46,7 +51,7 @@ class RateLimitedTwitterAPI:
             while not overlimits and attempts <= 3:
                 attempts = attempts + 1
                 try:
-                    response = api.request(resource, params, files)
+                    response = api.request(resource, params)
                 except Exception as e:
                     logging.warn('Sleeping through Exception (because %s around %s)', e, traceback.format_exc())
                     continue

@@ -66,7 +66,8 @@ class SMISC:
     def getTwitterAPI(self):
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
-        return RateLimitedTwitterAPI(list(zip(keys, secrets)))
+
+        return RateLimitedTwitterAPI(self.getRedis(), list(zip(keys, secrets)))
 
     def getService(self, which, *args):
         if 'tweet' == which:
