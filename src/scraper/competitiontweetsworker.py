@@ -1,4 +1,5 @@
 from ratelimit import ProtectedException
+from ratelimit import OverLimits
 
 import time
 import threading
@@ -18,7 +19,9 @@ class CompetitionTweetsScraperWorker(threading.Thread):
             if job is None:
                 return
 
-            (user_id, since_id) = (job["user_id"], job["since_id"])
+            (user_id, job_since_id) = (job["user_id"], job["since_id"])
+
+            since_id = job_since_id
 
             last_tweets = self.tweetservice.tweets_where('user_id = %s', [user_id], 1, 'tweet_id desc')
 
@@ -46,6 +49,12 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                 resp = self.rlapi.request('statuses/user_timeline', params)
             except ProtectedException as e:
                 logging.info('%s is protected', user_id)
+                return
+            except OverLimits:
+                self.scrapeservice.enqueue({
+                    "user_id": user_id,
+                    "since_id": job_since_id
+                })
                 return
 
             for tweet in resp:

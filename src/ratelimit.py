@@ -38,7 +38,11 @@ class RateLimitedTwitterAPI:
                 time.sleep(1)
 
         logging.warn('Raising because no clients worked.')
-        raise Exception('All clients over limits')
+        raise OverLimits()
+
+class OverLimits(Exception):
+    def __init__(self):
+        self.msg = "All over limits"
 
 class ProtectedException(Exception):
     def __init__(self):

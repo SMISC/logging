@@ -1,4 +1,5 @@
 from ratelimit import ProtectedException
+from ratelimit import OverLimits
 
 import time
 import threading
@@ -26,6 +27,12 @@ class FollowersScraperWorker(threading.Thread):
                 resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
             except ProtectedException as e:
                 logging.info('%d is protected.', user_id)
+                return
+            except OverLimits:
+                self.scrapeservice.enqueue({
+                    "user_id": user_id,
+                    "cursor": cursor
+                })
                 return
 
             resp_follower_ids = []
