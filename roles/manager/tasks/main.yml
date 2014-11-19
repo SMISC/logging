@@ -177,7 +177,7 @@
   cron: name="competition tweets scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py competition-tweets"
 
 - name: turn on the info scraper job
-  cron: name="info scraper" state=present minute="15" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py info"
+  cron: name="info scraper" state=present minute="*/5" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py info"
 
 - name: turn on the hourly backup job
   cron: name="hourly backups" state=present minute="0" hour="*/3" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"

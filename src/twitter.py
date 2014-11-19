@@ -175,6 +175,7 @@ class TwitterAPIResponse:
     def __init__(self, response):
         self.status_code = response.status_code
         self.headers = response.headers
+        self.text = response.text
         self.json = json.loads(response.text)
 
 class AccessTokenRefresher:
@@ -234,6 +235,8 @@ class StatefulTwitter:
 
 class StatefulTwitterUnauthorized:
     def _get_refreshed_twitter(self, stateful):
+        logging.info('refreshing')
+
         refresher = stateful.get_refresher()
         injector = refresher.grant_injector()
         session = requests.Session()
@@ -257,7 +260,12 @@ class StatefulTwitterAuthorized:
 
     def request(self, stateful, *args, **kwargs):
         response = self.twitter.request(*args, **kwargs)
+
         if response.status_code == 429:
+            stateful.set_state(StatefulTwitterUnauthorized())
+            return None
+
+        elif response.status_code == 401:
             error_code = response.json['errors'][0]['code']
             if error_code == self.ERROR_CODE_EXPIRED_TOKEN:
                 stateful.set_state(StatefulTwitterUnauthorized())
@@ -266,19 +274,32 @@ class StatefulTwitterAuthorized:
         return response
 
 
-def twitter_from_credentials(key, secret, access_token = None, force_authorized = False):
+def twitter_from_credentials(key, secret, rds):
     refresher = AccessTokenRefresher(key, secret)
 
-    if access_token is None:
+    access_token = rds.get('access_key_%s' % (key))
+
+    if not access_token:
+        others_refreshing = rds.setnx('access_key_refreshing_%s' % (key), True)
+
+        if not others_refreshing:
+            raise SkipException()
+
+        rds.expire('access_key_refreshing_%s' % (key), 20)
+
         state = StatefulTwitterUnauthorized()
         twitter = StatefulTwitter(state, refresher)
-        if force_authorized:
-            state.force_transition(twitter)
-    else:
-        session = requests.Session()
-        session.auth = OAuth2TokenInjector(access_token)
-        twitter = Twitter(session)
-        state = StatefulTwitterAuthorized(twitter)
-        twitter = StatefulTwitter(state, refresher)
+        state.force_transition(twitter)
+        access_token = refresher.get_last_token_granted()
+        rds.setex('access_key_%s' % (key), 3600, access_token)
+
+    session = requests.Session()
+    session.auth = OAuth2TokenInjector(access_token)
+    twitter = Twitter(session)
+    state = StatefulTwitterAuthorized(twitter)
+    twitter = StatefulTwitter(state, refresher)
 
     return twitter
+
+class SkipException(Exception):
+    pass

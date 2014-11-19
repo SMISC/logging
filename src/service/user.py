@@ -5,14 +5,14 @@ class UserService:
     def __init__(self, db):
         self.db = db
 
-    def get_competition_users(self):
+    def get_competition_users(self, where = 'interesting=True'):
         page = 0
         pagesize = 1000
         users = []
         users_this_page = 0
 
         while page is 0 or users_this_page is not 0:
-            self.db.execute('select distinct on (user_id) id, user_id from tuser where interesting=True order by user_id, id asc limit %d offset %d' % (pagesize, pagesize*page))
+            self.db.execute('select distinct on (user_id) id, user_id from tuser where ' + where + ' order by user_id, id desc limit %d offset %d' % (pagesize, pagesize*page))
 
             users_this_page = 0
 

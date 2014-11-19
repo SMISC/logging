@@ -13,6 +13,9 @@ class CompetitionScraper:
         self.scanservice = scanservice
         self.threads = []
 
+    def get_competition_users(self):
+        return self.userservice.get_competition_users()
+
     def main(self):
         if not self.lockservice.acquire():
             return
@@ -20,7 +23,7 @@ class CompetitionScraper:
         if self.myscrapeservice.length() == 0:
             logging.info('Queue %s is empty. Beginning anew...', type(self))
             self.scanservice.begin_anew()
-            competition_users = self.userservice.get_competition_users()
+            competition_users = self.get_competition_users()
 
             self._generate_queue(competition_users)
 

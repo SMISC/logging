@@ -6,7 +6,7 @@ class BaseScanService:
         self.typename = typename
 
     def begin_anew(self):
-        self.db.execute('SELECT MAX(id) FROM "scan"')
+        self.db.execute('SELECT MAX(id) FROM "scan" WHERE "type" = %s', (self.typename,))
         result = self.db.fetchone()
         if result is not None:
             (last_scan_id,) = result

@@ -7,6 +7,9 @@ import configparser
 
 from ratelimit import RateLimitedTwitterAPI
 
+from twitter import twitter_from_credentials
+from twitter import SkipException
+
 from service.scrape import ScrapeService
 from service.tweet import TweetService
 from service.user import UserService
@@ -67,7 +70,18 @@ class SMISC:
         keys = self.config['twitter']['keys'].split("\n")
         secrets = self.config['twitter']['secrets'].split("\n")
 
-        return RateLimitedTwitterAPI(self.getRedis(), list(zip(keys, secrets)))
+        apis = []
+
+        for i in range(len(keys)):
+            key = keys[i]
+            secret = secrets[i]
+            try:
+                api = twitter_from_credentials(key, secret, self.getRedis())
+                apis.append(api)
+            except SkipException:
+                continue
+
+        return RateLimitedTwitterAPI(apis)
 
     def getService(self, which, *args):
         if 'tweet' == which:
@@ -118,7 +132,7 @@ class SMISC:
             scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
-            for i in range(15):
+            for i in range(128):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
                 scrapeservices.append(self.getService('scrape', 'followers'))

@@ -45,7 +45,7 @@ class CompetitionTweetsScraperWorker(threading.Thread):
             try:
                 resp = self.rlapi.request('statuses/user_timeline', params)
             except ProtectedException as e:
-                logging.info('%d is protected', user_id)
+                logging.info('%s is protected', user_id)
                 return
 
             for tweet in resp:
@@ -58,6 +58,8 @@ class CompetitionTweetsScraperWorker(threading.Thread):
 
             tweets = len(resp)
             self.tweetservice.commit()
+
+            logging.info('Wrote %d tweets', tweets)
 
             if tweets > 0:
                 self.scrapeservice.enqueue({
