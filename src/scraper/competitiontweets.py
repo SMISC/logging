@@ -13,7 +13,7 @@ class CompetitionTweetsScraper(CompetitionScraper):
         self.tweetservices = tweetservices
 
     def get_competition_users(self):
-        return self.userservice.get_competition_users('interesting=TRUE and protected=FALSE')
+        return self.userservice.get_competition_users('interesting=TRUE and (protected IS NULL or protected=FALSE)')
 
     def _generate_queue(self, users):
         for user_id in users:

@@ -53,7 +53,7 @@ class SMISC:
 
     def getRedis(self):
         if self.rds is None:
-            self.rds = redis.StrictRedis(host=self.config['redis']['host'], port=self.config['redis']['port'], db=int(self.config['redis']['database']))
+            self.rds = redis.StrictRedis(host=self.config['redis']['host'], port=self.config['redis']['port'], db=int(self.config['redis']['database']), decode_responses=True)
         return self.rds
         
     def getDatabase(self):
@@ -132,7 +132,7 @@ class SMISC:
             scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
-            for i in range(128):
+            for i in range(16):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
                 scrapeservices.append(self.getService('scrape', 'followers'))
@@ -149,7 +149,7 @@ class SMISC:
             scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
-            for i in range(15):
+            for i in range(16):
                 clients.append(self.getTwitterAPI())
                 tweetservices.append(self.getService('tweet'))
                 scrapeservices.append(self.getService('scrape', 'tweets'))
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     else:
         try:
             app.main()
-            logging.info('%s completed successfully.', app_name)
+            logging.debug('%s completed successfully.', app_name)
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
         finally:

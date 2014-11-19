@@ -33,9 +33,9 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                     since_id = last_tweet_id
 
             if since_id is None:
-                logging.info('Getting tweets for %s, starting with whenever', user_id)
+                logging.debug('Getting tweets for %s, starting with whenever', user_id)
             else:
-                logging.info('Getting tweets for %s, starting with %d', user_id, since_id)
+                logging.debug('Getting tweets for %s, starting with %d', user_id, since_id)
 
             params = {'user_id': user_id, 'count': 200}
 
@@ -58,8 +58,6 @@ class CompetitionTweetsScraperWorker(threading.Thread):
 
             tweets = len(resp)
             self.tweetservice.commit()
-
-            logging.info('Wrote %d tweets', tweets)
 
             if tweets > 0:
                 self.scrapeservice.enqueue({

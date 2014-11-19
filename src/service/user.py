@@ -5,7 +5,7 @@ class UserService:
     def __init__(self, db):
         self.db = db
 
-    def get_competition_users(self, where = 'interesting=True'):
+    def get_competition_users(self, where = 'interesting=TRUE'):
         page = 0
         pagesize = 1000
         users = []

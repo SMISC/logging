@@ -261,15 +261,13 @@ class StatefulTwitterAuthorized:
     def request(self, stateful, *args, **kwargs):
         response = self.twitter.request(*args, **kwargs)
 
-        if response.status_code == 429:
-            stateful.set_state(StatefulTwitterUnauthorized())
-            return None
-
-        elif response.status_code == 401:
-            error_code = response.json['errors'][0]['code']
-            if error_code == self.ERROR_CODE_EXPIRED_TOKEN:
-                stateful.set_state(StatefulTwitterUnauthorized())
-                return None
+        if response.status_code == 401:
+            rd = response.json
+            if 'errors' in rd:
+                error_code = response.json['errors'][0]['code']
+                if error_code == self.ERROR_CODE_EXPIRED_TOKEN:
+                    stateful.set_state(StatefulTwitterUnauthorized())
+                    return None
 
         return response
 

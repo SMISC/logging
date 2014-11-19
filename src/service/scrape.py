@@ -11,8 +11,6 @@ class ScrapeService:
     def dequeue(self):
         result = self.rds.lpop(self.key)
         if result:
-            if isinstance(result, bytes):
-                result = result.decode('utf-8')
             return json.loads(result)
     def length(self):
         return int(self.rds.llen(self.key))

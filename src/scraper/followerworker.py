@@ -20,7 +20,7 @@ class FollowersScraperWorker(threading.Thread):
 
             (user_id, cursor) = (job["user_id"], job["cursor"])
 
-            logging.info('Getting followers for %s with cursor %d', user_id, cursor)
+            logging.debug('Getting followers for %s with cursor %d', user_id, cursor)
 
             try:
                 resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
