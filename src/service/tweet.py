@@ -53,9 +53,22 @@ class TweetService:
 
     def commit(self):
         if len(self.tweets) > 0:
-            self.db.executemany('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp, interesting) VALUES(%s, %s, %s, %s, %s)', self.tweets)
+            parts = []
+            params = []
+            for tweet in self.tweets:
+                parts.append('(%s, %s, %s, %s, %s)')
+                params.extend(list(tweet))
+
+            self.db.execute('INSERT INTO "tweet" (tweet_id, user_id, text, timestamp, interesting) VALUES ' + (','.join(parts)), tuple(params))
+
         if len(self.entities) > 0:
-            self.db.executemany('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES(%s, %s, %s)', self.entities)
+            parts = []
+            params = []
+            for entity in self.entities:
+                parts.append('(%s, %s, %s)')
+                params.extend(list(entity))
+
+            self.db.execute('INSERT INTO "tweet_entity" (tweet_id, "type", text) VALUES ' + (','.join(parts)), tuple(params))
 
         self.tweets = []
         self.entities = []

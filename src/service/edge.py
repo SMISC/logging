@@ -10,7 +10,16 @@ class EdgeService:
             edges.append((time.time(), follower_id, followed_id))
 
         try:
-            self.db.executemany('INSERT INTO tuser_tuser (timestamp, from_user, to_user, weight) VALUES (%s, %s, %s, 1)', edges)
+            parts = []
+            params = []
+
+            for edge in edges:
+                parts.append('(%s, %s, %s, 1)')
+                params.extend(list(edge))
+
+            if len(edges):
+                query = 'INSERT INTO tuser_tuser (timestamp, from_user, to_user, weight) VALUES ' + (','.join(parts))
+                self.db.execute(query, tuple(params))
         except Exception as e:
             logging.exception('Error inserting user-user edges: %s', str(e))
     def get_edges(self, offset = 0, limit = 100):
