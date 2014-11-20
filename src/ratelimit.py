@@ -28,6 +28,8 @@ class RateLimitedTwitterAPI:
                 if response.status_code == 401:
                     logging.warn('Got 401\n\n%s', str(response.json))
                     raise ProtectedException()
+                elif response.status_code == 404:
+                    raise NotFound()
                 elif response.status_code == 429:
                     overlimits = True
                 elif response.status_code >= 400 and response.status_code < 500:
@@ -37,8 +39,12 @@ class RateLimitedTwitterAPI:
 
                 time.sleep(1)
 
-        logging.warn('Raising because no clients worked.')
+        logging.exception('Raising because no clients worked for %s (%s)', resource, params)
         raise OverLimits()
+
+class NotFound(Exception):
+    def __init__(self):
+        self.msg = "Entity not found (404)"
 
 class OverLimits(Exception):
     def __init__(self):

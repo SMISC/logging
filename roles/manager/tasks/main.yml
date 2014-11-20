@@ -41,9 +41,23 @@
     - htop
     - postgresql
     - php5-fpm
+    - php5-cli
     - php5-pgsql
     - nginx
     - redis-server
+
+- name: install composer
+  shell: "curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin"
+  args:
+    creates: /usr/local/bin/composer.phar
+
+- name: Check if composer.phar needs to be moved to composer
+  stat: path=/usr/local/bin/composer.phar
+  register: composer_stat
+
+- name: Move composer.phar
+  command: mv /usr/local/bin/composer.phar /usr/local/bin/composer
+  when: composer_stat.stat.exists
 
 - name: Install Python modules for 3-2
   pip: name={{ item }} executable=pip-3.2

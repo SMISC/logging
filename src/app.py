@@ -132,7 +132,7 @@ class SMISC:
             scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
-            for i in range(16):
+            for i in range(32):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('edge'))
                 scrapeservices.append(self.getService('scrape', 'followers'))
@@ -149,7 +149,7 @@ class SMISC:
             scrapeservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
-            for i in range(16):
+            for i in range(32):
                 clients.append(self.getTwitterAPI())
                 tweetservices.append(self.getService('tweet'))
                 scrapeservices.append(self.getService('scrape', 'tweets'))

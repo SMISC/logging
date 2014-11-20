@@ -1,5 +1,6 @@
 from ratelimit import ProtectedException
 from ratelimit import OverLimits
+from ratelimit import NotFound
 
 import time
 import threading
@@ -28,6 +29,8 @@ class FollowersScraperWorker(threading.Thread):
             except ProtectedException as e:
                 logging.info('%d is protected.', user_id)
                 return
+            except NotFound:
+                logging.info('Skipping user %d not found', user_id)
             except OverLimits:
                 self.scrapeservice.enqueue({
                     "user_id": user_id,

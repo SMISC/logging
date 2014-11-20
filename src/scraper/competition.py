@@ -30,7 +30,7 @@ class CompetitionScraper:
         self._run_user_queue()
 
         queue_length = self.myscrapeservice.length()
-        logging.info('%d users remaining for %s', queue_length, type(self))
+        logging.info('[start] %d users remaining for %s', queue_length, type(self))
 
         for thread in self.threads:
             thread.start()
@@ -39,4 +39,4 @@ class CompetitionScraper:
             thread.join()
 
         queue_length = self.myscrapeservice.length()
-        logging.info('%d users remaining for %s', queue_length, type(self))
+        logging.info('[end] %d users remaining for %s', queue_length, type(self))
