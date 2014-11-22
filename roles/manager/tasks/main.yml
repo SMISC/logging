@@ -193,5 +193,5 @@
 - name: turn on the info scraper job
   cron: name="info scraper" state=present minute="*/5" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py info"
 
-- name: turn on the hourly backup job
-  cron: name="hourly backups" state=present minute="0" hour="*/3" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
+- name: turn on the daily backup job
+  cron: name="hourly backups" state=present minute="0" hour="0" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"

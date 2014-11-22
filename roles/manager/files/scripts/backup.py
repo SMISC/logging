@@ -20,9 +20,8 @@ class RotatingFilenameHourly:
         return lastN
 
 class BackupPostgresql:
-    def run(self):
-        tfd = tempfile.NamedTemporaryFile(delete=False)
-        subprocess.call(['pg_dump', '-U', 'pacsocial', 'pacsocial'], stdout=tfd)
+    def run(self, where):
+        subprocess.call('pg_dump -U pacsocial pacsocial | gzip > %s' % (where,), shell=True)
         return tfd.name
         
 class BackupManager:
@@ -55,10 +54,7 @@ class BackupManager:
             except OSError:
                 pass # already exists
 
-            fp = service.run()
-            fptar = self._tar(fp)
-            fptargz = self._gz(fptar)
-            self._move(fptargz, rt.getCurrent())
+            service.run(rt.getCurrent())
 
             permissible_backups = set(rt.getLastN(BACKUP_LEVEL))
             existing_backups = os.walk(backup_dir)
