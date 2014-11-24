@@ -15,7 +15,7 @@
 
 	// Hostname or IP address for server.  Use '' for UNIX domain socket.
 	// use 'localhost' for TCP/IP connection on this computer
-	$conf['servers'][0]['host'] = '';
+	$conf['servers'][0]['host'] = 'localhost';
 
 	// Database port on server (5432 is the PostgreSQL default)
 	$conf['servers'][0]['port'] = 5432;
@@ -24,11 +24,10 @@
 	// Possible options: disable, allow, prefer, require
 	// To require SSL on older servers use option: legacy
 	// To ignore the SSL mode, use option: unspecified
-	$conf['servers'][0]['sslmode'] = 'allow';
+	$conf['servers'][0]['sslmode'] = 'require';
 
-	// Change the default database only if you cannot connect to template1.
 	// For a PostgreSQL 8.1+ server, you can set this to 'postgres'.
-	$conf['servers'][0]['defaultdb'] = 'template1';
+	$conf['servers'][0]['defaultdb'] = 'postgres';
 
 	// Specify the path to the database dump utilities for this server.
 	// You can set these to '' if no dumper is available.
