@@ -48,6 +48,21 @@ Route::filter('auth', function()
     }
 });
 
+Route::filter('auth.single', function()
+{
+    if (!Session::get(Config::get('app.authentication_session_key'), false))
+    {
+        if (Request::ajax())
+        {
+            return Response::make('Unauthorized', 401);
+        }
+        else
+        {
+            return Redirect::guest('login');
+        }
+    }
+});
+
 
 Route::filter('auth.basic', function()
 {

@@ -191,4 +191,6 @@ return array(
 
     ),
 
+    'authentication_secret' => '4ed2ae6de8f44bfcd106497c9bcefc48b83e73d67ae61f3b017a50ab818cb7de',
+    'authentication_session_key' => 'authorized',
 );

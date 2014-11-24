@@ -11,8 +11,8 @@
 |
 */
 
-Route::get('/', array('before' => 'auth', 'uses' => 'HomeController@showOverview'));
-Route::get('/overview', array('before' => 'auth', 'uses' => 'HomeController@showOverview'));
+Route::get('/', array('before' => 'auth.single', 'uses' => 'HomeController@showOverview'));
+Route::get('/overview', array('before' => 'auth.single', 'uses' => 'HomeController@showOverview'));
 
 Route::get('/login', 'LoginController@showLogin');
 Route::post('/login', 'LoginController@attemptLogin');

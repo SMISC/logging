@@ -9,10 +9,11 @@ class LoginController extends BaseController
 
     public function attemptLogin()
     {
-        $username = Input::get('username');
         $password = Input::get('password');
         
-        if(Auth::attempt(array('username' => $username, 'password' => $password))) {
+        if(hash('sha256', $password) === Config::get('app.authentication_secret')) {
+            Session::set(Config::get('app.authentication_session_key'), true);
+
             return Redirect::intended('/overview');
         } else {
             return Redirect::to('login')->with('message', 'Login failed');
