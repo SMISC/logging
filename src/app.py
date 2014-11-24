@@ -36,7 +36,7 @@ class SMISC:
         self.locks = []
 
     def setupLogging(self, level):
-        handler = logging.handlers.RotatingFileHandler(self.config['smisc']['log'], maxBytes=1024*1024*10, backupCount=5)
+        handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
         formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
         handler.setFormatter(formatter)
         self.log.addHandler(handler)
