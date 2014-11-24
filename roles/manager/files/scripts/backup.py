@@ -1,72 +1,26 @@
 import time
+import ConfigParser
 import datetime
 import os.path
 import os
 import tempfile
 import subprocess
-
-BACKUP_LEVEL = 12
-
-class RotatingFilenameHourly:
-    def __init__(self, basepath):
-        self.basepath = basepath
-        self.scheme = '%Y.%m.%d.%H'
-    def getCurrent(self):
-        return self.basepath + time.strftime(self.scheme)
-    def getLastN(self, n):
-        lastN = []
-        for i in range(n):
-            lastN.append(self.basepath + time.strftime(self.scheme, time.gmtime(time.time() - (3600*i))))
-        return lastN
+import boto.glacier
+import boto.glacier.layer2
 
 class BackupPostgresql:
-    def run(self, where):
-        subprocess.call('pg_dump -U pacsocial pacsocial | gzip > %s' % (where,), shell=True)
-        return tfd.name
+    def run(self, fp):
+        return subprocess.call('pg_dump -U pacsocial pacsocial | base64 > %s' % (fp,), shell=True)
         
-class BackupManager:
-    def __init__(self):
-        self.backups = {}
-    def addBackup(self, name, service):
-        self.backups[name] = service
-
-    def _tar(self, fp):
-        op = fp + '.tar'
-        subprocess.call(['tar', 'cf', op, fp])
-        subprocess.call(['rm', fp])
-        return op
-    def _gz(self, fp):
-        subprocess.call(['gzip', fp])
-        return fp + '.gz'
-
-    def _move(self, src, dest):
-        subprocess.call(['mv', src, dest])
-
-    def _rm(self, src):
-        subprocess.call(['rm', src])
-
-    def run(self):
-        for (name, service) in self.backups.items():
-            backup_dir = '/var/local/backups/' + name + '/'
-            rt = RotatingFilenameHourly(backup_dir)
-            try:
-                os.mkdir(backup_dir)
-            except OSError:
-                pass # already exists
-
-            service.run(rt.getCurrent())
-
-            permissible_backups = set(rt.getLastN(BACKUP_LEVEL))
-            existing_backups = os.walk(backup_dir)
-
-            for (_, _, backups) in existing_backups:
-                for backup in backups:
-                    if os.path.join(backup_dir, backup) not in permissible_backups:
-                        self._rm(os.path.join(backup_dir, backup))
-
 if __name__ == "__main__":
-    backer = BackupManager()
-    pgsql = BackupPostgresql()
-    backer.addBackup('postgresql', pgsql)
-    backer.run()
+    config = ConfigParser.ConfigParser()
+    config.read('/usr/local/share/smisc.ini')
+    glacier = boto.glacier.layer2.Layer2(config.get('glacier', 'key'), config.get('glacier', 'secret'), region_name=config.get('glacier', 'region'))
+    vault = glacier.get_vault(config.get('glacier', 'vault-postgresqlbackups'))
+    with tempfile.NamedTemporaryFile() as fd:
+        fp = fd.name
+        pgsql = BackupPostgresql()
+        pgsql.run(fp)
+        created_dt = datetime.datetime.fromtimestamp(time.time())
 
+        writer = vault.upload_archive(fp, description='PostgreSQL snapshot created at ' + created_dt.strftime('%b %d %Y - %H:%M:%S'))

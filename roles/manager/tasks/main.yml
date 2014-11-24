@@ -1,9 +1,16 @@
 ---
-- name: set our hostname to smisc
-  hostname: name={{ hostname }}
+- name: get our hostname
+  command: hostname
+  changed_when: False
+  register: hostname_stat
 
-- name: set our hostname to smisc
+- name: set our hostname in memory to smisc
+  hostname: name={{ hostname }}
+  when: hostname_stat.stdout.find("{{ hostname }}") == -1
+
+- name: set our hostname on startup to smisc
   replace: dest=/etc/hostname regexp='(?!{{ fqdn }})' replace='{{ fqdn }}'
+  when: hostname_stat.stdout.find("{{ hostname }}") == -1
 
 - name: set our FQDN
   lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} {{ hostname }}" dest=/etc/hosts
@@ -46,18 +53,13 @@
     - nginx
     - redis-server
 
-- name: install composer
-  shell: "curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin"
-  args:
-    creates: /usr/local/bin/composer.phar
-
-- name: Check if composer.phar needs to be moved to composer
-  stat: path=/usr/local/bin/composer.phar
+- name: check if composer is installed
+  stat: path=/usr/local/bin/composer
   register: composer_stat
 
-- name: Move composer.phar
-  command: mv /usr/local/bin/composer.phar /usr/local/bin/composer
-  when: composer_stat.stat.exists
+- name: install composer
+  when: False == composer_stat.stat.exists
+  include: install_composer.yml
 
 - name: Install Python modules for 3-2
   pip: name={{ item }} executable=pip-3.2
@@ -65,12 +67,13 @@
     - TwitterAPI
     - redis
     - psycopg2
+    - boto
 
 - name: Install Python modules for 2-7
   pip: name={{ item }} executable=pip-2.7
   with_items:
     - psycopg2
-
+    - boto
 
 - name: Synchronize nginx configuration
   synchronize: src=config/nginx/ dest=/etc/nginx/ delete=yes
@@ -181,17 +184,14 @@
     - postgresql
     - hot
 
-#- name: turn on the channel scraper job
-#  cron: name="channel scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py channel"
+#- name: turn on the follower scraper job
+#  cron: name="follower scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py followers"
 
-- name: turn on the follower scraper job
-  cron: name="follower scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py followers"
+#- name: turn on the competition tweets scraper scraper job
+#  cron: name="competition tweets scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py competition-tweets"
 
-- name: turn on the competition tweets scraper scraper job
-  cron: name="competition tweets scraper" state=present minute="*" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py competition-tweets"
+#- name: turn on the info scraper job
+#  cron: name="info scraper" state=present minute="*/5" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py info"
 
-- name: turn on the info scraper job
-  cron: name="info scraper" state=present minute="*/5" hour="*" day="*" month="*" job="timeout 10m python3 /usr/local/src/smisc/app.py info"
-
-- name: turn on the daily backup job
-  cron: name="hourly backups" state=present minute="0" hour="0" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
+#- name: turn on the daily backup job
+#  cron: name="hourly backups" state=present minute="0" hour="0" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
