@@ -49,10 +49,15 @@
     - php5-fpm
     - php5-cli
     - php5-pgsql
-    - php5-redis
+    - php-pear
     - nginx
     - redis-server
+    - php5-dev
     - php5-mcrypt
+
+- name: install PHP PEAR modules
+  command: pecl install redis
+  ignore_errors: yes
 
 - name: check if composer is installed
   stat: path=/usr/local/bin/composer
@@ -145,7 +150,13 @@
 
 - name: Add the pacsocial user to postgres
   sudo_user: postgres
-  postgresql_user: name=pacsocial state=present
+  postgresql_user: name=pacsocial state=present password="{{ pacsocial_password }}"
+  tags:
+    - postgresql
+
+- name: Add the dashboard user to postgres
+  sudo_user: postgres
+  postgresql_user: name=dashboard state=present password="{{ dashboard_password }}"
   tags:
     - postgresql
 
@@ -154,6 +165,16 @@
   postgresql_db: name=pacsocial state=present owner=pacsocial
   tags:
     - postgresql
+
+- name: Add the dashboard database to postgres
+  sudo_user: postgres
+  postgresql_db: name=dashboard state=present owner=dashboard
+  tags:
+    - postgresql
+
+- name: Ensure that the dashboard has read access to pacsocial data
+  sudo_user: postgres
+  command: psql -c 'grant select on all tables in schema "public" to dashboard' pacsocial postgres 
 
 - name: Deploy smisc configuration
   synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
