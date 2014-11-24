@@ -23,7 +23,7 @@
     - /var/local/backups
     - /var/local/backups/postgresql
     - /usr/local/share/nginx
-    - /usr/local/src/{{ fqdn }}
+    - /usr/local/src/{{ fqdn }}/empty
     - /usr/local/src/{{ fqdn }}/dashboard
     - /usr/local/src/{{ fqdn }}/sql
 
@@ -52,6 +52,7 @@
     - php5-pgsql
     - nginx
     - redis-server
+    - php5-mcrypt
 
 - name: check if composer is installed
   stat: path=/usr/local/bin/composer
