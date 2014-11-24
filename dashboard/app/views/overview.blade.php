@@ -1,6 +1,7 @@
 @extends('base')
 
 @section('content')
-authenticated woo
+
+<h2> {{{ $edges }}} edges</h2>
 
 @stop

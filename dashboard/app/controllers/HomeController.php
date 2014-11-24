@@ -4,6 +4,10 @@ class HomeController extends BaseController
 {
     public function showOverview()
     {
-        $this->layout->content = View::make('overview');
+        $redis = LaravelRedis::connection('pacsocial');
+
+        $this->layout->content = View::make('overview')->with(array(
+            'edges' => $redis->llen('followers')
+        ));
     }
 }
