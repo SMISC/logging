@@ -14,6 +14,8 @@ class LoginController extends BaseController
         
         if(Auth::attempt(array('username' => $username, 'password' => $password))) {
             return Redirect::intended('/overview');
+        } else {
+            $this->layout->content = View::make('login');
         }
     }
 }

@@ -176,6 +176,10 @@
   sudo_user: postgres
   command: psql -c 'grant select on all tables in schema "public" to dashboard' pacsocial postgres 
 
+- name: Ensure that the pacsocial user has read access to dashboard data
+  sudo_user: postgres
+  command: psql -c 'grant select on all tables in schema "public" to pacsocial' dashboard postgres 
+
 - name: Deploy smisc configuration
   synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini
   tags: 
