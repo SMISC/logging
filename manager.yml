@@ -3,3 +3,7 @@
   sudo: yes
   roles: 
     - manager
+- hosts: smisc
+  sudo: yes
+  roles:
+    - manager

@@ -1,4 +1,2 @@
-[manager]
-104.131.176.27 ansible_ssh_user=root fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com"
 [smisc]
 104.131.71.175 ansible_ssh_user=root fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com"
