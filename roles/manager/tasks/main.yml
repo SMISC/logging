@@ -78,7 +78,7 @@
 - name: Synchronize nginx configuration
   synchronize: src=config/nginx/ dest=/etc/nginx/ delete=yes
   notify: 
-    - restart nginx
+    - reload nginx
   tags:
     - nginx
 
@@ -91,12 +91,12 @@
 - name: Synchronize PostgreSQL configuration
   synchronize: src=config/postgresql/ dest=/etc/postgresql/9.1/main/
   notify:
-    - restart postgresql
+    - reload postgresql
 
 - name: Synchronize redis configuration
   synchronize: src=config/redis/ dest=/etc/redis/
   notify:
-    - restart redis
+    - reload redis
 
 - name: Synchronize backup script
   synchronize: src=scripts/backup.py dest=/usr/local/bin/smisc-backup.py
@@ -116,12 +116,12 @@
 #    - php.ini
 #    - php-fpm.conf
 #  notify:
-#    - restart php
+#    - reload php
 
 - name: Synchronize monit scripts
   synchronize: src=config/monit/ dest=/etc/monit/ group=no owner=no perms=no recursive=yes
   notify:
-     - restart monit
+     - reload monit
   tags:
     - monit
 

@@ -58,7 +58,7 @@ class SMISC:
         
     def getDatabase(self):
         if self.dbc is None:
-            self.dbc = psycopg2.connect(user=self.config['postgres']['username'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
+            self.dbc = psycopg2.connect(user=self.config['postgres']['username'], password=self.config['postgres']['password'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
             self.dbc.autocommit = True
         return self.dbc
         
