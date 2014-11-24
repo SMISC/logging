@@ -13,7 +13,7 @@
   when: hostname_stat.stdout.find("{{ hostname }}") == -1
 
 - name: set our FQDN
-  lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} {{ hostname }}" dest=/etc/hosts
+  lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} {{ hostname }} smisc.{{ domain }} smisc-sql.{{ domain }}" dest=/etc/hosts
   
 - name: ensure local directory structure is set up
   command: mkdir -p "{{ item }}" creates={{ item }}
@@ -23,9 +23,8 @@
     - /var/local/backups
     - /var/local/backups/postgresql
     - /usr/local/share/nginx
-    - /usr/local/src/{{ fqdn }}/empty
-    - /usr/local/src/{{ fqdn }}/dashboard
-    - /usr/local/src/{{ fqdn }}/sql
+    - /usr/local/src/{{ domain }}/sql
+    - /usr/local/src/{{ domain }}/dashboard
 
 - name: add base repositories
   apt_repository: repo='{{item}}' state=present
@@ -50,6 +49,7 @@
     - php5-fpm
     - php5-cli
     - php5-pgsql
+    - php5-redis
     - nginx
     - redis-server
     - php5-mcrypt
@@ -126,15 +126,6 @@
   tags:
     - monit
 
-- name: Ensure files have the proper mode and owner
-  file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }}
-  with_items:
-    - { src: "/etc/monit/monitrc" }
-    - { src: "/usr/local/share/nginx/{{ fqdn }}.crt", owner: "www-data", mode: 400 }
-    - { src: "/usr/local/share/nginx/{{ fqdn }}.key", owner: "www-data", mode: 400 }
-  tags:
-    - monit
-
 - name: Deploy smisc code
   synchronize: src=src/ dest=/usr/local/src/smisc/
   tags: 
@@ -142,12 +133,12 @@
     - hot
 
 - name: Synchronize phpPgAdmin
-  synchronize: src=pgsql/ dest=/usr/local/src/{{ fqdn }}/sql group=no owner=no perms=no recursive=yes
+  synchronize: src=pgsql/ dest=/usr/local/src/{{ domain }}/sql group=no owner=no perms=no recursive=yes delete=yes
   tags:
     - smisc
 
 - name: Synchronize dashboard code
-  synchronize: src=dashboard/ dest=/usr/local/src/{{ fqdn }}/dashboard group=no owner=no perms=no recursive=yes
+  synchronize: src=dashboard/ dest=/usr/local/src/{{ domain }}/dashboard group=no owner=no perms=no recursive=yes delete=yes
   tags:
     - smisc
     - hot
@@ -169,6 +160,24 @@
   tags: 
     - smisc
     - hot
+
+- name: Ensure files have the proper mode and owner
+  file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }}
+  with_items:
+    - { src: "/etc/monit/monitrc" }
+    - { src: "/usr/local/share/nginx/{{ fqdn }}.key", owner: "www-data", mode: 400 }
+    - { src: "/usr/local/share/nginx/smisc-sql.{{ domain }}.crt", owner: "www-data", mode: 400 }
+    - { src: "/usr/local/share/nginx/smisc.{{ domain }}.crt", owner: "www-data", mode: 400 }
+  tags:
+    - monit
+    - smisc
+
+- name: Ensure directories have the proper mode and owner
+  file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }} recurse=yes state=directory
+  with_items:
+    - { src: "/usr/local/src/{{ domain }}/dashboard/app/storage", owner: "www-data", mode: 775 }
+  tags:
+    - smisc
 
 - name: Core services are running
   service: name={{ item }} state=started
