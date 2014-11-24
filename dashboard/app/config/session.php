@@ -16,7 +16,7 @@ return array(
     |
     */
 
-    'driver' => 'file',
+    'driver' => 'redis',
 
     /*
     |--------------------------------------------------------------------------
@@ -135,6 +135,6 @@ return array(
     |
     */
 
-    'secure' => false,
+    'secure' => true,
 
 );
