@@ -1,6 +1,8 @@
 import logging
 import time
 
+logger = logging.getLogger(__name__)
+
 class EdgeService:
     def __init__(self, db):
         self.db = db
@@ -21,7 +23,7 @@ class EdgeService:
                 query = 'INSERT INTO tuser_tuser (timestamp, from_user, to_user, weight) VALUES ' + (','.join(parts))
                 self.db.execute(query, tuple(params))
         except Exception as e:
-            logging.exception('Error inserting user-user edges: %s', str(e))
+            logger.exception('Error inserting user-user edges: %s', str(e))
     def get_edges(self, offset = 0, limit = 100):
         self.db.execute("SELECT to_user, from_user FROM tuser_tuser order by timestamp asc limit %s offset %s", (limit, offset))
         try:

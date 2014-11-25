@@ -6,6 +6,8 @@ import threading
 import logging
 import queue
 
+logger = logging.getLogger(__name__)
+
 class CompetitionTweetsScraperWorker(threading.Thread):
     def __init__(self, scrapeservice, rlapi, tweetservice):
         threading.Thread.__init__(self)
@@ -36,9 +38,9 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                     since_id = last_tweet_id
 
             if since_id is None:
-                logging.debug('Getting tweets for %s, starting with whenever', user_id)
+                logger.debug('Getting tweets for %s, starting with whenever', user_id)
             else:
-                logging.debug('Getting tweets for %s, starting with %d', user_id, since_id)
+                logger.debug('Getting tweets for %s, starting with %d', user_id, since_id)
 
             params = {'user_id': user_id, 'count': 200}
 
@@ -48,7 +50,7 @@ class CompetitionTweetsScraperWorker(threading.Thread):
             try:
                 resp = self.rlapi.request('statuses/user_timeline', params)
             except ProtectedException as e:
-                logging.info('%s is protected', user_id)
+                logger.info('%s is protected', user_id)
                 return
             except OverLimits:
                 self.scrapeservice.enqueue({
@@ -75,5 +77,5 @@ class CompetitionTweetsScraperWorker(threading.Thread):
                 })
 
         except Exception as err:
-            logging.exception('Caught error: %s' % (str(err)))
+            logger.exception('Caught error: %s' % (str(err)))
 

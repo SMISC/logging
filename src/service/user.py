@@ -1,6 +1,8 @@
 import logging
 import psycopg2
 
+logger = logging.getLogger(__name__)
+
 class UserService:
     def __init__(self, db):
         self.db = db
@@ -74,5 +76,5 @@ class UserService:
             result = self.db.execute('insert into tuser (user_id, screen_name, full_name, followers, bio, total_tweets, timestamp, following, interesting, location, website, profile_image_url, profile_banner_url, protected) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', uval)
             return True
         except Exception as e:
-            logging.exception('Error inserting user: %s', str(e))
+            logger.exception('Error inserting user: %s', str(e))
             return False

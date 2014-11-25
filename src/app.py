@@ -37,7 +37,7 @@ class SMISC:
 
     def setupLogging(self, level):
         handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
-        formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\t\t{message}', style='{')
+        formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\tp{process}\t\t{message}', style='{')
         handler.setFormatter(formatter)
         self.log.addHandler(handler)
 
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     app_name = sys.argv[1]
 
     smisc = SMISC(app_name)
-    smisc.setupLogging(logging.INFO)
+    smisc.setupLogging(logging.DEBUG)
 
     app = smisc.getProgram(app_name)
     if app is None:

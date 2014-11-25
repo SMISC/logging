@@ -7,6 +7,8 @@ import threading
 import logging
 import queue
 
+logger = logging.getLogger(__name__)
+
 class FollowersScraperWorker(threading.Thread):
     def __init__(self, scrapeservice, rlapi, edgeservice):
         threading.Thread.__init__(self)
@@ -22,16 +24,17 @@ class FollowersScraperWorker(threading.Thread):
 
             (user_id, cursor) = (job["user_id"], job["cursor"])
 
-            logging.debug('Getting followers for %s with cursor %d', user_id, cursor)
+            logger.debug('Getting followers for %s with cursor %d', user_id, cursor)
 
             try:
                 resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
             except ProtectedException as e:
-                logging.info('%d is protected.', user_id)
+                logger.info('%d is protected.', user_id)
                 return
             except NotFound:
-                logging.info('Skipping user %d not found', user_id)
+                logger.info('Skipping user %d not found', user_id)
             except OverLimits:
+                logger.info('Requeueing because over limits')
                 self.scrapeservice.enqueue({
                     "user_id": user_id,
                     "cursor": cursor
@@ -53,5 +56,5 @@ class FollowersScraperWorker(threading.Thread):
                 })
 
         except Exception as err:
-            logging.exception('Caught error: %s' % (str(err)))
+            logger.exception('Caught error: %s' % (str(err)))
 

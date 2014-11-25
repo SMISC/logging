@@ -1,6 +1,8 @@
 import logging
 import time
 
+logger = logging.getLogger(__name__)
+
 class LockService:
     def __init__(self, rds, key):
         self.rds = rds
@@ -13,10 +15,10 @@ class LockService:
 
         if not rv:
             time_started = self.inspect()
-            logging.info('%s locked (since %.0f minutes ago).', self.key, (time.time() - time_started) / 60)
+            logger.info('%s locked (since %.0f minutes ago).', self.key, (time.time() - time_started) / 60)
         else:
             self.rds.expire(self.key, 360)
-            logging.debug('%s acquired and now locked', self.key)
+            logger.debug('%s acquired and now locked', self.key)
 
         return rv
 
@@ -31,7 +33,7 @@ class LockService:
 
     def release(self):
         if self.acquired:
-            logging.debug('%s released', self.key)
+            logger.debug('%s released', self.key)
             self.rds.delete(self.key)
         else:
-            logging.exception('tried to free a lock what was never locked. silently ignoring....')
+            logger.exception('tried to free a lock what was never locked. silently ignoring....')

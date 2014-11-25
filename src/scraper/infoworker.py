@@ -6,6 +6,8 @@ import logging
 from ratelimit import ProtectedException
 from util import twittertime as twittertime
 
+logger = logging.getLogger(__name__)
+
 class InfoScraperWorker(threading.Thread):
     def __init__(self, rlapi, userservice, scrapeservice):
         threading.Thread.__init__(self)
@@ -28,7 +30,7 @@ class InfoScraperWorker(threading.Thread):
                     time.sleep(1)
                     t = t - 1
 
-            logging.debug('Acquired %d users', len(user_ids))
+            logger.debug('Acquired %d users', len(user_ids))
 
             if len(user_ids) == 0:
                 return
@@ -50,7 +52,7 @@ class InfoScraperWorker(threading.Thread):
                 try:
                     ts = twittertime(user['created_at'])
                 except Exception as e:
-                    logging.warn("Caught error when parsing timestamp (%s): %s", user['created_at'], str(e))
+                    logger.warn("Caught error when parsing timestamp (%s): %s", user['created_at'], str(e))
 
                 self.userservice.create_user({
                     'user_id': user['id_str'],
@@ -70,4 +72,4 @@ class InfoScraperWorker(threading.Thread):
                 })
 
         except Exception as err:
-            logging.exception('Caught error: %s' % (str(err)))
+            logger.exception('Caught error: %s' % (str(err)))

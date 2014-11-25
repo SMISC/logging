@@ -13,3 +13,6 @@
 
     - name: kill all running services
       shell: killall python3
+
+    - name: flush redis
+      shell: redis-cli flushall

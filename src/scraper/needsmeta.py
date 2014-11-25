@@ -1,6 +1,8 @@
 import logging
 import time
 
+logger = logging.getLogger(__name__)
+
 class NeedsMetaScraper:
     def __init__(self, tweetservice, userservice, scrapeservice, edgeservice):
         self.tweetservice = tweetservice
@@ -13,7 +15,7 @@ class NeedsMetaScraper:
         edge_offset = 0
         
         while True:
-            logging.debug('Polling for tweets > %d' % (last_tweet_id))
+            logger.debug('Polling for tweets > %d' % (last_tweet_id))
             recent_tweets = self.tweetservice.tweets_where('tweet_id > %s', [last_tweet_id])
             
             user_ids = []
@@ -27,7 +29,7 @@ class NeedsMetaScraper:
                 self.scrapeservice.enqueue('follow', user_id)
                 self.scrapeservice.enqueue('info', user_id)
 
-            logging.debug('Polling for edges (set %d)' % (edge_offset))
+            logger.debug('Polling for edges (set %d)' % (edge_offset))
             edges = self.edgeservice.get_edges(edge_offset)
             for edge in edges:
                 self.scrapeservice.enqueue('info', edge['to_user'])

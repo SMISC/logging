@@ -4,6 +4,8 @@ import signal
 import threading
 import logging
 
+logger = logging.getLogger(__name__)
+
 class CompetitionScraper:
     def __init__(self, userservice, lockservice, scrapeservices, scanservice):
         self.userservice = userservice
@@ -21,7 +23,7 @@ class CompetitionScraper:
             return
 
         if self.myscrapeservice.length() == 0:
-            logging.info('Queue %s is empty. Beginning anew...', type(self))
+            logger.info('Queue %s is empty. Beginning anew...', type(self))
             self.scanservice.begin_anew()
             competition_users = self.get_competition_users()
 
@@ -30,7 +32,7 @@ class CompetitionScraper:
         self._run_user_queue()
 
         queue_length = self.myscrapeservice.length()
-        logging.info('[start] %d users remaining for %s', queue_length, type(self))
+        logger.info('[start] %d users remaining for %s', queue_length, type(self))
 
         for thread in self.threads:
             thread.start()
@@ -39,4 +41,4 @@ class CompetitionScraper:
             thread.join()
 
         queue_length = self.myscrapeservice.length()
-        logging.info('[end] %d users remaining for %s', queue_length, type(self))
+        logger.info('[end] %d users remaining for %s', queue_length, type(self))

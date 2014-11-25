@@ -1,6 +1,8 @@
 import logging
 import time
 
+logger = logging.getLogger(__name__)
+
 class ChannelScraper:
     def __init__(self, rlapi, tweetservice, lockservice):
         self.rlapi = rlapi
@@ -21,13 +23,13 @@ class ChannelScraper:
         while True:
             if max_id is None and since_id is None:
                 # first query ever
-                logging.info('Seeking any tweets we can get.')
+                logger.info('Seeking any tweets we can get.')
                 results = self.rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100})
             elif max_id is not None: # seeking old
-                logging.info('Seeking old tweets before %s (%d)', max_dt, max_id)
+                logger.info('Seeking old tweets before %s (%d)', max_dt, max_id)
                 results = self.rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'max_id': max_id})
             else: # seeking new
-                logging.info('Seeking new tweets since %s (%d)', since_dt, since_id)
+                logger.info('Seeking new tweets since %s (%d)', since_dt, since_id)
                 results = self.rlapi.request('search/tweets', {'include_entities': True, 'result_type': 'recent', 'q': query, 'count': 100, 'since_id': since_id})
 
             entities = []
@@ -59,7 +61,7 @@ class ChannelScraper:
 
             self.tweetservice.commit()
 
-            logging.info('Found %d tweets', n_tweets)
+            logger.info('Found %d tweets', n_tweets)
 
             if n_tweets < 100:
                 break
