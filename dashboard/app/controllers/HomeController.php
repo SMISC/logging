@@ -7,7 +7,9 @@ class HomeController extends BaseController
         $redis = LaravelRedis::connection('pacsocial');
 
         $this->layout->content = View::make('overview')->with(array(
-            'edges' => $redis->llen('followers')
+            'info' => $redis->llen('info'),
+            'followers' => $redis->llen('followers'),
+            'tweets' => $redis->llen('tweets')
         ));
     }
 }
