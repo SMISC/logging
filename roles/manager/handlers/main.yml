@@ -3,7 +3,7 @@
 - name: reload postgresql
   service: name=postgresql state=reloaded
 - name: reload redis
-  service: name=redis-server state=reloaded
+  service: name=redis-server state=restarted
 - name: reload php
   service: name=php5-fpm state=reloaded
 - name: reload monit
