@@ -37,7 +37,7 @@ server {
     listen              443 ssl;
     server_name         smisc-sql.jacobgreenleaf.com;
     ssl_certificate     /usr/local/share/nginx/smisc-sql.jacobgreenleaf.com.crt;
-    ssl_certificate_key /usr/local/share/nginx/smisc.jacobgreenleaf.com.key;
+    ssl_certificate_key /usr/local/share/nginx/smisc-sql.jacobgreenleaf.com.key;
 
     index               index.html index.php;
     root                /usr/local/src/jacobgreenleaf.com/sql;
