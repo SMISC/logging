@@ -254,13 +254,13 @@
     - hot
 
 - name: turn on the follower scraper job
-  cron: state=absent name="follower scraper" minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py followers"
+  cron: state=present name="follower scraper" minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py followers"
 
 - name: turn on the competition tweets scraper scraper job
-  cron: state=absent name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py competition-tweets"
+  cron: state=present name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py competition-tweets"
 
 - name: turn on the info scraper job
-  cron: state=absent name="info scraper" minute="0,30" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py info"
+  cron: state=present name="info scraper" minute="0,30" hour="*" day="*" month="*" job="python3 /usr/local/src/smisc/app.py info"
 
-#- name: turn on the daily backup job
-#  cron: name="hourly backups" state=present minute="0" hour="0" day="*" month="*" job="python3 /usr/local/bin/smisc-backup.py"
+- name: turn on the daily backup job
+  cron: state=present name="hourly backups" minute="0" hour="0" day="*" month="*" job="python3 /usr/local/bin/smisc/app.py backup"
