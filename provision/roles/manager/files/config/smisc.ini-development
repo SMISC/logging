@@ -5,7 +5,7 @@ log = /var/local/log/smisc.log
 key = AKIAI5NXLISN6MXU6I4A
 secret = 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
 region = us-west-2
-vault-postgresqlbackups = postgresql-backups
+vault-postgresqlbackups = postgresql-backups-dev
 sns_topic = arn:aws:sns:us-west-2:898852207045:backups
 
 [twitter]

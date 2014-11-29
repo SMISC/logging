@@ -20,16 +20,16 @@ class Backup:
         scan_ids = self.backupservice.get_scans_not_backedup('followers')
 
         for scan_id in scan_ids:
-            logging.info('backing up followers scan #%d', scan_id)
+            logging.info('backing up followers scan #%d', scan['id'], scan['ref_start'], scan['ref_end'])
 
     def _runTweets(self):
         scan_ids = self.backupservice.get_scans_not_backedup('tweets')
 
         for scan_id in scan_ids:
-            logging.info('backing up tweet scan #%d', scan_id)
+            logging.info('backing up tweet scan #%d', scan['id'], scan['ref_start'], scan['ref_end'])
 
     def _runUsers(self):
         scan_ids = self.backupservice.get_scans_not_backedup('info')
 
         for scan_id in scan_ids:
-            logging.info('backing up info scan #%d', scan_id)
+            logging.info('backing up info scan #%d from %d to %d', scan['id'], scan['ref_start'], scan['ref_ned'])

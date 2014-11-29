@@ -55,6 +55,34 @@
     - php5-dev
     - php5-mcrypt
     - rsync
+    - git
+    - debhelper 
+    - debiandoc-sgml 
+    - docutils-common 
+    - gettext 
+    - html2text 
+    - intltool-debian 
+    - libcroco3 
+    - libgettextpo0 
+    - libglib2.0-0 
+    - libhtml-parser-perl 
+    - libhtml-tagset-perl 
+    - libhtml-tree-perl 
+    - libroman-perl 
+    - libsgmls-perl 
+    - libsp1c2 
+    - libtext-format-perl 
+    - libunistring0 
+    - liburi-perl 
+    - po-debconf 
+    - python-docutils 
+    - python-roman 
+    - sgml-data 
+    - sgmlspl 
+    - sp
+
+- name: Install python 3.4.2
+  include: install_python.yml
 
 - name: install PHP PEAR modules
   command: pecl install redis
@@ -68,8 +96,8 @@
   when: False == composer_stat.stat.exists
   include: install_composer.yml
 
-- name: Install Python modules for 3-2
-  pip: name={{ item }} executable=pip-3.2
+- name: Install Python modules for 3-4
+  pip: name={{ item }} executable=pip3.4
   with_items:
     - TwitterAPI
     - redis

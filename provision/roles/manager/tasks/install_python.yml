@@ -1,0 +1,20 @@
+- name: check if python34 is installed
+  stat: path=/usr/local/bin/python3.4
+  register: python34_check
+
+- name: download python src
+  get_url: url=https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz dest=/usr/local/src/python-3.4.2.tgz
+  when: python34_check.stat.exists == False
+
+- name: extract python
+  command: tar xvf python-3.4.2.tgz
+  when: python34_check.stat.exists == False
+  args:
+    chdir: /usr/local/src
+    creates: /usr/local/src/python-3.4.2
+
+- name: install python
+  shell: ./configure; make; make install
+  when: python34_check.stat.exists == False
+  args:
+    chdir: /usr/local/src/Python-3.4.2

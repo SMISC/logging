@@ -53,6 +53,7 @@ class SMISC:
         self.log.setLevel(level)
 
         logging.getLogger('requests').setLevel(logging.ERROR)
+        logging.getLogger('boto').setLevel(logging.ERROR)
 
     def getConfig(self):
         return self.config
@@ -172,9 +173,10 @@ class SMISC:
             glacier = boto.glacier.layer2.Layer2(self.config.get('glacier', 'key'), self.config.get('glacier', 'secret'), region_name=self.config.get('glacier', 'region'))
             vault = glacier.get_vault(self.config.get('glacier', 'vault-postgresqlbackups'))
             lockservice = self.getService('lock', which)
-            backupservices = self.getService('backup')
+            backupservice = self.getService('backup')
             edgeservice = self.getService('edge')
             userservice = self.getService('user')
+            tweetservice = self.getService('tweet')
             scanservices = {
                 'followers': self.getService('scan', 'followers'),
                 'info': self.getService('scan', 'info'),
