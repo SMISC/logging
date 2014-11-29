@@ -5,8 +5,6 @@ import os.path
 import os
 import tempfile
 import subprocess
-import boto.glacier
-import boto.glacier.layer2
 
 class BackupPostgresql:
     def run(self, fp):

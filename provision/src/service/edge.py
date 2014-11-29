@@ -1,11 +1,13 @@
 import logging
 import time
+from model import Model
 
 logger = logging.getLogger(__name__)
 
-class EdgeService:
+class EdgeService(Model):
     def __init__(self, db):
-        self.db = db
+        Model.__init__(self, db, "tuser_tuser")
+
     def add_follower_edges(self, followed_id, follower_ids):
         edges = []
         for follower_id in follower_ids:
@@ -24,17 +26,19 @@ class EdgeService:
                 self.db.execute(query, tuple(params))
         except Exception as e:
             logger.exception('Error inserting user-user edges: %s', str(e))
-    def get_edges(self, offset = 0, limit = 100):
-        self.db.execute("SELECT to_user, from_user FROM tuser_tuser order by timestamp asc limit %s offset %s", (limit, offset))
-        try:
-            results = self.db.fetchall()
-        except psycopg2.ProgrammingError:
-            return []
 
-        edges = []
-        for result in results:
-            edges.append({
-                'to_user': result[0],
-                'from_user': result[1]
-            })
-        return edges
+    def get_edges_between_count(self, id_start, id_end):
+        self.db.execute("SELECT count(id) from tuser_tuser WHERE id >= %s and id < %s", (id_start, id_end))
+        result = self.bd.fetchone()
+        return int(result[0])
+
+    def get_edges_between(self, id_start, id_end, page_num, PS=1E4):
+        offset = (PS * page_num)
+        limit = PS
+
+        self.db.execute("SELECT * from tuser_tuser WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
+        return self._fetch_all()
+        
+    def get_edges(self, offset = 0, limit = 100):
+        self.db.execute("SELECT id, to_user, from_user FROM tuser_tuser order by timestamp asc limit %s offset %s", (limit, offset))
+        return self._fetch_all()

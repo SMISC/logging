@@ -1,11 +1,13 @@
 import logging
 import psycopg2
 
+from model import Model
+
 logger = logging.getLogger(__name__)
 
-class UserService:
+class UserService(Model):
     def __init__(self, db):
-        self.db = db
+        Model.__init__(self, db, "tuser")
 
     def get_competition_users(self, where = 'interesting=TRUE'):
         page = 0
@@ -35,40 +37,17 @@ class UserService:
 
         return users
 
+    def get_users_between(self, id_start, id_end, page_num):
+        PS = 1E4 # 10,000
+
+        offset = (PS * page_num)
+        limit = PS
+        self.db.execute("SELECT * from tuser_tuser WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
+        return self._fetch_all()
+
     def users_where(self, where, args = []):
-        result = self.db.execute('select user_id, screen_name, full_name, followers, following, bio, timestamp, total_tweets, interesting, location, website, profile_image_url, profile_banner_url, protected from tuser where ' + where, tuple(args))
-        try:
-            results = self.db.fetchall()
-        except psycopg2.ProgrammingError:
-            return []
-
-        users = []
-        if results is not None:
-            for result in results:
-                if results[13] is None: # protected
-                    results[13] = False
-                if results[8] is None: # interesting
-                    results[8] = False
-
-                users.append({
-                    "user_id": int(result[0]),
-                    "screen_name": result[1],
-                    "full_name": result[2],
-                    "followers": int(result[3]),
-                    "following": int(result[4]),
-                    "bio": result[5],
-                    "timestamp": int(result[6]),
-                    "total_tweets": int(result[7]),
-                    "interesting": bool(result[8]),
-                    "location": result[9],
-                    "website": result[10],
-                    "profile_image_url": result[11],
-                    "profile_banner_url": result[12],
-                    "protected": bool(result[13])
-                })
-            return users
-
-        return []
+        result = self.db.execute('select * from tuser where ' + where, tuple(args))
+        return self._fetch_all()
 
     def create_user(self, user):
         uval = (user["user_id"], user["screen_name"], user["full_name"], user["followers"], user["bio"], user["total_tweets"], user["timestamp"], user["following"], user["interesting"], user["location"], user["website"], user["profile_image_url"], user["profile_banner_url"], user["protected"])

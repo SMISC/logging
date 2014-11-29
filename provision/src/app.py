@@ -1,20 +1,26 @@
 import psycopg2
+import psycopg2.extras
 import redis
 import sys
 import logging
 import logging.handlers
 import configparser
+import boto.glacier
+import boto.glacier.layer2
 
 from ratelimit import RateLimitedTwitterAPI
 
 from twitter import twitter_from_credentials
 from twitter import SkipException
 
+from backup import Backup
+
 from service.scrape import ScrapeService
 from service.tweet import TweetService
 from service.user import UserService
 from service.edge import EdgeService
 from service.lock import LockService
+from service.backup import BackupService
 
 from service.scan.info import InfoScanService
 from service.scan.tweet import TweetScanService
@@ -64,7 +70,7 @@ class SMISC:
         
     def getDatabaseCursor(self):
         dbc = self.getDatabase()
-        return dbc.cursor()
+        return dbc.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     def getTwitterAPI(self):
         keys = self.config['twitter']['keys'].split("\n")
@@ -92,6 +98,8 @@ class SMISC:
             return ScrapeService(self.getRedis(), args[0])
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
+        elif 'backup' == which:
+            return BackupService(self.getDatabaseCursor())
         elif 'scan' == which:
             backend = args[0]
             if 'info' == backend:
@@ -160,8 +168,21 @@ class SMISC:
 
             return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices, scanservice)
 
-        elif 'clean' == which:
-            pass
+        elif 'backup' == which:
+            glacier = boto.glacier.layer2.Layer2(self.config.get('glacier', 'key'), self.config.get('glacier', 'secret'), region_name=self.config.get('glacier', 'region'))
+            vault = glacier.get_vault(self.config.get('glacier', 'vault-postgresqlbackups'))
+            lockservice = self.getService('lock', which)
+            backupservices = self.getService('backup')
+            edgeservice = self.getService('edge')
+            userservice = self.getService('user')
+            scanservices = {
+                'followers': self.getService('scan', 'followers'),
+                'info': self.getService('scan', 'info'),
+                'tweets': self.getService('scan', 'tweets')
+            }
+
+            return Backup(vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

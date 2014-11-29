@@ -1,24 +1,10 @@
 import base64
+from model import Model
 
-class BackupService:
-    def __init__(self, glacier, db, edgeservice, userservice, tweetservice):
-        self.glacier = glacier
-        self.db = db
-        self.scanservice = scanservice
-        self.edgeservice = edgeservice
-        self.userservice = userservice
-        self.tweetservice = tweetservice
+class BackupService(Model):
+    def __init__(self, db):
+        Model.__init__(self, db, "backups")
 
-    def run(self):
-        self._runEdges()
-        self._runUsers()
-        self._runTweets()
-
-    def _runEdges(self):
-        pass
-
-    def _runTweets(self):
-        pass
-
-    def _runUsers(self):
-        pass
+    def get_scans_not_backedup(self, dtype):
+        self.db.execute("select id from scan where type = %s and not exists (select * from backups where backups.scan_id = scan.id)", (dtype,))
+        return self._fetch_all()
