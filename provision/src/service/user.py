@@ -37,12 +37,17 @@ class UserService(Model):
 
         return users
 
+    def get_users_between_count(self, id_start, id_end):
+        self.db.execute("SELECT count(id) from tuser WHERE id >= %s and id < %s", (id_start, id_end))
+        result = self.db.fetchone()
+        return int(result[0])
+
     def get_users_between(self, id_start, id_end, page_num):
         PS = 1E4 # 10,000
 
         offset = (PS * page_num)
         limit = PS
-        self.db.execute("SELECT * from tuser_tuser WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
+        self.db.execute("SELECT * from tuser WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
         return self._fetch_all()
 
     def users_where(self, where, args = []):

@@ -1,8 +1,9 @@
+from model import Model
 from util import twittertime as twittertime
 
-class TweetService:
+class TweetService(Model):
     def __init__(self, db):
-        self.db = db
+        Model.__init__(self, db, "tweet")
         self.tweets = []
         self.entities = []
     def get_latest_tweet_id(self):
@@ -27,6 +28,18 @@ class TweetService:
                 })
             return tweets
         return []
+
+    def get_tweets_between_count(self, id_start, id_end):
+        self.db.execute("SELECT count(id) from tweet WHERE id >= %s and id < %s", (id_start, id_end))
+        result = self.db.fetchone()
+        return int(result[0])
+
+    def get_tweets_between(self, id_start, id_end, page_num, PS=1E4):
+        offset = (PS * page_num)
+        limit = PS
+
+        self.db.execute("SELECT * from tweet WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
+        return self._fetch_all()
 
     def queue_tweet(self, status, interesting):
         tweet_id = int(status["id"])

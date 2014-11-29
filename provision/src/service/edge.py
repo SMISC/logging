@@ -29,7 +29,7 @@ class EdgeService(Model):
 
     def get_edges_between_count(self, id_start, id_end):
         self.db.execute("SELECT count(id) from tuser_tuser WHERE id >= %s and id < %s", (id_start, id_end))
-        result = self.bd.fetchone()
+        result = self.db.fetchone()
         return int(result[0])
 
     def get_edges_between(self, id_start, id_end, page_num, PS=1E4):
