@@ -1,4 +1,4 @@
-dev ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com"
+dev ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222 fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-development"
 
 [smisc]
 dev

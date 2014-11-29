@@ -164,6 +164,7 @@
 - name: Add the pacsocial database to postgres
   sudo_user: postgres
   postgresql_db: name=pacsocial state=present owner=pacsocial
+  register: pacsocial_db
   tags:
     - postgresql
 
@@ -182,7 +183,7 @@
   command: psql -c 'grant select on all tables in schema "public" to pacsocial' dashboard postgres 
 
 - name: Deploy smisc configuration
-  synchronize: src=config/smisc.ini dest=/usr/local/share/smisc.ini rsync_path="sudo rsync"
+  synchronize: src=config/{{ config_file }} dest=/usr/local/share/smisc.ini rsync_path="sudo rsync"
   tags: 
     - smisc
     - hot

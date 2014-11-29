@@ -1,2 +1,2 @@
 [smisc]
-104.131.71.175 ansible_ssh_user=root fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com"
+104.131.71.175 ansible_ssh_user=root fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"

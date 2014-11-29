@@ -1,0 +1,25 @@
+[smisc]
+log = /var/local/log/smisc.log
+
+[glacier]
+key = AKIAI5NXLISN6MXU6I4A
+secret = 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
+region = us-west-2
+vault-postgresqlbackups = postgresql-backups
+sns_topic = arn:aws:sns:us-west-2:898852207045:backups
+
+[twitter]
+keys: 83UirqBmv5RoEkXpNn8rSa1z0
+secrets: YmFhh7c3yr4AwmMtmodNm6MFc2lq60bv6qZanJqSWYbpxAPALC
+
+[postgres]
+username = pacsocial
+password = 1234qwer
+host = smisc.jacobgreenleaf.com
+port = 5432
+database = pacsocial
+
+[redis]
+host = smisc.jacobgreenleaf.com
+port = 6379
+database = 0
