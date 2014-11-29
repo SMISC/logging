@@ -197,6 +197,7 @@
     - { src: "/usr/local/share/nginx/{{ fqdn }}.key", owner: "www-data", mode: 400 }
     - { src: "/usr/local/share/nginx/smisc-sql.{{ domain }}.crt", owner: "www-data", mode: 400 }
     - { src: "/usr/local/share/nginx/smisc.{{ domain }}.crt", owner: "www-data", mode: 400 }
+    - { src: "/usr/local/share/nginx/smisc.{{ domain }}.crt", owner: "www-data", mode: 400 }
   tags:
     - monit
     - smisc
