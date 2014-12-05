@@ -263,4 +263,4 @@
   cron: state=present name="info scraper" minute="0,30" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py info"
 
 - name: turn on the daily backup job
-  cron: state=present name="hourly backups" minute="0" hour="0" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/bin/smisc/app.py backup"
+  cron: state=present name="backups" minute="0" hour="0" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/bin/smisc/app.py backup"

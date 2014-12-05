@@ -10,9 +10,11 @@
         - follower scraper
         - competition tweets scraper
         - info scraper
+        - backups
 
     - name: kill all running services
       shell: killall python3
+      ignore_errors: True
 
     - name: flush redis
       shell: redis-cli flushall
