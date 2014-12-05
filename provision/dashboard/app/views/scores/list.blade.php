@@ -2,6 +2,6 @@
 
 @section('content')
 
-<h2> {{{ $edges }}} edges</h2>
+<h2>Teams</h2>
 
 @stop

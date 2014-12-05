@@ -4,24 +4,23 @@
         @section('head')
             <link rel="stylesheet" href="/css/main.css" />
         @show
+        <title>SocialBots II</title>
     </head>
     <body>
         @section('header')
-            <h1 id="title">
-                SocialBots II
-            </h1>
+            <span id="title" title="SocialBots II"></span>
 
             <ul id="nav">
-                @if ($logged_in)
+                @if (Route::currentRouteName() != 'login')
                 <li
-                    @if ($page == 'scores')
+                    @if (strpos(Route::currentRouteName(), 'scores') !== -1)
                         class="active"
                     @endif
                 >
                     <a href="/scores">scores</a>
                 </li>
                 <li
-                    @if ($page == 'diagnostics')
+                    @if (Route::currentRouteName() == 'diagnostics')
                         class="active"
                     @endif
                 >
