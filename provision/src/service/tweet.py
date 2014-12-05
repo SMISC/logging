@@ -51,7 +51,11 @@ class TweetService(Model):
 
         if "urls" in status["entities"] and len(status["entities"]["urls"]) > 0:
             for url in status["entities"]["urls"]:
-                self.entities.append( (tweet_id, "url", url["url"]) )
+                expanded_url = url["expanded_url"]
+                if expanded_url is None:
+                    expanded_url = url["url"]
+
+                self.entities.append( (tweet_id, "url", expanded_url) )
 
         if "hashtags" in status["entities"] and len(status["entities"]["hashtags"]) > 0:
             for htag in status["entities"]["hashtags"]:
@@ -60,6 +64,9 @@ class TweetService(Model):
         if "user_mentions" in status["entities"] and len(status["entities"]["user_mentions"]) > 0:
             for mention in status["entities"]["user_mentions"]:
                 self.entities.append( (tweet_id, "mention", mention["id_str"]) )
+
+        if "in_reply_to_user_id_str" in status and status["in_reply_to_user_id_str"] is not None:
+            self.entities.append( (tweet_id, "reply", status["in_reply_to_user_id_str"]) )
 
     def get_number_of_queued(self):
         return len(self.tweets)
