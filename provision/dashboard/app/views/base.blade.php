@@ -9,7 +9,9 @@
     <body>
         @section('header')
         <div id="header">
-            <span id="title" title="SocialBots II"></span>
+            <a href="/">
+                <span id="title" title="SocialBots II"></span>
+            </a>
 
             <ul id="nav">
                 @if (Route::currentRouteName() != 'login')
