@@ -4,12 +4,29 @@ class ScoresController extends BaseController
 {
     public function showTeamList()
     {
-        $redis = LaravelRedis::connection('pacsocial');
+        $teams = Team::all();
 
-        $this->layout->content = View::make('scores.list')->with(array(
-            'info' => $redis->llen('info'),
-            'followers' => $redis->llen('followers'),
-            'tweets' => $redis->llen('tweets')
+        $bots = array();
+
+        foreach($teams as $team)
+        {
+            $bots[$team->id] = count($team->bots);
+        }
+
+        $this->layout->content = View::make('scores.teams')->with(array(
+            'teams' => $teams,
+            'bots' => $bots
+        ));
+    }
+
+    public function showTeam($team_id)
+    {
+        $team = Team::get($team_id);
+        $bots = $team->bots;
+
+        $this->layout->content = View::make('scores.team')->with(array(
+            'team' => $team,
+            'bots' => $bots
         ));
     }
 }

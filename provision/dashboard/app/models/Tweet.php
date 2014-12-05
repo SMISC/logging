@@ -3,6 +3,7 @@
 class Tweet extends Eloquent
 {
     protected $table = 'tweet';
+    protected $connection = 'competition';
 
     public function entities()
     {

@@ -46,10 +46,10 @@ return array(
 
     'connections' => array(
 
-        'pgsql' => array(
+        'competition' => array(
             'driver'   => 'pgsql',
             'host'     => 'localhost',
-            'database' => 'dashboard',
+            'database' => 'pacsocial',
             'username' => 'dashboard',
             'password' => '1234qwer',
             'charset'  => 'utf8',
@@ -57,7 +57,7 @@ return array(
             'schema'   => 'public',
         ),
 
-        'competition' => array(
+        'dashboard' => array(
             'driver'   => 'pgsql',
             'host'     => 'localhost',
             'database' => 'pacsocial',

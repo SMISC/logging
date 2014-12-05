@@ -8,12 +8,13 @@
     </head>
     <body>
         @section('header')
+        <p id="header">
             <span id="title" title="SocialBots II"></span>
 
             <ul id="nav">
                 @if (Route::currentRouteName() != 'login')
                 <li
-                    @if (strpos(Route::currentRouteName(), 'scores') !== -1)
+                    @if (strpos(Route::currentRouteName(), 'scores') !== false)
                         class="active"
                     @endif
                 >
@@ -32,6 +33,7 @@
                 </li>
                 @endif
             </ul>
+        </p>
         @show
     
         @yield('content')
