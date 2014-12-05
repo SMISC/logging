@@ -14,25 +14,31 @@
 Route::get('/', array(
     'as' => 'scores-index',
     'before' => 'auth.single', 
-    'uses' => 'ScoresController@showTeamList'
+    'uses' => 'ScoresController@showTeams'
 ));
 
-Route::get('/scores', array(
+Route::get('scores', array(
     'as' => 'scores-list',
     'before' => 'auth.single', 
-    'uses' => 'ScoresController@showTeamList'
+    'uses' => 'ScoresController@showTeams'
 ));
 
-Route::get('/diagnostics', array(
+Route::get('team/{team}', array(
+    'as' => 'scores-team',
+    'before' => 'auth.single', 
+    'uses' => 'ScoresController@showTeam'
+));
+
+Route::get('diagnostics', array(
     'as' => 'diagnostics',
     'before' => 'auth.single', 
     'uses' => 'DiagnosticsController@showOverview'
 ));
 
 
-Route::get('/login', array(
+Route::get('login', array(
     'as' => 'login',
     'uses' => 'LoginController@showLogin'
 ));
 
-Route::post('/login', 'LoginController@attemptLogin');
+Route::post('login', 'LoginController@attemptLogin');

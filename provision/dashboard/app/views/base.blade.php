@@ -8,7 +8,7 @@
     </head>
     <body>
         @section('header')
-        <p id="header">
+        <div id="header">
             <span id="title" title="SocialBots II"></span>
 
             <ul id="nav">
@@ -18,22 +18,22 @@
                         class="active"
                     @endif
                 >
-                    <a href="/scores">scores</a>
+                    {{ link_to_action('ScoresController@showTeams', 'scores') }}
                 </li>
                 <li
                     @if (Route::currentRouteName() == 'diagnostics')
                         class="active"
                     @endif
                 >
-                    <a href="/diagnostics">diagnostics</a>
+                    {{ link_to_action('DiagnosticsController@showOverview', 'diagnostics') }}
                 </li>
                 @else
                 <li class="active">
-                    <a href="/login">login</a>
+                    {{ link_to_action('LoginController@showLogin', 'login') }}
                 </li>
                 @endif
             </ul>
-        </p>
+        </div>
         @show
     
         @yield('content')

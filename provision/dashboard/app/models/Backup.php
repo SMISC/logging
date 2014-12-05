@@ -2,7 +2,7 @@
 
 class Backup extends Eloquent
 {
-    protected $table = 'backup';
+    protected $table = 'backups';
     protected $connection = 'competition';
 
     public function scan()

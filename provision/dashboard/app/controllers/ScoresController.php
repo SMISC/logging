@@ -2,7 +2,7 @@
 
 class ScoresController extends BaseController
 {
-    public function showTeamList()
+    public function showTeams()
     {
         $teams = Team::all();
 
@@ -21,7 +21,7 @@ class ScoresController extends BaseController
 
     public function showTeam($team_id)
     {
-        $team = Team::get($team_id);
+        $team = Team::find($team_id);
         $bots = $team->bots;
 
         $this->layout->content = View::make('scores.team')->with(array(

@@ -40,6 +40,7 @@ class DiagnosticsController extends BaseController
         foreach($snapshots as &$snapshot)
         {
             $snapshot['length'] = $redis->llen($snapshot['redis_key']);
+            $snapshot['count'] = count(Scan::where('type', '=', $snapshot['redis_key'])->get());
         }
 
         $backups = Backup::with('scan')->get();
