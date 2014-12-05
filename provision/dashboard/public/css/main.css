@@ -2,4 +2,21 @@ html, body {
     margin: 0;
 }
 
+#header {
+    background: #333;
+    color: white;
+}
 
+#header #title:before {
+    content: attr(title);
+}
+
+#header #nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#header #nav li {
+    display: inline-block;
+}

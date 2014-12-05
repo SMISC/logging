@@ -22,7 +22,7 @@ class FollowersScraperWorker(threading.Thread):
             if job is None:
                 return
 
-            (user_id, cursor) = (job["user_id"], job["cursor"])
+            (user_id, cursor, bot) = (job["user_id"], job["cursor"], job["bot"])
 
             logger.debug('Getting followers for %s with cursor %d', user_id, cursor)
 
@@ -37,7 +37,8 @@ class FollowersScraperWorker(threading.Thread):
                 logger.info('Requeueing because over limits')
                 self.scrapeservice.enqueue({
                     "user_id": user_id,
-                    "cursor": cursor
+                    "cursor": cursor,
+                    "bot": bot
                 })
                 return
 
@@ -46,13 +47,14 @@ class FollowersScraperWorker(threading.Thread):
             for fid in resp['ids']:
                 resp_follower_ids.append(str(fid))
 
-            self.edgeservice.add_follower_edges(user_id, resp_follower_ids)
+            self.edgeservice.add_follower_edges(user_id, resp_follower_ids, bot)
             next_cursor = resp['next_cursor']
 
             if next_cursor != 0:
                 self.scrapeservice.enqueue({
                     "user_id": user_id,
-                    "cursor": next_cursor
+                    "cursor": next_cursor,
+                    "bot": bot
                 })
 
         except Exception as err:

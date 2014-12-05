@@ -16,9 +16,9 @@ class CompetitionTweetsScraper(CompetitionScraper):
         return self.userservice.get_competition_users('interesting=TRUE and (protected IS NULL or protected=FALSE)')
 
     def _generate_queue(self, users):
-        for user_id in users:
+        for user in users:
             self.myscrapeservice.enqueue({
-                "user_id": user_id,
+                "user_id": user["user_id"],
                 "since_id": None
             })
 

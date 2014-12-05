@@ -12,8 +12,8 @@ class InfoScraper(CompetitionScraper):
         self.userservices = userservices
 
     def _generate_queue(self, users):
-        for user_id in users:
-            self.myscrapeservice.enqueue(user_id)
+        for user in users:
+            self.myscrapeservice.enqueue(user["user_id"])
 
     def _run_user_queue(self):
         n_threads = len(self.rlapis)

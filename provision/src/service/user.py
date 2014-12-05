@@ -16,7 +16,7 @@ class UserService(Model):
         users_this_page = 0
 
         while page is 0 or users_this_page is not 0:
-            self.db.execute('select distinct on (user_id) id, user_id from tuser where ' + where + ' order by user_id, id desc limit %d offset %d' % (pagesize, pagesize*page))
+            self.db.execute('select distinct on (user_id) id, user_id, (team_bot.team_id IS NOT NULL) as is_bot from tuser left join team_bot on team_bot.twitter_id = tuser.user_id where ' + where + ' order by user_id, id desc limit %d offset %d' % (pagesize, pagesize*page))
 
             users_this_page = 0
 
@@ -29,8 +29,7 @@ class UserService(Model):
                 users_results = []
 
             for user_result in users_results:
-                user_id = user_result[1]
-                users.append(str(user_id))
+                users.append(user_result)
                 users_this_page += 1
 
             page = page + 1

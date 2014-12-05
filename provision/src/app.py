@@ -24,7 +24,8 @@ from service.backup import BackupService
 
 from service.scan.info import InfoScanService
 from service.scan.tweet import TweetScanService
-from service.scan.edge import EdgeScanService
+from service.scan.edge import BotEdgeScanService
+from service.scan.edge import WideEdgeScanService
 
 from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
@@ -107,8 +108,10 @@ class SMISC:
                 return InfoScanService(self.getDatabaseCursor(), backend)
             elif 'tweets' == backend:
                 return TweetScanService(self.getDatabaseCursor(), backend)
-            elif 'followers' == backend:
-                return EdgeScanService(self.getDatabaseCursor(), backend)
+            elif 'followers_wide' == backend or 'followers' == backend:
+                return WideEdgeScanService(self.getDatabaseCursor(), backend)
+            elif 'followers_bot' == backend:
+                return BotEdgeScanService(self.getDatabaseCursor(), backend)
 
             raise Exception("Backend for %s not found" % (backend,))
 
@@ -134,6 +137,40 @@ class SMISC:
             scanservice = self.getService('scan', 'info')
 
             return InfoScraper(clients, userservices, myuserservice, lockservice, scrapeservices, scanservice)
+
+        elif 'followers_wide' == which:
+            clients = []
+            edgeservices = []
+            scrapeservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock', which)
+            for i in range(32):
+                clients.append(self.getTwitterAPI())
+                edgeservices.append(self.getService('edge'))
+                scrapeservices.append(self.getService('scrape', 'followers_wide'))
+
+            scrapeservices.append(self.getService('scrape', 'followers_wide')) # append an extra for main thread 
+
+            scanservice = self.getService('scan', 'followers_wide')
+
+            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
+
+        elif 'followers_bot' == which:
+            clients = []
+            edgeservices = []
+            scrapeservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock', which)
+            for i in range(32):
+                clients.append(self.getTwitterAPI())
+                edgeservices.append(self.getService('edge'))
+                scrapeservices.append(self.getService('scrape', 'followers_bot'))
+
+            scrapeservices.append(self.getService('scrape', 'followers_bot')) # append an extra for main thread 
+
+            scanservice = self.getService('scan', 'followers_bot')
+
+            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'followers' == which:
             clients = []
