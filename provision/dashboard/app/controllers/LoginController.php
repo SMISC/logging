@@ -4,7 +4,11 @@ class LoginController extends BaseController
 {
     public function showLogin()
     {
-        $this->layout->content = View::make('login')->with('message', Session::get('message', ''));
+        $this->layout->content = View::make('login')->with(array(
+            'message' => Session::get('message', ''),
+            'page' => BaseController::PAGE_LOGIN,
+            'logged_in' => false
+        ));
     }
 
     public function attemptLogin()

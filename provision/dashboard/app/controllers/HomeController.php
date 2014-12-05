@@ -9,7 +9,9 @@ class HomeController extends BaseController
         $this->layout->content = View::make('overview')->with(array(
             'info' => $redis->llen('info'),
             'followers' => $redis->llen('followers'),
-            'tweets' => $redis->llen('tweets')
+            'tweets' => $redis->llen('tweets'),
+            'logged_in' => true,
+            'page' => BaseController::PAGE_SCORES
         ));
     }
 }
