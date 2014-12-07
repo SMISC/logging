@@ -24,11 +24,13 @@ class DiagnosticsController extends BaseController
                 'name' => 'Followers (short)',
                 'target_size' => 'n/a'
             ),
+            /*
             array(
                 'redis_key' => 'followers',
                 'name' => 'Followers (legacy)',
                 'target_size' => self::TARGET_SIZE
             ),
+            */
 
             array(
                 'redis_key' => 'tweets',
@@ -40,7 +42,9 @@ class DiagnosticsController extends BaseController
         foreach($snapshots as &$snapshot)
         {
             $snapshot['length'] = $redis->llen($snapshot['redis_key']);
-            $snapshot['count'] = count(Scan::where('type', '=', $snapshot['redis_key'])->get());
+            $snapshot['count'] = count(Scan::whereRaw('type = ? and ref_end is not NULL', array($snapshot['redis_key']))->get());
+            $snapshot['in_progress'] = Scan::whereRaw('type = ? and ref_end is NULL', array($snapshot['redis_key']))->orderBy('id', 'desc')->limit(1)->get();
+            $snapshot['last_finished'] = Scan::whereRaw('type = ? and ref_end is not NULL', array($snapshot['redis_key']))->orderBy('id', 'desc')->limit(1)->get();
         }
 
         $backups = Backup::with('scan')->get();
