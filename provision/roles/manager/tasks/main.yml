@@ -256,8 +256,8 @@
 - name: turn on the wide follower scraper job
   cron: state=present name="wide follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_wide"
 
-- name: turn on the bot follower scraper job
-  cron: state=present name="bot follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot"
+- name: turn off the bot follower scraper job
+  cron: state=absent name="bot follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot"
 
 - name: turn on the competition tweets scraper scraper job
   cron: state=present name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py competition-tweets"
