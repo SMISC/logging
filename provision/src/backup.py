@@ -19,7 +19,7 @@ class Backup:
         self.scanservices = scanservices
 
     def main(self):
-        if not self.lockservice.acquire():
+        if not self.lockservice.acquire(None): # there is no expire time
             return
 
         self._runEdges()

@@ -10,10 +10,10 @@ class EdgeScanService(BaseScanService):
                 return most_recent_ref_id
         
         
-class BotEdgeScanService(BaseScanService):
+class BotEdgeScanService(EdgeScanService):
     def _get_where(self):
         return 'bot = TRUE'
 
-class WideEdgeScanService(BaseScanService):
+class WideEdgeScanService(EdgeScanService):
     def _get_where(self):
         return '1=1'

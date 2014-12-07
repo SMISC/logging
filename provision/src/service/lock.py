@@ -9,7 +9,7 @@ class LockService:
         self.key = 'lock_%s' % (key)
         self.acquired = None
 
-    def acquire(self):
+    def acquire(self, expire_time = 3600):
         rv = self.rds.setnx(self.key, time.time())
         self.acquired = rv
 
@@ -17,7 +17,8 @@ class LockService:
             time_started = self.inspect()
             logger.info('%s locked (since %.0f minutes ago).', self.key, (time.time() - time_started) / 60)
         else:
-            self.rds.expire(self.key, 3600)
+            if expire_time is not None:
+                self.rds.expire(self.key, expire_time)
             logger.debug('%s acquired and now locked', self.key)
 
         return rv

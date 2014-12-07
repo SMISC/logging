@@ -7,7 +7,7 @@
 <dl>
     @foreach ($snapshots as $snapshot)
     <dt>{{ $snapshot['name'] }}</dt>
-    <dd>{{ number_format($snapshot['length']) }} of {{ number_format($snapshot['target_size']) }}</dd>
+    <dd>{{ number_format($snapshot['length']) }} of {{ number_format((int)$snapshot['target_size']) }}</dd>
     @endforeach
 
     @if (count($snapshots) == 0)
