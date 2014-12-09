@@ -29,20 +29,53 @@ class ScoresController extends BaseController
             }
 
             $scores[$team->id] = array(
-                'followers' => 0
+                Score::TYPE_FOLLOW => 0,
+                Score::TYPE_REPLY => 0,
+                Score::TYPE_LINKSHARE => 0
             );
         }
 
-        $scores_list = $this->scorer->get_followers_count();
+        $follower_scores_list = $this->scorer->get_followers_count();
 
-        foreach($scores_list as $score)
+        foreach($follower_scores_list as $score)
         {
             $team_id = $bots_teams[$score->bot_id];
 
             if(isset($scores[$team_id]))
             {
-                $scores[$team_id]['followers'] += (self::FOLLOW_POINTS * $score->networked_followers);
+                $scores[$team_id][Score::TYPE_FOLLOW] += (self::FOLLOW_POINTS * $score->networked_followers);
             }
+        }
+
+        $points_scores_list = $this->scorer->get_points();
+
+        foreach($points_scores_list as $score)
+        {
+            $team_id = $bots_teams[$score->bot_id];
+
+            if(isset($scores[$team_id]))
+            {
+                if($score->type === Score::TYPE_REPLY)
+                {
+                    $scores[$team_id][Score::TYPE_REPLY] += (self::REPLY_POINTS * $score->num);
+                }
+                else if($score->type === Score::TYPE_LINKSHARE)
+                {
+                    $scores[$team_id][Score::TYPE_LINKSHARE] += (self::LINKSHARE_POINTS * $score->num);
+                }
+            }
+        }
+
+        foreach($scores as $team_id => $team_scores)
+        {
+            $total = 0;
+
+            foreach($team_scores as $type => $team_score)
+            {
+                $total += $team_score;
+            }
+
+            $scores[$team_id]['total'] = $total;
         }
 
         $this->layout->content = View::make('scores.teams')->with(array(
@@ -66,18 +99,49 @@ class ScoresController extends BaseController
             $bot_ids[] = $bot['twitter_id'];
 
             $scores[$bot['twitter_id']] = array(
-                'followers' => 0
+                Score::TYPE_FOLLOW => 0,
+                Score::TYPE_REPLY => 0,
+                Score::TYPE_LINKSHARE => 0
             );
         }
 
-        $scores_list = $this->scorer->get_followers_count();
+        $followers_scores_list = $this->scorer->get_followers_count();
 
-        foreach($scores_list as $score)
+        foreach($followers_scores_list as $score)
         {
             if(in_array($score->bot_id, $bot_ids))
             {
-                $scores[$score->bot_id]['followers'] += (self::FOLLOW_POINTS * $score->networked_followers);
+                $scores[$score->bot_id][Score::TYPE_FOLLOW] += (self::FOLLOW_POINTS * $score->networked_followers);
             }
+        }
+
+        $points_scores_list = $this->scorer->get_points();
+
+        foreach($points_scores_list as $score)
+        {
+            if(in_array($score->bot_id, $bot_ids))
+            {
+                if($score->type === Score::TYPE_REPLY)
+                {
+                    $scores[$score->bot_id][Score::TYPE_REPLY] += (self::REPLY_POINTS * $score->num);
+                }
+                else if($score->type === Score::TYPE_LINKSHARE)
+                {
+                    $scores[$score->bot_id][Score::TYPE_LINKSHARE] += (self::LINKSHARE_POINTS * $score->num);
+                }
+            }
+        }
+
+        foreach($scores as $bot => $bot_scores)
+        {
+            $total = 0;
+
+            foreach($bot_scores as $type => $score)
+            {
+                $total += $score;
+            }
+
+            $scores[$bot]['total'] = $total;
         }
 
         $this->layout->content = View::make('scores.team')->with(array(

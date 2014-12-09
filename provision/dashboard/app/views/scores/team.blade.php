@@ -26,10 +26,10 @@
         @foreach ($bots as $bot)
         <tr>
             <td><a href="//twitter.com/{{{ $bot['screen_name'] }}}">@{{{ $bot['screen_name'] }}}</a></td>
-            <td>{{ $scores[$bot['twitter_id']]['followers'] }}</td>
-            <td>[...]</td>
-            <td>[...]</td>
-            <td>[...]</td>
+            <td>{{ $scores[$bot['twitter_id']][Score::TYPE_FOLLOW] }} pt</td>
+            <td>{{ $scores[$bot['twitter_id']][Score::TYPE_REPLY] }} pt</td>
+            <td>{{ $scores[$bot['twitter_id']][Score::TYPE_LINKSHARE] }} pt</td>
+            <td>{{ $scores[$bot['twitter_id']]['total'] }} pt</td>
         </tr>
         @endforeach
     </tbody>

@@ -32,10 +32,10 @@
         <tr>
             <td>{{ link_to_action('ScoresController@showTeam', $team->name, array($team->id)) }}</td>
             <td>{{ count($bots[$team->id]) }}
-            <td>{{ $scores[$team->id]['followers'] }}</td>
-            <td>[...]</td>
-            <td>[...]</td>
-            <td>[...]</td>
+            <td>{{ $scores[$team->id][Score::TYPE_FOLLOW] }} pt</td>
+            <td>{{ $scores[$team->id][Score::TYPE_REPLY] }} pt</td>
+            <td>{{ $scores[$team->id][Score::TYPE_LINKSHARE] }} pt</td>
+            <td>{{ $scores[$team->id]['total'] }} pt</td>
         </tr>
         @endforeach
 
