@@ -20,8 +20,8 @@ class BackupService(Model):
 
         return scans
 
-    def mark_backed_up(self, scan_id, ref_count, timestamp = None):
+    def mark_backed_up(self, scan_id, ref_count, glacier_id, timestamp = None):
         if timestamp is None:
             timestamp = int(time.time())
 
-        self.db.execute('insert into backups (scan_id, timestamp, ref_count) values (%s, %s, %s)', (scan_id, timestamp, ref_count))
+        self.db.execute('insert into backups (scan_id, timestamp, ref_count, glacier_id) values (%s, %s, %s, %s)', (scan_id, timestamp, ref_count, glacier_id))

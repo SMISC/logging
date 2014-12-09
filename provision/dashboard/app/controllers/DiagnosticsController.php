@@ -21,7 +21,12 @@ class DiagnosticsController extends BaseController
             ),
             array(
                 'redis_key' => 'followers_bot',
-                'name' => 'Followers (short)',
+                'name' => 'Followers (legacy short)',
+                'target_size' => 'n/a'
+            ),
+            array(
+                'redis_key' => 'followers_bot_v2',
+                'name' => 'Followers (legacy short)',
                 'target_size' => 'n/a'
             ),
             /*

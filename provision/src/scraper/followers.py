@@ -27,3 +27,10 @@ class FollowersScraper(CompetitionScraper):
         for i in range(n_threads):
             thread = FollowersScraperWorker(self.scrapeservices[i], self.rlapis[i], self.edgeservices[i])
             self.threads.append(thread)
+
+class BotFollowersScraper(FollowersScraper):
+    def get_competition_users(self):
+        return self.userservice.get_competition_users('interesting = TRUE AND team_bot.team_id IS NOT NULL')
+
+class WideFollowersScraper(FollowersScraper):
+    pass

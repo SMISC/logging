@@ -19,18 +19,21 @@ from service.scrape import ScrapeService
 from service.tweet import TweetService
 from service.user import UserService
 from service.edge import EdgeService
+from service.edge import BotEdgeService
 from service.lock import LockService
 from service.backup import BackupService
 
 from service.scan.info import InfoScanService
 from service.scan.tweet import TweetScanService
 from service.scan.edge import BotEdgeScanService
+from service.scan.edge import BotV2EdgeScanService
 from service.scan.edge import WideEdgeScanService
 
 from scraper.needsmeta import NeedsMetaScraper
 from scraper.channel import ChannelScraper
 from scraper.info import InfoScraper
-from scraper.followers import FollowersScraper
+from scraper.followers import BotFollowersScraper
+from scraper.followers import WideFollowersScraper
 from scraper.competitiontweets import CompetitionTweetsScraper
 
 class SMISC:
@@ -100,6 +103,8 @@ class SMISC:
             return ScrapeService(self.getRedis(), args[0])
         elif 'edge' == which:
             return EdgeService(self.getDatabaseCursor())
+        elif 'bot_edge' == which:
+            return BotEdgeService(self.getDatabaseCursor())
         elif 'backup' == which:
             return BackupService(self.getDatabaseCursor())
         elif 'scan' == which:
@@ -112,6 +117,8 @@ class SMISC:
                 return WideEdgeScanService(self.getDatabaseCursor(), backend)
             elif 'followers_bot' == backend:
                 return BotEdgeScanService(self.getDatabaseCursor(), backend)
+            elif 'followers_bot_v2' == backend:
+                return BotV2EdgeScanService(self.getDatabaseCursor(), backend)
 
             raise Exception("Backend for %s not found" % (backend,))
 
@@ -153,7 +160,7 @@ class SMISC:
 
             scanservice = self.getService('scan', 'followers_wide')
 
-            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
+            return WideFollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'followers_bot' == which:
             clients = []
@@ -170,7 +177,24 @@ class SMISC:
 
             scanservice = self.getService('scan', 'followers_bot')
 
-            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
+            return BotFollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
+
+        elif 'followers_bot_v2' == which:
+            clients = []
+            edgeservices = []
+            scrapeservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock', which)
+            for i in range(32):
+                clients.append(self.getTwitterAPI())
+                edgeservices.append(self.getService('bot_edge'))
+                scrapeservices.append(self.getService('scrape', 'followers_bot_v2'))
+
+            scrapeservices.append(self.getService('scrape', 'followers_bot_v2')) # append an extra for main thread 
+
+            scanservice = self.getService('scan', 'followers_bot_v2')
+
+            return BotFollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'followers' == which:
             clients = []

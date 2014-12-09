@@ -1,5 +1,10 @@
 @extends('base')
 
+@section('head')
+@parent
+<link rel="stylesheet" href="/css/scores.css" />
+@stop
+
 @section('content')
 
 <h1>Leaderboard</h1>
@@ -11,14 +16,12 @@
         <tr>
             <th rowspan="2">Team</th>
             <th rowspan="2">Bots</th>
-            <th colspan="6">Scores</th>
+            <th class="scores" colspan="4">Scores</th>
         </tr>
         <tr>
-            <th>@-mentions</th>
-            <th>@-replies</th>
-            <th>Follows</th>
-            <th>Link Share</th>
-            <th>Interaction</th>
+            <th>Follows ({{ ScoresController::FOLLOW_POINTS }} pt)</th>
+            <th>@ interactions ({{ ScoresController::REPLY_POINTS}} pt)</th>
+            <th>Link Retweets ({{ ScoresController::LINKSHARE_POINTS}} pt)</th>
             <th>Total</th>
         </tr>
     </thead>
@@ -28,10 +31,8 @@
         @foreach ($teams as $team)
         <tr>
             <td>{{ link_to_action('ScoresController@showTeam', $team->name, array($team->id)) }}</td>
-            <td>{{ $bots[$team->id] }}
-            <td>[...]</td>
-            <td>[...]</td>
-            <td>[...]</td>
+            <td>{{ count($bots[$team->id]) }}
+            <td>{{ $scores[$team->id]['followers'] }}</td>
             <td>[...]</td>
             <td>[...]</td>
             <td>[...]</td>

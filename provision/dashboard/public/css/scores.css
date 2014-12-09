@@ -1,0 +1,9 @@
+th {
+    padding: 2px;
+    text-align: left;
+    width: 170px;
+}
+
+th.scores {
+    text-align: center;
+}

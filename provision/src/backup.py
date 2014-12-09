@@ -84,7 +84,7 @@ class Backup:
                 try:
                     archive_id = self.vault.upload_archive(fp, 'Snapshot of scan %s #%d at %s (scan at %s)' % (scan['type'], scan_id, created, scan_time))
                     logging.info('wrote archive %s' % (archive_id,))
-                    self.backupservice.mark_backed_up(scan_id, ref_count)
+                    self.backupservice.mark_backed_up(scan_id, ref_count, archive_id)
                     delete_method(start, end)
                 except boto.glacier.exceptions.UnexpectedHTTPResponseError as e:
                     logging.warn('Ignoring HTTP error %s', str(e))
@@ -103,17 +103,18 @@ class Backup:
 
     def _runTweets(self):
         scans = self.backupservice.get_scans_not_backedup('tweets')
-        if len(scans):
+        if False: #disable for now
             counter = getattr(self.tweetservice, 'get_tweets_between_count')
             getter = getattr(self.tweetservice, 'get_tweets_between')
             deleter = getattr(self.tweetservice, 'delete_between')
             self._backupTable(counter, getter, deleter, scans[0], 'tweets')
 
     def _runUsers(self):
+        '''
         scans = self.backupservice.get_scans_not_backedup('info')
-        if len(scans):
+        if len(scans) and len(scans) > 1: # need at least one 
             counter = getattr(self.userservice, 'get_users_between_count')
             getter = getattr(self.userservice, 'get_users_between')
             deleter = getattr(self.userservice, 'delete_between')
             self._backupTable(counter, getter, deleter, scans[0], 'info')
-
+        '''

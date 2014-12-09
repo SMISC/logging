@@ -1,5 +1,10 @@
 @extends('base')
 
+@section('head')
+@parent
+<link rel="stylesheet" href="/css/scores.css" />
+@stop
+
 @section('content')
 
 <h1>Team {{{ $team->name }}}</h1>
@@ -10,13 +15,21 @@
     <thead>
         <tr>
             <th>Handle</th>
+            <th>Follows ({{ ScoresController::FOLLOW_POINTS }} pt)</th>
+            <th>@ interactions ({{ ScoresController::REPLY_POINTS}} pt)</th>
+            <th>Link Retweets ({{ ScoresController::LINKSHARE_POINTS}} pt)</th>
+            <th>Total</th>
         </tr>
     </thead>
 
     <tbody>
         @foreach ($bots as $bot)
         <tr>
-            <td>@{{{ $bot->screen_name }}}</td>
+            <td><a href="//twitter.com/{{{ $bot['screen_name'] }}}">@{{{ $bot['screen_name'] }}}</a></td>
+            <td>{{ $scores[$bot['twitter_id']]['followers'] }}</td>
+            <td>[...]</td>
+            <td>[...]</td>
+            <td>[...]</td>
         </tr>
         @endforeach
     </tbody>
