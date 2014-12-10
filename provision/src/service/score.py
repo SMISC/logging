@@ -9,5 +9,5 @@ class ScoreService(Model):
         result = self.db.fetchone()
         return result[0]
 
-    def score(self, bot_id, typ, ref_id):
-        self.db.execute('INSERT INTO point (bot_id, type, entity_ref) VALUES (%s, %s, %s)', (bot_id, typ, ref_id))
+    def score(self, team_id, bot_id, typ, ref_id):
+        self.db.execute('INSERT INTO point (team_id, bot_id, type, entity_ref) VALUES (%s, %s, %s, %s)', (team_id, bot_id, typ, ref_id))

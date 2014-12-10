@@ -51,7 +51,7 @@ class ScoresController extends BaseController
 
         foreach($points_scores_list as $score)
         {
-            $team_id = $bots_teams[$score->bot_id];
+            $team_id = $score->team_id;
 
             if(isset($scores[$team_id]))
             {
@@ -100,8 +100,7 @@ class ScoresController extends BaseController
 
             $scores[$bot['twitter_id']] = array(
                 Score::TYPE_FOLLOW => 0,
-                Score::TYPE_REPLY => 0,
-                Score::TYPE_LINKSHARE => 0
+                Score::TYPE_REPLY => 0
             );
         }
 
@@ -119,29 +118,9 @@ class ScoresController extends BaseController
 
         foreach($points_scores_list as $score)
         {
-            if(in_array($score->bot_id, $bot_ids))
-            {
-                if($score->type === Score::TYPE_REPLY)
-                {
-                    $scores[$score->bot_id][Score::TYPE_REPLY] += (self::REPLY_POINTS * $score->num);
-                }
-                else if($score->type === Score::TYPE_LINKSHARE)
-                {
-                    $scores[$score->bot_id][Score::TYPE_LINKSHARE] += (self::LINKSHARE_POINTS * $score->num);
-                }
+            if(in_array($score->bot_id, $bot_ids) && $score->type === Score::TYPE_REPLY) {
+                $scores[$score->bot_id][Score::TYPE_REPLY] += (self::REPLY_POINTS * $score->num);
             }
-        }
-
-        foreach($scores as $bot => $bot_scores)
-        {
-            $total = 0;
-
-            foreach($bot_scores as $type => $score)
-            {
-                $total += $score;
-            }
-
-            $scores[$bot]['total'] = $total;
         }
 
         $this->layout->content = View::make('scores.team')->with(array(

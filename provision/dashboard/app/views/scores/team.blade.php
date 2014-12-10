@@ -17,8 +17,6 @@
             <th>Handle</th>
             <th>Follows ({{ ScoresController::FOLLOW_POINTS }} pt)</th>
             <th>@ interactions ({{ ScoresController::REPLY_POINTS}} pt)</th>
-            <th>Link Retweets ({{ ScoresController::LINKSHARE_POINTS}} pt)</th>
-            <th>Total</th>
         </tr>
     </thead>
 
@@ -28,8 +26,6 @@
             <td><a href="//twitter.com/{{{ $bot['screen_name'] }}}">@{{{ $bot['screen_name'] }}}</a></td>
             <td>{{ $scores[$bot['twitter_id']][Score::TYPE_FOLLOW] }} pt</td>
             <td>{{ $scores[$bot['twitter_id']][Score::TYPE_REPLY] }} pt</td>
-            <td>{{ $scores[$bot['twitter_id']][Score::TYPE_LINKSHARE] }} pt</td>
-            <td>{{ $scores[$bot['twitter_id']]['total'] }} pt</td>
         </tr>
         @endforeach
     </tbody>

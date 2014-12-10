@@ -49,9 +49,12 @@ class TweetService(Model):
         for bot in bots:
             bots_where.append("'" + bot['twitter_id'] + "'")
 
+        if id_start is None:
+            id_start = 0
+
         bots_where = ",".join(bots_where)
 
-        self.db.execute("SELECT tweet_entity.*, tweet.user_id from tweet_entity INNER JOIN tweet ON tweet.tweet_id = tweet_entity.tweet_id WHERE tweet.user_id NOT IN (" + bots_where + ") AND tweet_entity.tweet_id >= %s order by tweet_entity.tweet_id asc limit %s", (id_start, PS))
+        self.db.execute("SELECT tweet_entity.*, tweet.user_id from tweet_entity INNER JOIN tweet ON tweet.tweet_id = tweet_entity.tweet_id WHERE tweet.user_id NOT IN (" + bots_where + ") AND tweet_entity.tweet_id > %s order by tweet_entity.tweet_id asc limit %s", (id_start, PS))
 
         return self._fetch_all()
 

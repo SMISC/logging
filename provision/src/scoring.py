@@ -20,7 +20,10 @@ class Scoring:
         self.links = self.teamlinkservice.get_links()
         self.last_tweet_psqlid = self.scoreservice.get_last_score_ref_id()
 
-        logging.info('last scored tweet: %d', self.last_tweet_psqlid)
+        if self.last_tweet_psqlid is not None:
+            logging.info('last scored tweet: %d', self.last_tweet_psqlid)
+        else:
+            logging.info('never ran before')
 
         self.tweets_entities = self.tweetservice.get_scoring_entities(self.last_tweet_psqlid, self.bots)
 
@@ -35,7 +38,7 @@ class Scoring:
                 for bot in self.bots:
                     if bot['twitter_id'] == entity['text'].strip():
                         logging.info('bot %s scored a reply!', entity['text'])
-                        self.scoreservice.score(bot['twitter_id'], self.TYPE_REPLY, entity['tweet_id'])
+                        self.scoreservice.score(bot['team_id'], bot['twitter_id'], self.TYPE_REPLY, entity['tweet_id'])
                         break
                 
 
@@ -45,5 +48,5 @@ class Scoring:
                 for link in self.links:
                     if link['link'].strip() == entity['text'].strip():
                         logging.info('team %s scored a retweet of %s on tweet id %s!', link['team_id'], entity['text'], entity['tweet_id'])
-                        self.scoreservice.score(bot['twitter_id'], self.TYPE_REPLY, entity['tweet_id'])
+                        self.scoreservice.score(link['team_id'], None, self.TYPE_LINKSHARE, entity['tweet_id'])
                         break

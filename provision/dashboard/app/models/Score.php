@@ -13,11 +13,11 @@ class Score
 
     public function get_points()
     {
-        $rv = DB::connection('competition')->select('select bot_id, type, count(*) as num from point group by type, bot_id');
+        $rv = DB::connection('competition')->select('select team_id, bot_id, type, count(*) as num from point group by type, team_id, bot_id');
 
         foreach($rv as $val)
         {
-            // facepalm
+            // facepalm postgresql
             $val->type = trim($val->type);
         }
 
