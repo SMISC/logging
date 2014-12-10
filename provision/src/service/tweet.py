@@ -6,6 +6,7 @@ class TweetService(Model):
         Model.__init__(self, db, "tweet")
         self.tweets = []
         self.entities = []
+
     def get_latest_tweet_id(self):
         self.db.execute('select MAX(tweet_id) from "tweet"')
         rslt = self.db.fetchone()
@@ -39,6 +40,18 @@ class TweetService(Model):
         limit = PS
 
         self.db.execute("SELECT * from tweet WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
+        return self._fetch_all()
+
+    def get_scoring_entities(self, id_start, bots, PS=1E4):
+        bots_where = []
+
+        for bot in bots:
+            bots_where.append("'" + bot['bot_id'] + "'")
+
+        bots_where = ",".join(bots_where)
+
+        self.db.execute("SELECT tweet_entity.*, tweet.user_id from tweet_entity INNER JOIN tweet ON tweet.tweet_id = tweet_entity.tweet_id WHERE tweet.user_id NOT IN " + bots_where + " AND tweet_entity.tweet_id >= %s order by tweet_entity.tweet_id asc limit %s", (id_start, PS))
+
         return self._fetch_all()
 
     def queue_tweet(self, status, interesting):

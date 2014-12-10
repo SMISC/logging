@@ -14,14 +14,18 @@ from twitter import twitter_from_credentials
 from twitter import SkipException
 
 from backup import Backup
+from scoring import Scoring
 
 from service.scrape import ScrapeService
 from service.tweet import TweetService
+from service.bot import BotService
+from service.teamlink import TeamLinkService
 from service.user import UserService
 from service.edge import EdgeService
 from service.edge import BotEdgeService
 from service.lock import LockService
 from service.backup import BackupService
+from service.score import ScoreService
 
 from service.scan.info import InfoScanService
 from service.scan.tweet import TweetScanService
@@ -107,6 +111,12 @@ class SMISC:
             return BotEdgeService(self.getDatabaseCursor())
         elif 'backup' == which:
             return BackupService(self.getDatabaseCursor())
+        elif 'bot' == which:
+            return BotService(self.getDatabaseCursor())
+        elif 'teamlink' == which:
+            return TeamLinkService(self.getDatabaseCursor())
+        elif 'score' == which:
+            return ScoreService(self.getDatabaseCursor())
         elif 'scan' == which:
             backend = args[0]
             if 'info' == backend:
@@ -245,6 +255,14 @@ class SMISC:
             }
 
             return Backup(vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices)
+        
+        elif 'scoring' == which:
+            lockservice = self.getService('lock', which)
+            botservice = self.getService('bot')
+            teamlinkservice = self.getService('teamlink')
+            tweetservice = self.getService('tweet')
+            scoreservice = self.getService('score')
+            return Scoring(lockservice, botservice, teamlinkservice, tweetservice, scoreservice)
 
 
 if __name__ == '__main__':
