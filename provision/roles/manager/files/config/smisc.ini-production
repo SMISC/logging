@@ -1,5 +1,6 @@
 [smisc]
 log = /var/local/log/smisc.log
+log_level = INFO
 
 [glacier]
 key = AKIAI5NXLISN6MXU6I4A

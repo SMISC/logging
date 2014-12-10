@@ -33,6 +33,7 @@ class FollowersScraperWorker(threading.Thread):
                 return
             except NotFound:
                 logger.info('Skipping user %d not found', user_id)
+                return
             except OverLimits:
                 logger.info('Requeueing because over limits')
                 self.scrapeservice.enqueue({
