@@ -191,6 +191,10 @@ return array(
 
     ),
 
-    'authentication_secret' => '4ed2ae6de8f44bfcd106497c9bcefc48b83e73d67ae61f3b017a50ab818cb7de',
+    'authentication_secrets' => array(
+        '4ed2ae6de8f44bfcd106497c9bcefc48b83e73d67ae61f3b017a50ab818cb7de',
+        'cc3a1b50c482cb0f84b0dcb616475a243d3d036ffa0ceb12c3e652dee423b766',
+        '10979a6a561a64e43dd041602818192b02c05968c1fcdf8563cfc00367afca11'
+    ),
     'authentication_session_key' => 'authorized',
 );

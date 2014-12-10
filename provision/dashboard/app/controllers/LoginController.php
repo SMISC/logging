@@ -13,7 +13,7 @@ class LoginController extends BaseController
     {
         $password = Input::get('password');
         
-        if(hash('sha256', $password) === Config::get('app.authentication_secret')) {
+        if(in_array(hash('sha256', $password), Config::get('app.authentication_secrets'))) {
             Session::set(Config::get('app.authentication_session_key'), true);
 
             return Redirect::intended('/overview');
