@@ -25,6 +25,10 @@ keys: 83UirqBmv5RoEkXpNn8rSa1z0
     2JkBRkn59jBX2Sx0k2ku8POts
     UOJ2fAkVXYUSVTTWXURhwxSe4
     XelyUKLFmlqBQ4KzeOJSiwL1t
+    7mo57WIUaEbipgfUDrtakN6kK
+    csRXBHy6zZoLxZi7854DC2Gzy
+    raNsGdXAKQDpOuQB8RWHAmj8w
+    zSaDsnZSNFQPP01nGrQhKmBS0
 secrets: YmFhh7c3yr4AwmMtmodNm6MFc2lq60bv6qZanJqSWYbpxAPALC
     vHk9m9uotm5LHU8x4ev0t3rUReBAVIqVlWfPUDpEtJ1cbu5gLt
     YAbSae6GdAf7GWOmI71myk27VJcmcyAfweG8iNQQJJZzv8OHML
@@ -41,6 +45,10 @@ secrets: YmFhh7c3yr4AwmMtmodNm6MFc2lq60bv6qZanJqSWYbpxAPALC
     0eJtdLr49dwgxZwHLjGR2piBv3nuYKpCgcJYVK1hEXLfp9UQ9p
     l4pctQvPX1ljumyCbEes9i5TecBN6DWTvT8DBV0akAyTNOcd1U
     JTAfrNXFo1402OkNLPTZc9T3434NAHz8r6X6UqY8hwhyhYO7qX
+    umVe1syuF1ZUaz9n0w4DthubaBGr80TzRxoxkl2ae7gRjMwWD6
+    DHMk8319SyFTFmYINDgbE2KiopVJw2oYdkjSrcEOTTo8jPB73T
+    fxPU7tt1oXKzMAD35LuR0RnQ4pVyn6T3bwIZCajG6c8Kl6NjxW
+    rZ1wcUPpQk6VPCgg0BiAP173kk8gzH4vdkkr8qFKlvZSoK6vN4
 
 [postgres]
 username = pacsocial

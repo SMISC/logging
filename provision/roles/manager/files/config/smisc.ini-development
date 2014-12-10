@@ -9,8 +9,8 @@ vault-postgresqlbackups = postgresql-backups-dev
 sns_topic = arn:aws:sns:us-west-2:898852207045:backups
 
 [twitter]
-keys: 83UirqBmv5RoEkXpNn8rSa1z0
-secrets: YmFhh7c3yr4AwmMtmodNm6MFc2lq60bv6qZanJqSWYbpxAPALC
+keys: UvGjQcNL1zapKhBiSE44SL8KJ
+secrets: Zaekg8bPddZcxfXju3P8wZ6ft42s6ZKu1yJuCJsI0UPfASWXPh
 
 [postgres]
 username = pacsocial
