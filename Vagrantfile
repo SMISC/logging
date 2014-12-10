@@ -67,6 +67,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           ansible.groups = {
             "smisc" => ["dev"]
           }
+
+          ansible.extra_vars = {
+            fqdn: "smisc.jacobgreenleaf.com",
+            hostname: "smisc",
+            domain: "jacobgreenleaf.com",
+            config_file: "smisc.ini-development"
+          }
       end
   end
 

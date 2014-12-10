@@ -12,13 +12,10 @@ class CompetitionTweetsScraper(CompetitionScraper):
         self.rlapis = rlapis
         self.tweetservices = tweetservices
 
-    def get_competition_users(self):
-        return self.userservice.get_competition_users('interesting=TRUE and (protected IS NULL or protected=FALSE)')
-
     def _generate_queue(self, users):
         for user in users:
             self.myscrapeservice.enqueue({
-                "user_id": user["user_id"],
+                "user_id": user["twitter_id"],
                 "since_id": None
             })
 

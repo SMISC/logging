@@ -10,31 +10,10 @@ class UserService(Model):
         Model.__init__(self, db, "tuser")
 
     def get_competition_users(self, where = 'interesting=TRUE'):
-        page = 0
-        pagesize = 1000
-        users = []
-        users_this_page = 0
+        self.db.execute('select twitter_id, 0 as is_bot from targets UNION select twitter_id, 1 as is_bot from team_bot')
+        return self._fetch_all()
 
-        while page is 0 or users_this_page is not 0:
-            self.db.execute('select distinct on (user_id) id, user_id, (team_bot.team_id IS NOT NULL) as is_bot from tuser left join team_bot on team_bot.twitter_id = tuser.user_id where ' + where + ' order by user_id, id desc limit %d offset %d' % (pagesize, pagesize*page))
-
-            users_this_page = 0
-
-            try:
-                users_results = self.db.fetchall()
-            except psycopg2.ProgrammingError:
-                users_results = []
-
-            if users_results is None:
-                users_results = []
-
-            for user_result in users_results:
-                users.append(user_result)
-                users_this_page += 1
-
-            page = page + 1
-
-        return users
+        page = page + 1
 
     def get_users_between_count(self, id_start, id_end):
         self.db.execute("SELECT count(id) from tuser WHERE id >= %s and id < %s", (id_start, id_end))

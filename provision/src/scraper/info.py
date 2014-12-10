@@ -13,7 +13,7 @@ class InfoScraper(CompetitionScraper):
 
     def _generate_queue(self, users):
         for user in users:
-            self.myscrapeservice.enqueue(user["user_id"])
+            self.myscrapeservice.enqueue(user["twitter_id"])
 
     def _run_user_queue(self):
         n_threads = len(self.rlapis)

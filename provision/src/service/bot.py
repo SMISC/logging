@@ -6,5 +6,4 @@ class BotService(Model):
 
     def get_bots(self):
         self.db.execute('select * from "team_bot" where type=0')
-        results = self.db.fetchall()
-        return results
+        return self._fetch_all()

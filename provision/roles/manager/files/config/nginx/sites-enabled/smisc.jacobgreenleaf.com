@@ -34,11 +34,6 @@ server {
 }
 
 server {
-    /*
-    listen              443 ssl;
-    ssl_certificate     /usr/local/share/nginx/smisc-sql.jacobgreenleaf.com.crt;
-    ssl_certificate_key /usr/local/share/nginx/smisc-sql.jacobgreenleaf.com.key;
-    */
     listen              80;
     server_name         smisc-sql.jacobgreenleaf.com;
 

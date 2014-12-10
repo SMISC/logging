@@ -16,7 +16,7 @@ class FollowersScraper(CompetitionScraper):
     def _generate_queue(self, users):
         for user in users:
             self.myscrapeservice.enqueue({
-                "user_id": user["user_id"],
+                "user_id": user["twitter_id"],
                 "cursor": -1,
                 "bot": bool(user["is_bot"])
             })

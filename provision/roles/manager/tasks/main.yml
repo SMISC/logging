@@ -4,17 +4,17 @@
   changed_when: False
   register: hostname_stat
 
+- name: set our FQDN
+  lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} smisc smisc.{{ domain }} smisc-sql.{{ domain }}" dest=/etc/hosts
+  
 - name: set our hostname in memory to smisc
-  hostname: name={{ hostname }}
-  when: hostname_stat.stdout.find("{{ hostname }}") == -1
+  hostname: name=smisc
+  when: hostname_stat.stdout.find("smisc") == -1
 
 - name: set our hostname on startup to smisc
-  replace: dest=/etc/hostname regexp='(?!{{ fqdn }})' replace='{{ fqdn }}'
-  when: hostname_stat.stdout.find("{{ hostname }}") == -1
+  replace: dest=/etc/hostname regexp='.*' replace='{{ fqdn }}'
+  when: hostname_stat.stdout.find("smisc") == -1
 
-- name: set our FQDN
-  lineinfile: create=yes state=present line="127.0.0.1 {{ fqdn }} {{ hostname }} smisc.{{ domain }} smisc-sql.{{ domain }}" dest=/etc/hosts
-  
 - name: ensure local directory structure is set up
   command: mkdir -p "{{ item }}" creates={{ item }}
   with_items:
@@ -209,6 +209,14 @@
 - name: Ensure that the pacsocial user has read access to dashboard data
   sudo_user: postgres
   command: psql -c 'grant select on all tables in schema "public" to pacsocial' dashboard postgres 
+
+- name: put schema
+  copy: src=schema/schema.sql dest=/tmp/schema.sql
+
+- name: import schema
+  sudo_user: postgres
+  shell: "psql pacsocial postgres < /tmp/schema.sql"
+  when: pacsocial_db.changed
 
 - name: Deploy smisc configuration
   synchronize: src=config/{{ config_file }} dest=/usr/local/share/smisc.ini rsync_path="sudo rsync"
