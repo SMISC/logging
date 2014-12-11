@@ -15,10 +15,13 @@
     <thead>
         <tr>
             <th rowspan="2">Team</th>
-            <th rowspan="2">Bots</th>
+            <th colspan="2">Bots</th>
             <th class="scores" colspan="4">Scores</th>
         </tr>
         <tr>
+            <th>Active</th>
+            <th>Killed</th>
+
             <th>Follows ({{ ScoresController::FOLLOW_POINTS }} pt)</th>
             <th>@ interactions ({{ ScoresController::REPLY_POINTS}} pt)</th>
             <th>Link Retweets ({{ ScoresController::LINKSHARE_POINTS}} pt)</th>
@@ -31,7 +34,8 @@
         @foreach ($teams as $team)
         <tr>
             <td>{{ link_to_action('ScoresController@showTeam', $team->name, array($team->id)) }}</td>
-            <td>{{ count($bots[$team->id]) }}
+            <td>{{ count($bots[$team->id]) }}</td>
+            <td>{{ $kias[$team->id] }} </td>
             <td>{{ $scores[$team->id][Score::TYPE_FOLLOW] }} pt</td>
             <td>{{ $scores[$team->id][Score::TYPE_REPLY] }} pt</td>
             <td>{{ $scores[$team->id][Score::TYPE_LINKSHARE] }} pt</td>

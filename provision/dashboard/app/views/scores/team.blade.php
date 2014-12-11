@@ -23,7 +23,7 @@
     <tbody>
         @foreach ($bots as $bot)
         <tr>
-            <td><a href="//twitter.com/{{{ $bot['screen_name'] }}}">@{{{ $bot['screen_name'] }}}</a></td>
+            <td><a {{ ($bot['kill_date'] != null) ? 'class="kia" title="Killed"' : '' }} href="//twitter.com/{{{ $bot['screen_name'] }}}">@{{{ $bot['screen_name'] }}}</a></td>
             <td>{{ $scores[$bot['twitter_id']][Score::TYPE_FOLLOW] }} pt</td>
             <td>{{ $scores[$bot['twitter_id']][Score::TYPE_REPLY] }} pt</td>
         </tr>

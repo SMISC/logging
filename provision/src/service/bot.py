@@ -7,7 +7,7 @@ class BotService(Model):
         Model.__init__(self, db, "team_bot")
 
     def get_bots(self):
-        self.db.execute('select * from "team_bot" where type=0')
+        self.db.execute('select * from "team_bot" where type=0 and kill_date IS NULL')
         return self._fetch_all()
     
     def kill(self, twitter_id):

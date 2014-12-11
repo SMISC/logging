@@ -4,6 +4,10 @@ th {
     width: 170px;
 }
 
-th.scores {
+tr:first-child th {
     text-align: center;
+}
+
+a.kia {
+    text-decoration: line-through;
 }
