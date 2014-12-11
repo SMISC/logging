@@ -213,9 +213,17 @@
 - name: put schema
   copy: src=schema/schema.sql dest=/tmp/schema.sql
 
+- name: put fixture
+  copy: src=schema/fixture-small.sql dest=/tmp/fixture-small.sql
+
 - name: import schema
   sudo_user: postgres
   shell: "psql pacsocial postgres < /tmp/schema.sql"
+  when: pacsocial_db.changed
+
+- name: import fixture
+  sudo_user: postgres
+  shell: "psql pacsocial postgres < /tmp/fixture-small.sql"
   when: pacsocial_db.changed
 
 - name: Deploy smisc configuration

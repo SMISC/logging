@@ -51,6 +51,39 @@ ALTER SEQUENCE backups_id_seq OWNED BY backups.id;
 
 
 --
+-- Name: cron_score; Type: TABLE; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE TABLE cron_score (
+    id integer NOT NULL,
+    tweet_id bigint
+);
+
+
+ALTER TABLE public.cron_score OWNER TO pacsocial;
+
+--
+-- Name: cron_score_id_seq; Type: SEQUENCE; Schema: public; Owner: pacsocial
+--
+
+CREATE SEQUENCE cron_score_id_seq
+START WITH 1
+INCREMENT BY 1
+NO MINVALUE
+NO MAXVALUE
+CACHE 1;
+
+
+ALTER TABLE public.cron_score_id_seq OWNER TO pacsocial;
+
+--
+-- Name: cron_score_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pacsocial
+--
+
+ALTER SEQUENCE cron_score_id_seq OWNED BY cron_score.id;
+
+
+--
 -- Name: point; Type: TABLE; Schema: public; Owner: pacsocial; Tablespace: 
 --
 
@@ -58,7 +91,8 @@ CREATE TABLE point (
     id integer NOT NULL,
     type character(15),
     entity_ref bigint,
-    bot_id character varying(32)
+    bot_id character varying(32),
+    team_id integer
 );
 
 
@@ -414,6 +448,13 @@ ALTER TABLE ONLY backups ALTER COLUMN id SET DEFAULT nextval('backups_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: pacsocial
 --
 
+ALTER TABLE ONLY cron_score ALTER COLUMN id SET DEFAULT nextval('cron_score_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: pacsocial
+--
+
 ALTER TABLE ONLY point ALTER COLUMN id SET DEFAULT nextval('point_id_seq'::regclass);
 
 
@@ -475,53 +516,7 @@ ADD CONSTRAINT scan_pkey PRIMARY KEY (id);
 
 
 --
--- Name: team_pkey; Type: CONSTRAINT; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-ALTER TABLE ONLY team
-ADD CONSTRAINT team_pkey PRIMARY KEY (id);
-
-
---
--- Name: by id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX "by id" ON tuser USING btree (user_id);
-
-
---
--- Name: by_tuser_id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX by_tuser_id ON team_bot USING btree (twitter_id);
-
-
---
--- Name: byid; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX byid ON tuser_tuser USING btree (id, from_user);
-
-
---
--- Name: byiddddd; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX byiddddd ON tweet USING btree (id, user_id);
-
-
---
--- Name: bytweet; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX bytweet ON tweet_entity USING btree (tweet_id);
-
-
---
--- Name: targets_by_id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
---
-
-CREATE INDEX targets_by_id ON targets USING btree (twitter_id);
+-- Name: e (twitter_id);
 
 
 --
