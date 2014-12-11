@@ -49,16 +49,11 @@ class SMISC:
         self.dbc = None
         self.locks = []
 
-    def setupLogging(self):
+    def setupLogging(self, level):
         handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
         formatter = logging.Formatter('{asctime}\t{name}\t{levelname}\tp{process}\t\t{message}', style='{')
         handler.setFormatter(formatter)
         self.log.addHandler(handler)
-
-        if 'DEBUG' == self.config['smisc']['log_level']:
-            level = logging.DEBUG
-        elif 'INFO' == self.config['smisc']['log_level']:
-            level = logging.INFO
 
         stdout_handler = logging.StreamHandler(sys.stdout)
         self.log.addHandler(stdout_handler)
@@ -198,18 +193,38 @@ class SMISC:
             clients = []
             edgeservices = []
             scrapeservices = []
+            botservices = []
             userservice = self.getService('user')
             lockservice = self.getService('lock', which)
+
             for i in range(32):
                 clients.append(self.getTwitterAPI())
                 edgeservices.append(self.getService('bot_edge'))
+                botservices.append(self.getService('bot'))
                 scrapeservices.append(self.getService('scrape', 'followers_bot_v2'))
 
             scrapeservices.append(self.getService('scrape', 'followers_bot_v2')) # append an extra for main thread 
 
             scanservice = self.getService('scan', 'followers_bot_v2')
 
-            return BotFollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
+            return BotFollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice, botservices)
+
+        elif 'followers' == which:
+            clients = []
+            edgeservices = []
+            scrapeservices = []
+            userservice = self.getService('user')
+            lockservice = self.getService('lock', which)
+            for i in range(32):
+                clients.append(self.getTwitterAPI())
+                edgeservices.append(self.getService('edge'))
+                scrapeservices.append(self.getService('scrape', 'followers'))
+
+            scrapeservices.append(self.getService('scrape', 'followers')) # append an extra for main thread 
+
+            scanservice = self.getService('scan', 'followers')
+
+            return FollowersScraper(clients, edgeservices, userservice, lockservice, scrapeservices, scanservice)
 
         elif 'competition-tweets' == which:
             clients = []
@@ -261,7 +276,7 @@ if __name__ == '__main__':
     app_name = sys.argv[1]
 
     smisc = SMISC(app_name)
-    smisc.setupLogging()
+    smisc.setupLogging(logging.DEBUG)
 
     app = smisc.getProgram(app_name)
     if app is None:

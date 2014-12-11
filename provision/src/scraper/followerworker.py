@@ -10,11 +10,12 @@ import queue
 logger = logging.getLogger(__name__)
 
 class FollowersScraperWorker(threading.Thread):
-    def __init__(self, scrapeservice, rlapi, edgeservice):
+    def __init__(self, scrapeservice, rlapi, edgeservice, botservice = None):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.edgeservice = edgeservice
         self.scrapeservice = scrapeservice
+        self.botservice = botservice
 
     def run(self):
         try:
@@ -32,7 +33,11 @@ class FollowersScraperWorker(threading.Thread):
                 logger.info('%d is protected.', user_id)
                 return
             except NotFound:
-                logger.info('Skipping user %d not found', user_id)
+                if self.botservice is not None:
+                    logger.info('Bot %s KIA', user_id)
+                    self.botservice.kill(user_id)
+                else:
+                    logger.info('Skipping user %s not found', user_id)
                 return
             except OverLimits:
                 logger.info('Requeueing because over limits')

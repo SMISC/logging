@@ -201,7 +201,8 @@ CREATE TABLE team_bot (
     team_id integer,
     twitter_id character varying(32),
     screen_name character varying(32),
-    type integer DEFAULT 0
+    type integer DEFAULT 0,
+    kill_date integer
 );
 
 
