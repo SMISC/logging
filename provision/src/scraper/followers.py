@@ -14,19 +14,10 @@ class FollowersScraper(CompetitionScraper):
         self.edgeservices = edgeservices
 
     def _generate_queue(self, users):
-        for user in users:
-            self.myscrapeservice.enqueue({
-                "user_id": user["twitter_id"],
-                "cursor": -1,
-                "bot": bool(user["is_bot"])
-            })
+        pass
 
     def _run_user_queue(self):
-        n_threads = len(self.rlapis)
-
-        for i in range(n_threads):
-            thread = FollowersScraperWorker(self.scrapeservices[i], self.rlapis[i], self.edgeservices[i])
-            self.threads.append(thread)
+        pass
 
 class BotFollowersScraper(FollowersScraper):
     def __init__(self, rlapis, edgeservices, userservice, lockservice, scrapeservices, scanservice, botservices):
@@ -40,8 +31,29 @@ class BotFollowersScraper(FollowersScraper):
             thread = FollowersScraperWorker(self.scrapeservices[i], self.rlapis[i], self.edgeservices[i], self.botservices[i])
             self.threads.append(thread)
 
+    def _generate_queue(self, users):
+        for user in users:
+            self.myscrapeservice.enqueue({
+                "user_id": user["twitter_id"],
+                "cursor": -1,
+                "bot": True
+            })
+
     def get_competition_users(self):
-        return self.userservice.get_competition_users('interesting = TRUE AND team_bot.team_id IS NOT NULL')
+        return self.botservices[0].get_bots()
 
 class WideFollowersScraper(FollowersScraper):
-    pass
+    def _run_user_queue(self):
+        n_threads = len(self.rlapis)
+
+        for i in range(n_threads):
+            thread = FollowersScraperWorker(self.scrapeservices[i], self.rlapis[i], self.edgeservices[i])
+            self.threads.append(thread)
+
+    def _generate_queue(self, users):
+        for user in users:
+            self.myscrapeservice.enqueue({
+                "user_id": user["twitter_id"],
+                "cursor": -1,
+                "bot": False
+            })

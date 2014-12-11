@@ -4,3 +4,5 @@ __pycache__
 *.swo
 .vagrant
 provision/ansible.cfg
+provision/roles/manager/files/smisc.jacobgreenleaf.com.key
+provision/roles/manager/files/smisc.jacobgreenleaf.com.crt
