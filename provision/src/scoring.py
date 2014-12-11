@@ -32,6 +32,13 @@ class Scoring:
         self._do_reply()
         self._do_link_share()
 
+        max_tweet_id = -1
+
+        for entity in self.tweets_entities:
+            max_tweet_id = max(max_tweet_id, int(entity['tweet_id']))
+
+        self.scoreservice.mark_last_score_ref_id(max_tweet_id)
+
     def _do_reply(self):
         for entity in self.tweets_entities:
             if entity['type'] == 'mention':
