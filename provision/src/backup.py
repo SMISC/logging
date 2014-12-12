@@ -94,7 +94,7 @@ class Backup:
         logging.info('not backing up empty scan')
 
     def _runEdges(self):
-        scans = self.backupservice.get_scans_not_backedup('followers')
+        scans = self.backupservice.get_scans_not_backedup('followers_wide')
         if len(scans):
             counter = getattr(self.edgeservice, 'get_edges_between_count')
             getter = getattr(self.edgeservice, 'get_edges_between')
