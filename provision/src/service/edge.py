@@ -65,3 +65,17 @@ class BotEdgeService(EdgeService):
                 self.db.execute(query, tuple(params))
         except Exception as e:
             logger.exception('Error inserting user-user edges: %s', str(e))
+
+class EdgeServiceBig(Model):
+    def __init__(self, unnamed_cursor, named_cursor):
+        Model.__init__(self, unnamed_cursor, "tuser_tuser")
+        self.unc = unnamed_cursor
+        self.nc = named_cursor
+
+    def get_edges_between(self, id_start, id_end):
+        self.nc.execute("SELECT * from tuser_tuser WHERE id >= %s and id < %s order by id asc", (id_start, id_end))
+        return self.nc
+
+    def delete_between(self, id_start, id_end):
+        self.unc.execute("DELETE FROM " + self.table + " WHERE id >= %s and id < %s", (id_start, id_end))
+

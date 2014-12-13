@@ -22,6 +22,7 @@ from service.bot import BotService
 from service.teamlink import TeamLinkService
 from service.user import UserService
 from service.edge import EdgeService
+from service.edge import EdgeServiceBig
 from service.edge import BotEdgeService
 from service.lock import LockService
 from service.backup import BackupService
@@ -46,7 +47,8 @@ class SMISC:
         self.config.read('/usr/local/share/smisc.ini')
         self.log = logging.getLogger(None)
         self.rds = None
-        self.dbc = None
+        self.dbc_auto = None
+        self.dbc_noauto = None
         self.locks = []
 
     def setupLogging(self, level):
@@ -72,10 +74,15 @@ class SMISC:
         return self.rds
         
     def getDatabase(self, autocommit = True):
-        if self.dbc is None:
-            self.dbc = psycopg2.connect(user=self.config['postgres']['username'], password=self.config['postgres']['password'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
-            self.dbc.autocommit = autocommit
-        return self.dbc
+        if autocommit:
+            if self.dbc_auto is None:
+                self.dbc_auto = psycopg2.connect(user=self.config['postgres']['username'], password=self.config['postgres']['password'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
+                self.dbc_auto.autocommit = True
+            return self.dbc_auto
+        else:
+            if self.dbc_noauto is None:
+                self.dbc_noauto = psycopg2.connect(user=self.config['postgres']['username'], password=self.config['postgres']['password'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
+            return self.dbc_noauto
         
     def getDatabaseCursor(self, name = None, autocommit = True):
         dbc = self.getDatabase(autocommit)
@@ -110,7 +117,7 @@ class SMISC:
         elif 'bot_edge' == which:
             return BotEdgeService(self.getDatabaseCursor())
         elif 'backup' == which:
-            return BackupService(self.getDatabaseCursor(name='backup', autocommit=False))
+            return BackupService(self.getDatabaseCursor())
         elif 'bot' == which:
             return BotService(self.getDatabaseCursor())
         elif 'teamlink' == which:
@@ -248,7 +255,7 @@ class SMISC:
             vault = glacier.get_vault(self.config.get('glacier', 'vault-postgresqlbackups'))
             lockservice = self.getService('lock', which)
             backupservice = self.getService('backup')
-            edgeservice = self.getService('edge')
+            edgeservice = EdgeServiceBig(self.getDatabaseCursor(), self.getDatabaseCursor('backupedge', False))
             userservice = self.getService('user')
             tweetservice = self.getService('tweet')
             scanservices = {
