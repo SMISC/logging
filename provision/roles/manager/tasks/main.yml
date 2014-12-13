@@ -235,6 +235,12 @@
 - name: generate keys
   include: generate_keys.yml
 
+- name: synchronize main cert
+  synchronize: src=smisc.{{ domain }}.crt dest=/usr/local/share/nginx/smisc.{{ domain }}.crt rsync_path="sudo rsync"
+
+- name: synchronize main key
+  synchronize: src=smisc.{{ domain }}.key dest=/usr/local/share/nginx/smisc.{{ domain }}.key rsync_path="sudo rsync"
+
 - name: Ensure files have the proper mode and owner
   file: path={{ item.src }} owner={{ item.owner | default("root") }} mode={{ item.mode | default(0700) }}
   with_items:
@@ -242,7 +248,7 @@
     - { src: "/usr/local/share/nginx/{{ fqdn }}.key", owner: "www-data", mode: 400 }
     - { src: "/usr/local/share/nginx/smisc-sql.{{ domain }}.crt", owner: "www-data", mode: 400 }
     - { src: "/usr/local/share/nginx/smisc.{{ domain }}.crt", owner: "www-data", mode: 400 }
-    - { src: "/usr/local/share/nginx/smisc.{{ domain }}.crt", owner: "www-data", mode: 400 }
+    - { src: "/usr/local/share/nginx/smisc.{{ domain }}.key", owner: "www-data", mode: 400 }
   tags:
     - monit
     - smisc
@@ -269,14 +275,11 @@
     - postgresql
     - hot
 
-- name: turn on the wide follower scraper job
+- name: turn off the wide follower scraper job
   cron: state=present name="wide follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_wide"
 
 - name: turn on the hourly bot follower scraper job v2
   cron: state=present name="bot follower scraper v2" minute="0" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot_v2"
-
-- name: turn off the hourly bot follower scraper job v1
-  cron: state=absent name="bot follower scraper" minute="0" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot"
 
 - name: turn on the competition tweets scraper scraper job
   cron: state=present name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py competition-tweets"
@@ -285,7 +288,7 @@
   cron: state=present name="info scraper" minute="0,30" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py info"
 
 - name: turn on the daily backup job
-  cron: state=present name="backups" minute="0" hour="0" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/bin/smisc/app.py backup"
+  cron: state=absent name="backup" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py backup"
 
 - name: turn on the scoring job
   cron: state=present name="score" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py scoring"

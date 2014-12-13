@@ -71,15 +71,15 @@ class SMISC:
             self.rds = redis.StrictRedis(host=self.config['redis']['host'], port=self.config['redis']['port'], db=int(self.config['redis']['database']), decode_responses=True)
         return self.rds
         
-    def getDatabase(self):
+    def getDatabase(self, autocommit = True):
         if self.dbc is None:
             self.dbc = psycopg2.connect(user=self.config['postgres']['username'], password=self.config['postgres']['password'], database=self.config['postgres']['database'], host=self.config['postgres']['host'])
-            self.dbc.autocommit = True
+            self.dbc.autocommit = autocommit
         return self.dbc
         
-    def getDatabaseCursor(self):
-        dbc = self.getDatabase()
-        return dbc.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    def getDatabaseCursor(self, name = None, autocommit = True):
+        dbc = self.getDatabase(autocommit)
+        return dbc.cursor(name = name, cursor_factory=psycopg2.extras.DictCursor)
     
     def getTwitterAPI(self):
         keys = self.config['twitter']['keys'].split("\n")
@@ -110,7 +110,7 @@ class SMISC:
         elif 'bot_edge' == which:
             return BotEdgeService(self.getDatabaseCursor())
         elif 'backup' == which:
-            return BackupService(self.getDatabaseCursor())
+            return BackupService(self.getDatabaseCursor(name='backup', autocommit=False))
         elif 'bot' == which:
             return BotService(self.getDatabaseCursor())
         elif 'teamlink' == which:

@@ -76,6 +76,7 @@ class Backup:
                         self._writeHeader(fd, rows[0])
                     for row in rows:
                         self._writeRow(fd, row)
+                    logging.info('page #%d of %d (%0.2f)', page, pages, float(page) / pages * 100)
                 
                 fd.flush()
 
@@ -92,6 +93,7 @@ class Backup:
                 return
 
         logging.info('not backing up empty scan')
+        self.backupservice.mark_backed_up(scan_id, ref_count, None)
 
     def _runEdges(self):
         scans = self.backupservice.get_scans_not_backedup('followers_wide')

@@ -1,6 +1,3 @@
 ---
-- name: create self-signed certificate for smisc
-  command: openssl req -newkey rsa:2048 -nodes -x509 -subj "/C=US/ST=California/L=San Francisco/O=IT/CN=smisc.{{domain}}" -days 3650 -keyout /usr/local/share/nginx/smisc.{{domain}}.key -out /usr/local/share/nginx/smisc.{{domain}}.crt -extensions v3_ca creates=/usr/local/share/nginx/smisc.{{domain}}.crt
-
 - name: create self-signed certificate for sql-smisc
   command: openssl req -newkey rsa:2048 -nodes -x509 -subj "/C=US/ST=California/L=San Francisco/O=IT/CN=smisc-sql.{{domain}}" -days 3650 -keyout /usr/local/share/nginx/smisc-sql.{{domain}}.key -out /usr/local/share/nginx/smisc-sql.{{domain}}.crt -extensions v3_ca creates=/usr/local/share/nginx/smisc-sql.{{domain}}.crt
