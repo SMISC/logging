@@ -20,13 +20,13 @@ define(['settings'], function(Settings) {
       datasources: {
         influxdb: {
           type: 'influxdb',
-          url: "http://my_influxdb_server:8086/db/smisc",
+          url: "http://smisc.jacobgreenleaf.com:8086/db/smisc",
           username: 'dashboard',
           password: '1234qwer',
         },
         grafana: {
           type: 'influxdb',
-          url: "http://my_influxdb_server:8086/db/dashboard",
+          url: "http://smisc.jacobgreenleaf.com:8086/db/dashboard",
           username: 'dashboard',
           password: '1234qwer',
           grafanaDB: true
