@@ -43,7 +43,7 @@ class TweetService(Model):
         self.db.execute("SELECT * from tweet WHERE id >= %s and id < %s order by id asc limit %s offset %s", (id_start, id_end, limit, offset))
         return self._fetch_all()
 
-    def get_scoring_entities(self, id_start, bots, PS=1E4):
+    def get_scoring_entities(self, id_start, bots, PS=1E5):
         bots_where = []
 
         for bot in bots:

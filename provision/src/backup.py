@@ -76,7 +76,7 @@ class Backup:
                 row_number += 1
 
                 if time.time() > t:
-                    logging.info('row %d', row_number)
+                    logging.info('backing up %s - row %d', name, row_number)
                     t = time.time() + 10
                     fd.flush()
 
@@ -90,6 +90,7 @@ class Backup:
                     delete_method(start, end)
                 except boto.glacier.exceptions.UnexpectedHTTPResponseError as e:
                     logging.warn('Ignoring HTTP error %s', str(e))
+                    return
 
         logging.info('not backing up empty scan')
         self.backupservice.mark_backed_up(scan_id, 0, None)
