@@ -10,7 +10,7 @@
   "sharedCrosshair": false,
   "rows": [
     {
-      "title": "Welcome to Grafana",
+      "title": "Twitter",
       "height": "300px",
       "collapse": false,
       "editable": true,
@@ -23,15 +23,15 @@
           "y-axis": true,
           "scale": 1,
           "y_formats": [
-            "short",
+            "ms",
             "short"
           ],
           "grid": {
             "max": null,
             "min": null,
-            "leftMax": 5,
+            "leftMax": null,
             "rightMax": null,
-            "leftMin": 0,
+            "leftMin": null,
             "rightMin": null,
             "threshold1": null,
             "threshold2": null,
@@ -76,19 +76,20 @@
               "function": "mean",
               "column": "value",
               "rawQuery": true,
-              "query": "select PERCENTILE(elapsed,95) from \"twitter.response\" where time > now() - 6h group by time(120s) order asc;",
-              "alias": "upper 95"
+              "query": "select PERCENTILE(elapsed*1000,95) from \"twitter.response\" where time > now() - 6h group by time($interval) order asc;",
+              "alias": "upper 95",
+              "interval": ""
             },
             {
               "target": "randomWalk('random walk')",
-              "function": "mean",
-              "column": "elapsed",
+              "function": "median",
+              "column": "elapsed*1000",
               "series": "twitter.response",
-              "query": "select mean(elapsed) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
-              "interval": "120s",
+              "query": "select median(elapsed*1000) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "interval": "",
               "hide": false,
               "fill": "",
-              "alias": "mean"
+              "alias": "median"
             }
           ],
           "aliasColors": {},
@@ -102,15 +103,235 @@
           "seriesOverrides": [],
           "links": [],
           "leftYAxisLabel": "Time (s)",
-          "height": ""
+          "height": "",
+          "interval": "180s"
         },
         {
-          "title": "Twitter HTTP Status Codes",
+          "title": "Twitter Responses",
           "error": false,
           "span": 6,
           "editable": true,
           "type": "graph",
           "id": 5,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "short",
+            "short"
+          ],
+          "grid": {
+            "leftMax": 3000,
+            "rightMax": 3000,
+            "leftMin": 0,
+            "rightMin": 0,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)",
+            "thresholdLine": false
+          },
+          "lines": false,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": true,
+          "stack": true,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false,
+            "rightSide": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "function": "count",
+              "column": "status",
+              "series": "twitter.response",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 200 group by time($interval) order asc",
+              "condition": "status = 200",
+              "interval": "",
+              "fill": "",
+              "alias": "200 OK",
+              "hide": false,
+              "rawQuery": false,
+              "groupby_field": ""
+            },
+            {
+              "function": "count",
+              "column": "status",
+              "series": "twitter.response",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 500 and status < 600) group by time($interval) order asc",
+              "condition": "(status >= 500 and status < 600)",
+              "interval": "",
+              "fill": "",
+              "alias": "500 Server Error",
+              "hide": false
+            },
+            {
+              "function": "count",
+              "column": "status",
+              "series": "twitter.response",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 429 group by time($interval) order asc",
+              "condition": "status = 429",
+              "interval": "",
+              "fill": "",
+              "alias": "429 Over Rate Limit",
+              "hide": false
+            },
+            {
+              "function": "count",
+              "column": "status",
+              "series": "twitter.response",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 400 and status < 500 and status <> 429) group by time($interval) order asc",
+              "condition": "(status >= 400 and status < 500 and status <> 429)",
+              "interval": "",
+              "fill": "",
+              "alias": "4xx Client Error",
+              "hide": false
+            },
+            {
+              "target": "",
+              "function": "count",
+              "column": "status",
+              "series": "twitter.response",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "alias": "requests",
+              "interval": "",
+              "fill": ""
+            }
+          ],
+          "aliasColors": {
+            "429 RateLimit": "#E0F9D7",
+            "200 OK": "#629E51",
+            "requests": "#1F78C1",
+            "429 Over Rate Limit": "#DEDAF7"
+          },
+          "seriesOverrides": [
+            {
+              "alias": "requests",
+              "bars": false,
+              "lines": true,
+              "linewidth": 2,
+              "yaxis": 2,
+              "zindex": 1
+            }
+          ],
+          "links": [],
+          "interval": "180s",
+          "leftYAxisLabel": ""
+        }
+      ],
+      "showTitle": true
+    },
+    {
+      "title": "SOCIALBOTS",
+      "height": "250px",
+      "editable": true,
+      "collapse": false,
+      "panels": [
+        {
+          "title": "Scan Progress",
+          "error": false,
+          "span": 6,
+          "editable": true,
+          "type": "graph",
+          "id": 6,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "none",
+            "short"
+          ],
+          "grid": {
+            "leftMax": 15500,
+            "rightMax": null,
+            "leftMin": 0,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)",
+            "thresholdLine": false
+          },
+          "lines": true,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false,
+            "alignAsTable": false,
+            "rightSide": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "function": "mean",
+              "column": "length",
+              "series": "app.queuelength.tweets",
+              "query": "select mean(length) from \"app.queuelength.tweets\" where $timeFilter group by time($interval) order asc",
+              "alias": "tweets",
+              "interval": "20s"
+            },
+            {
+              "function": "mean",
+              "column": "length",
+              "series": "app.queuelength.followers_wide",
+              "query": "select mean(length) from \"app.queuelength.followers_wide\" where $timeFilter group by time($interval) order asc",
+              "alias": "followers (all)",
+              "interval": "20s"
+            },
+            {
+              "function": "mean",
+              "column": "length",
+              "series": "app.queuelength.info",
+              "query": "select mean(length) from \"app.queuelength.info\" where $timeFilter group by time($interval) order asc",
+              "alias": "profiles",
+              "interval": "20s"
+            }
+          ],
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "links": [],
+          "leftYAxisLabel": ""
+        },
+        {
+          "title": "Network Tweet Velocity",
+          "error": false,
+          "span": 6,
+          "editable": true,
+          "type": "graph",
+          "id": 10,
           "datasource": null,
           "renderer": "flot",
           "x-axis": true,
@@ -129,13 +350,13 @@
             "threshold1Color": "rgba(216, 200, 27, 0.27)",
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
-          "lines": false,
+          "lines": true,
           "fill": 0,
           "linewidth": 1,
           "points": false,
           "pointradius": 5,
-          "bars": true,
-          "stack": true,
+          "bars": false,
+          "stack": false,
           "percentage": false,
           "legend": {
             "show": true,
@@ -154,58 +375,219 @@
           },
           "targets": [
             {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 200 group by time($interval) fill(0) order asc",
-              "condition": "status = 200",
-              "interval": "120s",
-              "fill": "0",
-              "alias": "200 OK",
-              "hide": false
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 429 group by time($interval) fill(0) order asc",
-              "condition": "status = 429",
-              "interval": "120s",
-              "fill": "0",
-              "alias": "429 RateLimit",
-              "hide": false
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status >= 500 and status < 600 group by time($interval) fill(0) order asc",
-              "condition": "status >= 500 and status < 600",
-              "interval": "120s",
-              "fill": "0",
-              "alias": "500 Server Error",
-              "hide": false
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 404 group by time($interval) fill(0) order asc",
-              "condition": "status = 404",
-              "interval": "120s",
-              "fill": "0",
-              "alias": "404 Not Found",
-              "hide": false
+              "function": "sum",
+              "column": "count",
+              "series": "app.tweet",
+              "query": "select sum(count) from \"app.tweet\" where $timeFilter group by time($interval) order asc",
+              "interval": "5m",
+              "alias": "tweets",
+              "condition": ""
             }
           ],
-          "aliasColors": {
-            "429 RateLimit": "#DEDAF7",
-            "200 OK": "#629E51"
-          },
+          "aliasColors": {},
           "seriesOverrides": [],
           "links": []
         }
-      ]
+      ],
+      "showTitle": true
+    },
+    {
+      "title": "MACHINE",
+      "height": "250px",
+      "editable": true,
+      "collapse": false,
+      "panels": [
+        {
+          "title": "CPU load",
+          "error": false,
+          "span": 4,
+          "editable": true,
+          "type": "graph",
+          "id": 7,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "none",
+            "short"
+          ],
+          "grid": {
+            "leftMax": 8,
+            "rightMax": null,
+            "leftMin": 0,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "lines": true,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "function": "mean",
+              "column": "one",
+              "series": "machine.load",
+              "query": "select mean(one) from \"machine.load\" where $timeFilter group by time($interval) order asc",
+              "alias": "load"
+            }
+          ],
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "leftYAxisLabel": "",
+          "links": [],
+          "interval": "120s"
+        },
+        {
+          "title": "Disk Usage",
+          "error": false,
+          "span": 4,
+          "editable": true,
+          "type": "graph",
+          "id": 8,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "bits",
+            "percent"
+          ],
+          "grid": {
+            "leftMax": null,
+            "rightMax": null,
+            "leftMin": 0,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "lines": true,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "target": "",
+              "function": "median",
+              "column": "free",
+              "series": "machine.disk",
+              "query": "select median(free) from \"machine.disk\" where $timeFilter group by time($interval) order asc",
+              "alias": "free"
+            }
+          ],
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "links": [],
+          "leftYAxisLabel": ""
+        },
+        {
+          "title": "Memory",
+          "error": false,
+          "span": 4,
+          "editable": true,
+          "type": "graph",
+          "id": 9,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "bits",
+            "short"
+          ],
+          "grid": {
+            "leftMax": null,
+            "rightMax": null,
+            "leftMin": 0,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "lines": true,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "function": "median",
+              "column": "free",
+              "series": "machine.memory",
+              "query": "select median(free) from \"machine.memory\" where $timeFilter group by time($interval) order asc",
+              "alias": "free memory",
+              "interval": "120s"
+            }
+          ],
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "links": [],
+          "leftYAxisLabel": ""
+        }
+      ],
+      "showTitle": true
     }
   ],
   "nav": [
@@ -253,6 +635,7 @@
     "list": [],
     "enable": true
   },
+  "refresh": "1m",
   "version": 6,
   "hideAllLegends": false
 }
