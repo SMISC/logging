@@ -105,6 +105,7 @@
     - TwitterAPI
     - redis
     - psycopg2
+    - influxdb
 
 - name: Install Python modules for 2-7
   pip: name={{ item }} executable=pip-2.7
