@@ -179,7 +179,7 @@ class TwitterAPIResponse:
         self.headers = response.headers
         self.text = response.text
         self.json = json.loads(response.text)
-        self._response = response
+        self.elapsed = response.elapsed.total_seconds()
 
 class AccessTokenRefresher:
     def __init__(self, key, secret):

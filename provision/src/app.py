@@ -46,6 +46,7 @@ from scraper.competitiontweets import CompetitionTweetsScraper
 
 class SMISC:
     def __init__(self, app):
+        self.app = app
         self.config = configparser.ConfigParser()
         self.config.read('/usr/local/share/smisc.ini')
         self.log = logging.getLogger(None)
@@ -56,7 +57,7 @@ class SMISC:
 
     def getStats(self):
         ifclient = InfluxDBClient('localhost', 8086, self.config['influxdb']['username'], self.config['influxdb']['password'], self.config['influxdb']['database'])
-        return StatsClient(ifclient)
+        return StatsClient(ifclient, self.app)
 
     def setupLogging(self, level):
         handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
@@ -110,7 +111,7 @@ class SMISC:
             except SkipException:
                 continue
 
-        return RateLimitedTwitterAPI(apis, self.getInfluxDB())
+        return RateLimitedTwitterAPI(apis, self.getStats())
 
     def getService(self, which, *args):
         if 'tweet' == which:
@@ -293,6 +294,7 @@ if __name__ == '__main__':
     smisc.setupLogging(logging.DEBUG)
 
     app = smisc.getProgram(app_name)
+    stats = smisc.getStats()
 
     if app is None:
         logging.error('Invalid application "%s"' % (app_name))
@@ -300,8 +302,10 @@ if __name__ == '__main__':
         try:
             app.main()
             logging.debug('%s completed successfully.', app_name)
+            stats.log_app_return(0)
         except Exception as err:
             logging.exception('Caught error: %s' % (str(err)))
+            stats.log_app_return(1)
         finally:
             for lock in smisc.locks:
                 if lock.get_did_acquire():

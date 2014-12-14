@@ -26,8 +26,11 @@
 - name: add a dashboard database
   shell: "curl -X POST 'http://127.0.0.1:8086/db?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_dashboard_database }}\"}'"
 
-- name: add smisc user
-  shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_dashboard_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_smisc_user }}\", \"password\": \"{{ influxdb_smisc_password }}\"}'"
+- name: add smisc user for smisc database
+  shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_smisc_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_smisc_user }}\", \"password\": \"{{ influxdb_smisc_password }}\"}'"
 
-- name: add database user
+- name: add dashboard user for smisc database
+  shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_dashboard_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_dashboard_user }}\", \"password\": \"{{ influxdb_dashboard_password }}\"}'"
+
+- name: add database user for dashboard databse
   shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_dashboard_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_dashboard_user }}\", \"password\": \"{{ influxdb_dashboard_password }}\"}'"
