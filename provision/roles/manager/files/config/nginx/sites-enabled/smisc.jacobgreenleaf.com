@@ -8,9 +8,24 @@ server {
 
 server {
     listen              80;
-    server_name         smisc-psql.jacobgreenleaf.com;
+    server_name         smisc-sql.jacobgreenleaf.com;
+
+    index               index.html index.php;
+    root                /usr/local/src/jacobgreenleaf.com/sql;
+
+    location ~ \.php$ {
+        include             "fastcgi_params";
+        fastcgi_pass        127.0.0.1:9000;
+    }
+}
+
+server {
+    listen              80;
+    server_name         smisc-grafana.jacobgreenleaf.com;
+    root                /usr/local/src/jacobgreenleaf.com/grafana;
+
     location / {
-        return              301 https://smisc-psql.jacobgreenleaf.com$request_uri;
+        try_files $uri /index.html;
     }
 }
 
@@ -21,7 +36,8 @@ server {
     ssl_certificate_key /usr/local/share/nginx/smisc.jacobgreenleaf.com.key;
 
     index               index.html index.php;
-    root                /usr/local/src/jacobgreenleaf.com/dashboard/public;
+
+    root      /usr/local/src/jacobgreenleaf.com/dashboard/public;
 
     location ~ \.php$ {
         include             "fastcgi_params";
@@ -30,18 +46,5 @@ server {
 
     location / {
         try_files $uri /index.php?$args;
-    }
-}
-
-server {
-    listen              80;
-    server_name         smisc-sql.jacobgreenleaf.com;
-
-    index               index.html index.php;
-    root                /usr/local/src/jacobgreenleaf.com/sql;
-
-    location ~ \.php$ {
-        include             "fastcgi_params";
-        fastcgi_pass        127.0.0.1:9000;
     }
 }

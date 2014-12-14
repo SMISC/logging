@@ -187,6 +187,12 @@
     - smisc
     - hot
 
+- name: Synchronize grafana
+  synchronize: src=grafana/ dest=/usr/local/src/{{ domain }}/grafana group=no owner=no perms=no recursive=yes delete=yes rsync_path="sudo rsync"
+  tags:
+    - smisc
+    - hot
+
 - name: Add the pacsocial user to postgres
   sudo_user: postgres
   postgresql_user: name=pacsocial state=present password="{{ pacsocial_password }}"
