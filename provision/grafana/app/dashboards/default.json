@@ -104,7 +104,7 @@
           "links": [],
           "leftYAxisLabel": "Time (s)",
           "height": "",
-          "interval": "180s"
+          "interval": "120s"
         },
         {
           "title": "Twitter Responses",
@@ -231,7 +231,7 @@
             }
           ],
           "links": [],
-          "interval": "180s",
+          "interval": "120s",
           "leftYAxisLabel": ""
         }
       ],
