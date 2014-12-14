@@ -2,6 +2,11 @@
 log = /var/local/log/smisc.log
 log_level = INFO
 
+[influxdb]
+username = smisc
+password = EkcLmAVO6IUq
+database = smisc
+
 [glacier]
 key = AKIAI5NXLISN6MXU6I4A
 secret = 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

@@ -8,7 +8,10 @@ import configparser
 import boto.glacier
 import boto.glacier.layer2
 
+from influxdb import InfluxDBClient
+
 from ratelimit import RateLimitedTwitterAPI
+from stats import StatsClient
 
 from twitter import twitter_from_credentials
 from twitter import SkipException
@@ -50,6 +53,10 @@ class SMISC:
         self.dbc_auto = None
         self.dbc_noauto = None
         self.locks = []
+
+    def getStats(self):
+        ifclient = InfluxDBClient('localhost', 8086, self.config['influxdb']['username'], self.config['influxdb']['password'], self.config['influxdb']['database'])
+        return StatsClient(ifclient)
 
     def setupLogging(self, level):
         handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
@@ -103,7 +110,7 @@ class SMISC:
             except SkipException:
                 continue
 
-        return RateLimitedTwitterAPI(apis)
+        return RateLimitedTwitterAPI(apis, self.getInfluxDB())
 
     def getService(self, which, *args):
         if 'tweet' == which:
@@ -286,6 +293,7 @@ if __name__ == '__main__':
     smisc.setupLogging(logging.DEBUG)
 
     app = smisc.getProgram(app_name)
+
     if app is None:
         logging.error('Invalid application "%s"' % (app_name))
     else:

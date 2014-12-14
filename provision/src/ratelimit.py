@@ -9,8 +9,9 @@ from util import twittertime
 logger = logging.getLogger(__name__)
 
 class RateLimitedTwitterAPI:
-    def __init__(self, apis):
+    def __init__(self, apis, ifdb):
         self.apis = apis
+        self.ifdb = ifdb
 
     def request(self, resource, params=None):
         for i in range(len(self.apis)):
@@ -22,10 +23,13 @@ class RateLimitedTwitterAPI:
                 try:
                     response = self.apis[i].request(resource, params)
                 except Exception as e:
+                    self.stats.exception()
                     logger.warn('Sleeping through Exception (because %s around %s)', e, traceback.format_exc())
                     time.sleep(eb)
                     eb = min(64, eb * 2)
                     continue
+
+                self.stats.log_twitter_response(resource, response.status_code, response._response.elapsed)
 
                 if response.status_code == 401:
                     logger.warn('Got 401\n\n%s', str(response.json))
