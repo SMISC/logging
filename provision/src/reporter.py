@@ -39,3 +39,6 @@ class Reporter:
 
         memory = psutil.virtual_memory()
         self.stats.log_memory(memory.free, memory.total)
+
+        du = psutil.disk_usage('/')
+        self.stats.log_diskusage(du.free, du.total)

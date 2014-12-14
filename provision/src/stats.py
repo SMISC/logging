@@ -56,6 +56,15 @@ class StatsClient:
             "columns": ["time", "count"] 
         })
 
+    def log_diskusage(self, free, total):
+        self.points.append({
+            "points": [
+                [free, total]
+            ],
+            "name": "machine.disk",
+            "columns": ["free", "total"]
+        })
+
     def log_exception(self, context = 'app', subcontext = ''):
         if '' != subcontext:
             subcontext = '.' + subcontext
