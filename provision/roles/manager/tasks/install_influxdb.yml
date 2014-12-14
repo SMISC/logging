@@ -4,7 +4,7 @@
   register: dpkg_influxdb
 
 - name: download influxdb 
-  get_urL: dest=/tmp/influxdb.deb url=https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb
+  get_url: dest=/tmp/influxdb.deb url=https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb
   when: dpkg_influxdb.rc != 0
 
 - name: install influxdb
