@@ -1,0 +1,33 @@
+- name: check if InfluxDB is already installed
+  command: dpkg -l influxdb
+  ignore_errors: yes
+  register: dpkg_influxdb
+
+- name: download influxdb 
+  get_urL: dest=/tmp/influxdb.deb url=https://s3.amazonaws.com/influxdb/influxdb_latest_amd64.deb
+  when: dpkg_influxdb.rc != 0
+
+- name: install influxdb
+  apt: deb=/tmp/influxdb.deb
+  when: dpkg_influxdb.rc != 0
+
+- name: start influxdb
+  service: name=influxdb state=started
+
+- name: wait for influxdb to start
+  wait_for: port=8086
+
+- name: update the root password
+  shell: "curl -X POST 'http://127.0.0.1:8086/cluster_admins/root?u=root&p=root' -d '{\"password\": \"{{ influxdb_root_password }}\"}'"
+
+- name: add a smisc database
+  shell: "curl -X POST 'http://127.0.0.1:8086/db?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_smisc_database }}\"}'"
+
+- name: add a dashboard database
+  shell: "curl -X POST 'http://127.0.0.1:8086/db?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_dashboard_database }}\"}'"
+
+- name: add smisc user
+  shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_dashboard_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_smisc_user }}\", \"password\": \"{{ influxdb_smisc_password }}\"}'"
+
+- name: add database user
+  shell: "curl -X POST 'http://127.0.0.1:8086/db/{{ influxdb_dashboard_database }}/users?u=root&p={{ influxdb_root_password }}' -d '{\"name\": \"{{ influxdb_dashboard_user }}\", \"password\": \"{{ influxdb_dashboard_password }}\"}'"

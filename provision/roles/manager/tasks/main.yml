@@ -84,6 +84,9 @@
 - name: Install python 3.4.2
   include: install_python.yml
 
+- name: Install InfluxDB
+  include: install_influxdb.yml
+
 - name: install PHP PEAR modules
   command: pecl install redis
   ignore_errors: yes
@@ -134,6 +137,11 @@
   synchronize: src=config/redis/ dest=/etc/redis/ rsync_path="sudo rsync"
   notify:
     - reload redis
+
+- name: Synchronize influxdb configuration
+  synchronize: src=config/influxdb/config.toml dest=/opt/influxdb/current/config.toml rsync_path="sudo rsync"
+  notify:
+    - restart influxdb
 
 - name: Synchronize backup script
   synchronize: src=scripts/backup.py dest=/usr/local/bin/smisc-backup.py rsync_path="sudo rsync"
@@ -269,6 +277,7 @@
     - nginx
     - php5-fpm
     - monit
+    - influxdb
   tags:
     - smisc
     - nginx
