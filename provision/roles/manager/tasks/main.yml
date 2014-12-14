@@ -102,13 +102,15 @@
     - TwitterAPI
     - redis
     - psycopg2
-    - boto
 
 - name: Install Python modules for 2-7
   pip: name={{ item }} executable=pip-2.7
   with_items:
     - psycopg2
     - boto
+
+- name: Install boto custom version for fixing bug with glacier
+  include: install_boto.yml
 
 - name: Synchronize nginx configuration
   synchronize: src=config/nginx/ dest=/etc/nginx/ delete=yes rsync_path="sudo rsync"
