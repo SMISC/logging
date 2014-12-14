@@ -22,13 +22,8 @@
                 >
                     {{ link_to_action('ScoresController@showTeams', 'scores') }}
                 </li>
-                <li
-                    @if (Route::currentRouteName() == 'diagnostics')
-                        class="active"
-                    @endif
-                >
-                    {{ link_to_action('DiagnosticsController@showOverview', 'diagnostics') }}
-                </li>
+                <li> <a href="http://smisc-grafana.jacobgreenleaf.com">diagnostics</a></li>
+
                 @else
                 <li class="active">
                     {{ link_to_action('LoginController@showLogin', 'login') }}

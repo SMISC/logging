@@ -29,13 +29,6 @@ Route::get('team/{team}', array(
     'uses' => 'ScoresController@showTeam'
 ));
 
-Route::get('diagnostics', array(
-    'as' => 'diagnostics',
-    'before' => 'auth.single', 
-    'uses' => 'DiagnosticsController@showOverview'
-));
-
-
 Route::get('login', array(
     'as' => 'login',
     'uses' => 'LoginController@showLogin'
