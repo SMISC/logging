@@ -6,14 +6,17 @@ import threading
 import logging
 import queue
 
+from util import twittertime as twittertime
+
 logger = logging.getLogger(__name__)
 
 class CompetitionTweetsScraperWorker(threading.Thread):
-    def __init__(self, scrapeservice, rlapi, tweetservice):
+    def __init__(self, scrapeservice, rlapi, tweetservice, stats):
         threading.Thread.__init__(self)
         self.rlapi = rlapi
         self.tweetservice = tweetservice
         self.scrapeservice = scrapeservice
+        self.stats = stats
 
     def run(self):
         try:
@@ -61,6 +64,11 @@ class CompetitionTweetsScraperWorker(threading.Thread):
 
             for tweet in resp:
                 self.tweetservice.queue_tweet(tweet, False)
+
+                try:
+                    self.stats.log_point('tweet', twittertime(tweet['created_at']))
+                except:
+                    pass
 
                 if since_id is None:
                     since_id = tweet['id']

@@ -106,6 +106,7 @@
     - redis
     - psycopg2
     - influxdb
+    - psutil
 
 - name: Install Python modules for 2-7
   pip: name={{ item }} executable=pip-2.7
@@ -310,3 +311,6 @@
 
 - name: turn on the scoring job
   cron: state=present name="score" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py scoring"
+
+- name: turn on the stats reporting job
+  cron: state=present name="reporter" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py reporter"

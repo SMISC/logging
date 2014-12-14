@@ -18,6 +18,7 @@ from twitter import SkipException
 
 from backup import Backup
 from scoring import Scoring
+from reporter import Reporter
 
 from service.scrape import ScrapeService
 from service.tweet import TweetService
@@ -53,11 +54,15 @@ class SMISC:
         self.rds = None
         self.dbc_auto = None
         self.dbc_noauto = None
+        self.stats = None
         self.locks = []
 
     def getStats(self):
-        ifclient = InfluxDBClient('localhost', 8086, self.config['influxdb']['username'], self.config['influxdb']['password'], self.config['influxdb']['database'])
-        return StatsClient(ifclient, self.app)
+        if self.stats is None:
+            ifclient = InfluxDBClient('localhost', 8086, self.config['influxdb']['username'], self.config['influxdb']['password'], self.config['influxdb']['database'])
+            self.stats = StatsClient(ifclient, self.app)
+
+        return self.stats
 
     def setupLogging(self, level):
         handler = logging.handlers.TimedRotatingFileHandler(self.config['smisc']['log'], when='D', backupCount=5)
@@ -255,8 +260,9 @@ class SMISC:
             scrapeservices.append(self.getService('scrape', 'tweets')) # append an extra for main thread 
 
             scanservice = self.getService('scan', 'tweets')
+            stats = self.getStats()
 
-            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices, scanservice)
+            return CompetitionTweetsScraper(clients, tweetservices, userservice, lockservice, scrapeservices, scanservice, stats)
 
         elif 'backup' == which:
             glacier = boto.glacier.layer2.Layer2(self.config.get('glacier', 'key'), self.config.get('glacier', 'secret'), region_name=self.config.get('glacier', 'region'))
@@ -281,7 +287,19 @@ class SMISC:
             tweetservice = self.getService('tweet')
             scoreservice = self.getService('score')
             return Scoring(lockservice, botservice, teamlinkservice, tweetservice, scoreservice)
+        
+        elif 'reporter' == which:
+            stats = self.getStats()
+            lockservice = self.getService('lock', which)
 
+            queues = {
+                'followers_wide': self.getService('scrape', 'followers_wide'),
+                'followers_bot_v2': self.getService('scrape', 'followers_bot_v2'),
+                'info': self.getService('scrape', 'info'),
+                'tweets': self.getService('scrape', 'tweets')
+            }
+
+            return Reporter(lockservice, stats, queues)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -310,5 +328,6 @@ if __name__ == '__main__':
             for lock in smisc.locks:
                 if lock.get_did_acquire():
                     lock.release()
+            stats.flush()
             
 
