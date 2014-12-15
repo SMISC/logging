@@ -1,7 +1,7 @@
 {
   "id": null,
   "title": "Social Bots Diagnostics Dashboard",
-  "originalTitle": "Grafana",
+  "originalTitle": "Social Bots Diagnostics Dashboard",
   "tags": [],
   "style": "dark",
   "timezone": "browser",
@@ -413,7 +413,7 @@
             "short"
           ],
           "grid": {
-            "leftMax": 8,
+            "leftMax": 100,
             "rightMax": null,
             "leftMin": 0,
             "rightMin": null,
@@ -423,8 +423,8 @@
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
           "lines": true,
-          "fill": 0,
-          "linewidth": 1,
+          "fill": 1,
+          "linewidth": 2,
           "points": false,
           "pointradius": 5,
           "bars": false,
@@ -448,15 +448,15 @@
           "targets": [
             {
               "function": "mean",
-              "column": "one",
+              "column": "one/8*100",
               "series": "machine.load",
-              "query": "select mean(one) from \"machine.load\" where $timeFilter group by time($interval) order asc",
+              "query": "select mean(one/8*100) from \"machine.load\" where $timeFilter group by time($interval) order asc",
               "alias": "load"
             }
           ],
           "aliasColors": {},
           "seriesOverrides": [],
-          "leftYAxisLabel": "",
+          "leftYAxisLabel": "%",
           "links": [],
           "interval": "120s"
         },
@@ -476,7 +476,7 @@
             "percent"
           ],
           "grid": {
-            "leftMax": null,
+            "leftMax": 214748364800,
             "rightMax": null,
             "leftMin": 0,
             "rightMin": null,
@@ -486,8 +486,8 @@
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
           "lines": true,
-          "fill": 0,
-          "linewidth": 1,
+          "fill": 1,
+          "linewidth": 2,
           "points": false,
           "pointradius": 5,
           "bars": false,
@@ -512,14 +512,29 @@
             {
               "target": "",
               "function": "median",
-              "column": "free",
+              "column": "total-free",
               "series": "machine.disk",
-              "query": "select median(free) from \"machine.disk\" where $timeFilter group by time($interval) order asc",
-              "alias": "free"
+              "query": "select median(total-free) from \"machine.disk\" where $timeFilter group by time($interval) order asc",
+              "alias": "disk usage"
+            },
+            {
+              "target": "",
+              "function": "mean",
+              "column": "total",
+              "series": "machine.disk",
+              "query": "select mean(total) from \"machine.disk\" where $timeFilter group by time($interval) order asc",
+              "alias": "total"
             }
           ],
-          "aliasColors": {},
-          "seriesOverrides": [],
+          "aliasColors": {
+            "total": "#E24D42"
+          },
+          "seriesOverrides": [
+            {
+              "alias": "total",
+              "fill": 0
+            }
+          ],
           "links": [],
           "leftYAxisLabel": ""
         },
@@ -549,8 +564,8 @@
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
           "lines": true,
-          "fill": 0,
-          "linewidth": 1,
+          "fill": 1,
+          "linewidth": 2,
           "points": false,
           "pointradius": 5,
           "bars": false,
@@ -574,15 +589,31 @@
           "targets": [
             {
               "function": "median",
-              "column": "free",
+              "column": "total-free",
               "series": "machine.memory",
-              "query": "select median(free) from \"machine.memory\" where $timeFilter group by time($interval) order asc",
-              "alias": "free memory",
+              "query": "select median(total-free) from \"machine.memory\" where $timeFilter group by time($interval) order asc",
+              "alias": "used",
               "interval": "120s"
+            },
+            {
+              "target": "",
+              "function": "mean",
+              "column": "total",
+              "series": "machine.memory",
+              "query": "select mean(total) from \"machine.memory\" where $timeFilter group by time($interval) order asc",
+              "groupby_field": "",
+              "alias": "total"
             }
           ],
-          "aliasColors": {},
-          "seriesOverrides": [],
+          "aliasColors": {
+            "total": "#E24D42"
+          },
+          "seriesOverrides": [
+            {
+              "alias": "total",
+              "fill": 0
+            }
+          ],
           "links": [],
           "leftYAxisLabel": ""
         }
@@ -600,6 +631,7 @@
         "5m",
         "15m",
         "1h",
+        "3h",
         "6h",
         "12h",
         "24h",
@@ -625,7 +657,8 @@
   ],
   "time": {
     "from": "now-6h",
-    "to": "now"
+    "to": "now",
+    "now": true
   },
   "templating": {
     "list": [],

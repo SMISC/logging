@@ -1,3 +1,4 @@
+---
 - name: check if python34 is installed
   stat: path=/usr/local/bin/python3.4
   register: python34_check
