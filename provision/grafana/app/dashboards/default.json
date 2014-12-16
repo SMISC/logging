@@ -324,69 +324,6 @@
           "seriesOverrides": [],
           "links": [],
           "leftYAxisLabel": ""
-        },
-        {
-          "title": "Network Tweet Velocity",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "id": 10,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "y_formats": [
-            "short",
-            "short"
-          ],
-          "grid": {
-            "leftMax": null,
-            "rightMax": null,
-            "leftMin": null,
-            "rightMin": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false
-          },
-          "nullPointMode": "connected",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": false
-          },
-          "targets": [
-            {
-              "function": "sum",
-              "column": "count",
-              "series": "app.tweet",
-              "query": "select sum(count) from \"app.tweet\" where $timeFilter group by time($interval) order asc",
-              "interval": "5m",
-              "alias": "tweets",
-              "condition": ""
-            }
-          ],
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
         }
       ],
       "showTitle": true
@@ -616,6 +553,82 @@
           ],
           "links": [],
           "leftYAxisLabel": ""
+        },
+        {
+          "title": "Network",
+          "error": false,
+          "span": 4,
+          "editable": true,
+          "type": "graph",
+          "id": 11,
+          "datasource": null,
+          "renderer": "flot",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "bps",
+            "short"
+          ],
+          "grid": {
+            "leftMax": null,
+            "rightMax": null,
+            "leftMin": null,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "lines": true,
+          "fill": 0,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": false,
+            "min": false,
+            "max": false,
+            "current": false,
+            "total": false,
+            "avg": false
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": false
+          },
+          "targets": [
+            {
+              "function": "sum",
+              "column": "recv/300",
+              "series": "machine.net",
+              "query": "select sum(recv/300) from \"machine.net\" where $timeFilter group by time($interval) order asc",
+              "condition": "",
+              "interval": "5m",
+              "alias": "in",
+              "groupby_field": "",
+              "fill": ""
+            },
+            {
+              "function": "sum",
+              "column": "sent/300",
+              "series": "machine.net",
+              "query": "select sum(sent/300) from \"machine.net\" where $timeFilter group by time($interval) order asc",
+              "condition": "",
+              "interval": "5m",
+              "alias": "out",
+              "groupby_field": "",
+              "fill": ""
+            }
+          ],
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "links": []
         }
       ],
       "showTitle": true
