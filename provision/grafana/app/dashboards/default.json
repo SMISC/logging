@@ -68,15 +68,16 @@
               "function": "median",
               "column": "elapsed*1000",
               "series": "twitter.response",
-              "query": "select median(elapsed*1000) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "query": "select median(elapsed*1000) from \"twitter.response\" where $timeFilter and ('$endpoint' = 'all' or (url = '$endpoint')) group by time($interval) order asc",
               "interval": "",
-              "alias": "median"
+              "alias": "median",
+              "condition": "('$endpoint' = 'all' or (url = '$endpoint'))"
             },
             {
               "function": "median",
               "column": "elapsed*1000",
               "series": "twitter.response",
-              "query": "select PERCENTILE(elapsed*1000,95) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "query": "select PERCENTILE(elapsed*1000,95) from \"twitter.response\" where $timeFilter and ('$endpoint' = 'all' or (url = '$endpoint')) group by time($interval) order asc",
               "interval": "",
               "rawQuery": true,
               "alias": "upper 95"
@@ -142,8 +143,8 @@
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 200 group by time($interval) order asc",
-              "condition": "status = 200",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status = 200 and ('$endpoint' = 'all' or (url = '$endpoint'))) group by time($interval) order asc",
+              "condition": "(status = 200 and ('$endpoint' = 'all' or (url = '$endpoint')))",
               "interval": "",
               "fill": "",
               "alias": "200 OK",
@@ -155,8 +156,8 @@
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 500 and status < 600) group by time($interval) order asc",
-              "condition": "(status >= 500 and status < 600)",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 500 and status < 600 and ('$endpoint' = 'all' or (url = '$endpoint'))) group by time($interval) order asc",
+              "condition": "(status >= 500 and status < 600 and ('$endpoint' = 'all' or (url = '$endpoint')))",
               "interval": "",
               "fill": "",
               "alias": "500 Server Error",
@@ -166,8 +167,8 @@
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 429 group by time($interval) order asc",
-              "condition": "status = 429",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 429 and ('$endpoint' = 'all' or (url = '$endpoint')) group by time($interval) order asc",
+              "condition": "status = 429 and ('$endpoint' = 'all' or (url = '$endpoint'))",
               "interval": "",
               "fill": "",
               "alias": "429 Over Rate Limit",
@@ -177,8 +178,8 @@
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 400 and status < 500 and status <> 429) group by time($interval) order asc",
-              "condition": "(status >= 400 and status < 500 and status <> 429)",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 400 and status < 500 and status <> 429 and ('all' = '$endpoint' or (url = '$endpoint'))) group by time($interval) order asc",
+              "condition": "(status >= 400 and status < 500 and status <> 429 and ('all' = '$endpoint' or (url = '$endpoint')))",
               "interval": "",
               "fill": "",
               "alias": "4xx Client Error",
@@ -189,10 +190,11 @@
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "query": "select count(status) from \"twitter.response\" where $timeFilter and ('all' = '$endpoint' or (url = '$endpoint')) group by time($interval) order asc",
               "alias": "requests",
               "interval": "",
-              "fill": ""
+              "fill": "",
+              "condition": "('all' = '$endpoint' or (url = '$endpoint'))"
             }
           ],
           "aliasColors": {
@@ -646,8 +648,40 @@
     "now": true
   },
   "templating": {
-    "list": [],
-    "enable": false
+    "list": [
+      {
+        "type": "custom",
+        "datasource": null,
+        "refresh_on_load": false,
+        "name": "endpoint",
+        "options": [
+          {
+            "text": "all",
+            "value": "all"
+          },
+          {
+            "text": "followers/ids",
+            "value": "followers/ids"
+          },
+          {
+            "text": "statuses/user_timeline",
+            "value": "statuses/user_timeline"
+          },
+          {
+            "text": "users/lookup",
+            "value": "users/lookup"
+          }
+        ],
+        "includeAll": false,
+        "allFormat": "glob",
+        "query": "all,followers/ids,statuses/user_timeline,users/lookup",
+        "current": {
+          "text": "all",
+          "value": "all"
+        }
+      }
+    ],
+    "enable": true
   },
   "annotations": {
     "list": [],
