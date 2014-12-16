@@ -35,9 +35,11 @@ class FollowersScraperWorker(threading.Thread):
             try:
                 resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
             except ProtectedException as e:
+                next_cursor = 0
                 logger.info('%d is protected.', user_id)
                 return
             except NotFound:
+                next_cursor = 0
                 if self.botservice is not None:
                     logger.info('Bot %s KIA', user_id)
                     self.botservice.kill(user_id)
