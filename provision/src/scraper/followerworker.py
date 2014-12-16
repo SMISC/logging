@@ -18,11 +18,6 @@ class FollowersScraperWorker(threading.Thread):
         self.botservice = botservice
 
     def run(self):
-        cursor = None
-        user_id = None
-        bot = None
-        next_cursor = None
-
         try:
             job = self.scrapeservice.dequeue()
             if job is None:
@@ -35,11 +30,9 @@ class FollowersScraperWorker(threading.Thread):
             try:
                 resp = self.rlapi.request('followers/ids', {'user_id': user_id, 'count': 5000, 'cursor': cursor})
             except ProtectedException as e:
-                next_cursor = 0
                 logger.info('%d is protected.', user_id)
                 return
             except NotFound:
-                next_cursor = 0
                 if self.botservice is not None:
                     logger.info('Bot %s KIA', user_id)
                     self.botservice.kill(user_id)
@@ -48,6 +41,11 @@ class FollowersScraperWorker(threading.Thread):
                 return
             except OverLimits:
                 logger.info('Requeueing because over limits')
+                self.scrapeservice.enqueue({
+                    "user_id": user_id,
+                    "cursor": cursor,
+                    "bot": bot
+                })
                 return
 
             resp_follower_ids = []
@@ -58,13 +56,13 @@ class FollowersScraperWorker(threading.Thread):
             self.edgeservice.add_follower_edges(user_id, resp_follower_ids, bot)
             next_cursor = resp['next_cursor']
 
-        except Exception as err:
-            logger.exception('Caught error: %s' % (str(err)))
-        finally:
             if next_cursor != 0:
                 self.scrapeservice.enqueue({
                     "user_id": user_id,
-                    "cursor": cursor,
+                    "cursor": next_cursor,
                     "bot": bot
                 })
+
+        except Exception as err:
+            logger.exception('Caught error: %s' % (str(err)))
 
