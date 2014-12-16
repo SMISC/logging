@@ -11,34 +11,35 @@
   "rows": [
     {
       "title": "Twitter",
-      "height": "300px",
+      "height": "350px",
       "collapse": false,
       "editable": true,
       "panels": [
         {
-          "id": 4,
-          "span": 6,
+          "title": "Twitter API Response Time",
+          "error": false,
+          "span": 4,
+          "editable": true,
           "type": "graph",
+          "id": 12,
+          "datasource": null,
+          "renderer": "flot",
           "x-axis": true,
           "y-axis": true,
-          "scale": 1,
           "y_formats": [
             "ms",
             "short"
           ],
           "grid": {
-            "max": null,
-            "min": null,
             "leftMax": null,
             "rightMax": null,
-            "leftMin": null,
+            "leftMin": 0,
             "rightMin": null,
             "threshold1": null,
             "threshold2": null,
             "threshold1Color": "rgba(216, 200, 27, 0.27)",
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
-          "resolution": 100,
           "lines": true,
           "fill": 1,
           "linewidth": 2,
@@ -46,8 +47,7 @@
           "pointradius": 5,
           "bars": false,
           "stack": false,
-          "spyable": true,
-          "options": false,
+          "percentage": false,
           "legend": {
             "show": true,
             "values": false,
@@ -55,61 +55,42 @@
             "max": false,
             "current": false,
             "total": false,
-            "avg": false,
-            "alignAsTable": false,
-            "rightSide": false
+            "avg": false
           },
-          "interactive": true,
-          "legend_counts": true,
-          "timezone": "browser",
-          "percentage": false,
-          "nullPointMode": "null",
+          "nullPointMode": "connected",
           "steppedLine": false,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": true,
             "shared": false
           },
           "targets": [
             {
-              "target": "",
-              "function": "mean",
-              "column": "value",
-              "rawQuery": true,
-              "query": "select PERCENTILE(elapsed*1000,95) from \"twitter.response\" where time > now() - 6h group by time($interval) order asc;",
-              "alias": "upper 95",
-              "interval": ""
-            },
-            {
-              "target": "randomWalk('random walk')",
               "function": "median",
               "column": "elapsed*1000",
               "series": "twitter.response",
               "query": "select median(elapsed*1000) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
               "interval": "",
-              "hide": false,
-              "fill": "",
               "alias": "median"
+            },
+            {
+              "function": "median",
+              "column": "elapsed*1000",
+              "series": "twitter.response",
+              "query": "select PERCENTILE(elapsed*1000,95) from \"twitter.response\" where $timeFilter group by time($interval) order asc",
+              "interval": "",
+              "rawQuery": true,
+              "alias": "upper 95"
             }
           ],
           "aliasColors": {},
-          "aliasYAxis": {},
-          "title": "Twitter API Response Time",
-          "datasource": "graphite",
-          "renderer": "flot",
-          "annotate": {
-            "enable": false
-          },
           "seriesOverrides": [],
           "links": [],
-          "leftYAxisLabel": "Time (s)",
-          "height": "",
-          "interval": "120s"
+          "interval": "2m"
         },
         {
           "title": "Twitter Responses",
           "error": false,
-          "span": 6,
+          "span": 4,
           "editable": true,
           "type": "graph",
           "id": 5,
@@ -233,20 +214,11 @@
           "links": [],
           "interval": "120s",
           "leftYAxisLabel": ""
-        }
-      ],
-      "showTitle": true
-    },
-    {
-      "title": "SOCIALBOTS",
-      "height": "250px",
-      "editable": true,
-      "collapse": false,
-      "panels": [
+        },
         {
           "title": "Scan Progress",
           "error": false,
-          "span": 6,
+          "span": 4,
           "editable": true,
           "type": "graph",
           "id": 6,
@@ -330,14 +302,14 @@
     },
     {
       "title": "MACHINE",
-      "height": "250px",
+      "height": "350px",
       "editable": true,
       "collapse": false,
       "panels": [
         {
           "title": "CPU load",
           "error": false,
-          "span": 4,
+          "span": 3,
           "editable": true,
           "type": "graph",
           "id": 7,
@@ -400,7 +372,7 @@
         {
           "title": "Disk Usage",
           "error": false,
-          "span": 4,
+          "span": 3,
           "editable": true,
           "type": "graph",
           "id": 8,
@@ -478,7 +450,7 @@
         {
           "title": "Memory",
           "error": false,
-          "span": 4,
+          "span": 3,
           "editable": true,
           "type": "graph",
           "id": 9,
@@ -557,7 +529,7 @@
         {
           "title": "Network",
           "error": false,
-          "span": 4,
+          "span": 3,
           "editable": true,
           "type": "graph",
           "id": 11,
