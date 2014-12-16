@@ -46,11 +46,6 @@ class FollowersScraperWorker(threading.Thread):
                 return
             except OverLimits:
                 logger.info('Requeueing because over limits')
-                self.scrapeservice.enqueue({
-                    "user_id": user_id,
-                    "cursor": cursor,
-                    "bot": bot
-                })
                 return
 
             resp_follower_ids = []
