@@ -22,6 +22,7 @@ from reporter import Reporter
 
 from service.scrape import ScrapeService
 from service.tweet import TweetService
+from service.tweet import BigTweetService
 from service.bot import BotService
 from service.teamlink import TeamLinkService
 from service.user import UserService
@@ -284,9 +285,10 @@ class SMISC:
             lockservice = self.getService('lock', which)
             botservice = self.getService('bot')
             teamlinkservice = self.getService('teamlink')
-            tweetservice = self.getService('tweet')
+            tweetservice = BigTweetService(self.getDatabaseCursor('tweet', False))
             scoreservice = self.getService('score')
-            return Scoring(lockservice, botservice, teamlinkservice, tweetservice, scoreservice)
+            stats = self.getStats()
+            return Scoring(lockservice, botservice, teamlinkservice, tweetservice, scoreservice, stats)
         
         elif 'reporter' == which:
             stats = self.getStats()

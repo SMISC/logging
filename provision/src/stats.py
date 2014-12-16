@@ -11,6 +11,15 @@ class StatsClient:
     def flush(self):
         self.ifdb.write_points(self.points)
 
+    def log_point(self, timestamp, point_type, team_id):
+        self.points.append({
+            "points": [
+                [timestamp, point_type, team_id, "1"]
+            ],
+            "name": "app.points",
+            "columns": ["time", "type", "team", "points"]
+        })
+
     def log_loadavg(self, one, five, fifteen):
         self.points.append({
             "points": [
