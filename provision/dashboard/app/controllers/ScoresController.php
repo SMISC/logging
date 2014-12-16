@@ -19,11 +19,13 @@ class ScoresController extends BaseController
         $scores = array();
         $bots_teams = array();
         $kias = array();
+        $actives = array();
 
         foreach($teams as $team)
         {
             $bots[$team->id] = $team->bots->toArray();
             $kias[$team->id] = 0;
+            $actives[$team->id] = 0;
 
             foreach($bots[$team->id] as $bot)
             {
@@ -32,6 +34,10 @@ class ScoresController extends BaseController
                 if(!is_null($bot['kill_date']))
                 {
                     $kias[$team->id]++;
+                }
+                else
+                {
+                    $actives[$team->id]++;
                 }
             }
 
@@ -88,7 +94,7 @@ class ScoresController extends BaseController
         $this->layout->content = View::make('scores.teams')->with(array(
             'teams' => $teams,
             'kias' => $kias,
-            'bots' => $bots,
+            'actives' => $actives,
             'scores' => $scores
         ));
     }

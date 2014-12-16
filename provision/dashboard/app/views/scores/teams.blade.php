@@ -34,7 +34,7 @@
         @foreach ($teams as $team)
         <tr>
             <td>{{ link_to_action('ScoresController@showTeam', $team->name, array($team->id)) }}</td>
-            <td>{{ count($bots[$team->id]) }}</td>
+            <td>{{ $actives[$team->id] }}</td>
             <td>{{ $kias[$team->id] }} </td>
             <td>{{ $scores[$team->id][Score::TYPE_FOLLOW] }} pt</td>
             <td>{{ $scores[$team->id][Score::TYPE_REPLY] }} pt</td>
