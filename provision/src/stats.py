@@ -47,6 +47,15 @@ class StatsClient:
             "columns": ["url", "status", "elapsed"]
         })
     
+    def log_throughput(self, sent, recv):
+        self.points.append({
+            "points": [
+                [sent, recv]
+            ],
+            "name": "machine.net",
+            "columns": ["sent", "recv"]
+        })
+
     def log_point(self, what, when, howmany = 1):
         self.points.append({
             "points": [

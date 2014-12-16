@@ -18,12 +18,14 @@ class Reporter:
 
         time_start = time.time()
 
+        nio = None
+
         while time.time() < (time_start + self.RUNTIME):
 
             logging.info('reporting statistics to InfluxDB')
 
             self._reportQueueLengths()
-            self._reportMachineStatistics()
+            nio = self._reportMachineStatistics(nio)
 
             self.stats.flush()
 
@@ -33,7 +35,7 @@ class Reporter:
         for (qn, queue) in self.queues.items():
             self.stats.log_queue_length(qn, queue.length())
 
-    def _reportMachineStatistics(self):
+    def _reportMachineStatistics(self, prev_nio):
         load = os.getloadavg()
         self.stats.log_loadavg(load[0], load[1], load[2])
 
@@ -42,3 +44,10 @@ class Reporter:
 
         du = psutil.disk_usage('/')
         self.stats.log_diskusage(du.free, du.total)
+
+        cur_nio = psutil.net_io_counters()
+
+        if prev_nio is not None:
+            self.stats.log_throughput(cur_nio.bytes_sent - prev_nio.bytes_sent, cur_nio.bytes_recv - prev_nio.bytes_recv)
+
+        return cur_nio
