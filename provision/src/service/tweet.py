@@ -114,7 +114,7 @@ class BigTweetService(Model):
     def __init__(self, cursor):
         Model.__init__(self, cursor, "tweet")
 
-    def get_scoring_entities(self, bots):
+    def get_scoring_entities(self, bots, tweet_id):
         bots_where = []
 
         for bot in bots:
@@ -122,5 +122,5 @@ class BigTweetService(Model):
 
         bots_where = ",".join(bots_where)
 
-        self.db.execute("SELECT tweet_entity.*, tweet.user_id, tweet.timestamp from tweet_entity INNER JOIN tweet ON tweet.tweet_id = tweet_entity.tweet_id WHERE tweet.user_id NOT IN (" + bots_where + ")  order by tweet_entity.tweet_id asc")
+        self.db.execute("SELECT tweet_entity.*, tweet.user_id, tweet.timestamp from tweet_entity INNER JOIN tweet ON tweet.tweet_id = tweet_entity.tweet_id WHERE tweet.user_id NOT IN (" + bots_where + ")  AND tweet.tweet_id > %s order by tweet_entity.tweet_id asc", (tweet_id,))
         return self.db
