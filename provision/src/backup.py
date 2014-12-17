@@ -87,7 +87,8 @@ class Backup:
                     archive_id = self.vault.upload_archive(fp, 'Snapshot of scan %s #%d at %s (scan at %s)' % (scan['type'], scan_id, created, scan_time))
                     logging.info('wrote archive %s' % (archive_id,))
                     self.backupservice.mark_backed_up(scan_id, row_number, archive_id)
-                    delete_method(start, end)
+                    # delete_method(start, end)
+                    logging.info('This is where I would delete the rows... IF I HAD ANY')
                 except boto.glacier.exceptions.UnexpectedHTTPResponseError as e:
                     logging.warn('Ignoring HTTP error %s', str(e))
                     return
