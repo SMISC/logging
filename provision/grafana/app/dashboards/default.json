@@ -270,26 +270,26 @@
           },
           "targets": [
             {
-              "function": "mean",
+              "function": "median",
               "column": "length",
               "series": "app.queuelength.tweets",
-              "query": "select mean(length) from \"app.queuelength.tweets\" where $timeFilter group by time($interval) order asc",
+              "query": "select median(length) from \"app.queuelength.tweets\" where $timeFilter group by time($interval) order asc",
               "alias": "tweets",
               "interval": ""
             },
             {
-              "function": "mean",
+              "function": "median",
               "column": "length",
               "series": "app.queuelength.followers_wide",
-              "query": "select mean(length) from \"app.queuelength.followers_wide\" where $timeFilter group by time($interval) order asc",
+              "query": "select median(length) from \"app.queuelength.followers_wide\" where $timeFilter group by time($interval) order asc",
               "alias": "followers (all)",
               "interval": ""
             },
             {
-              "function": "mean",
+              "function": "median",
               "column": "length",
               "series": "app.queuelength.info",
-              "query": "select mean(length) from \"app.queuelength.info\" where $timeFilter group by time($interval) order asc",
+              "query": "select median(length) from \"app.queuelength.info\" where $timeFilter group by time($interval) order asc",
               "alias": "profiles",
               "interval": ""
             }
