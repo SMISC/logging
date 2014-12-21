@@ -100,8 +100,8 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
-            "short"
+            "percent",
+            "none"
           ],
           "grid": {
             "leftMax": null,
@@ -121,7 +121,7 @@
           "pointradius": 5,
           "bars": true,
           "stack": true,
-          "percentage": false,
+          "percentage": true,
           "legend": {
             "show": true,
             "values": false,
@@ -140,64 +140,18 @@
           },
           "targets": [
             {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status = 200 and ('$endpoint' = 'all' or (url = '$endpoint'))) group by time($interval) order asc",
-              "condition": "(status = 200 and ('$endpoint' = 'all' or (url = '$endpoint')))",
-              "interval": "",
-              "fill": "",
-              "alias": "200 OK",
-              "hide": false,
-              "rawQuery": false,
-              "groupby_field": ""
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 500 and status < 600 and ('$endpoint' = 'all' or (url = '$endpoint'))) group by time($interval) order asc",
-              "condition": "(status >= 500 and status < 600 and ('$endpoint' = 'all' or (url = '$endpoint')))",
-              "interval": "",
-              "fill": "",
-              "alias": "500 Server Error",
-              "hide": false
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and status = 429 and ('$endpoint' = 'all' or (url = '$endpoint')) group by time($interval) order asc",
-              "condition": "status = 429 and ('$endpoint' = 'all' or (url = '$endpoint'))",
-              "interval": "",
-              "fill": "",
-              "alias": "429 Over Rate Limit",
-              "hide": false
-            },
-            {
-              "function": "count",
-              "column": "status",
-              "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and (status >= 400 and status < 500 and status <> 429 and ('all' = '$endpoint' or (url = '$endpoint'))) group by time($interval) order asc",
-              "condition": "(status >= 400 and status < 500 and status <> 429 and ('all' = '$endpoint' or (url = '$endpoint')))",
-              "interval": "",
-              "fill": "",
-              "alias": "4xx Client Error",
-              "hide": false
-            },
-            {
               "target": "",
               "function": "count",
               "column": "status",
               "series": "twitter.response",
-              "query": "select count(status) from \"twitter.response\" where $timeFilter and ('all' = '$endpoint' or (url = '$endpoint')) group by time($interval) order asc",
-              "alias": "requests",
+              "query": "select status, count(status) from \"twitter.response\" where $timeFilter group by time($interval), status order asc",
               "interval": "",
-              "fill": "",
-              "condition": "('all' = '$endpoint' or (url = '$endpoint'))"
+              "groupby_field": "status",
+              "alias": "$g"
             }
           ],
           "aliasColors": {
+            "429": "#E0F9D7",
             "429 RateLimit": "#E0F9D7",
             "200 OK": "#629E51",
             "requests": "#1F78C1",
@@ -210,7 +164,8 @@
               "lines": true,
               "linewidth": 2,
               "yaxis": 2,
-              "zindex": 1
+              "zindex": 1,
+              "stack": false
             }
           ],
           "links": [],
