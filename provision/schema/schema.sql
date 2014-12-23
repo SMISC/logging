@@ -20,14 +20,18 @@ SET default_with_oids = false;
 
 CREATE TABLE backups (
     id integer NOT NULL,
-    scan_id integer,
+    "table" varchar(20),
     "timestamp" integer,
-    ref_count bigint,
+    ref_start bigint,
+    ref_end bigint,
     glacier_id text
 );
 
 
 ALTER TABLE public.backups OWNER TO pacsocial;
+
+CREATE UNIQUE INDEX backupsbyid ON backups USING btree (id);
+CREATE INDEX backups_byrefend ON backups USING btree (ref_end);
 
 --
 -- Name: backups_id_seq; Type: SEQUENCE; Schema: public; Owner: pacsocial
@@ -117,7 +121,6 @@ ALTER TABLE public.point_id_seq OWNER TO pacsocial;
 --
 
 ALTER SEQUENCE point_id_seq OWNED BY point.id;
-
 
 --
 -- Name: scan; Type: TABLE; Schema: public; Owner: pacsocial; Tablespace: 
@@ -303,7 +306,7 @@ CREATE TABLE tuser_tuser (
     from_user character varying(32),
     to_user character varying(32),
     weight smallint,
-    id integer NOT NULL,
+    id bigint NOT NULL PRIMARY KEY,
     bot boolean
 );
 
