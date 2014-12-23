@@ -8,6 +8,7 @@ import boto.glacier.exceptions
 class Backup:
     RECORD_SEPARATOR = 30
     FIELD_SEPARATOR = 31
+    PAGE_SIZE = 1E4
 
     def __init__(self, vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices):
         self.vault = vault
@@ -23,8 +24,6 @@ class Backup:
             return
 
         self._runEdges()
-        self._runUsers()
-        self._runTweets()
 
     def _writeHeader(self, fd, row):
         values = []
@@ -50,15 +49,10 @@ class Backup:
 
         fd.write(chr(self.RECORD_SEPARATOR).encode('utf-8'))
         
-    def _backupTable(self, get_method, delete_method, scan, name):
+    def _backupTable(self, get_method, delete_method, ref_start, ref_end, name):
         created_dt = datetime.datetime.fromtimestamp(time.time())
         created = created_dt.strftime('%b %d %Y - %H:%M:%S')
-        scan_time_dt = datetime.datetime.fromtimestamp(scan['start'])
-        scan_time = scan_time_dt.strftime('%b %d %Y - %H:%M:%S')
 
-        scan_id = scan['id']
-        start = scan['ref_start']
-        end = scan['ref_end']
         written_columns = False
 
         row_number = 0
@@ -66,7 +60,7 @@ class Backup:
         with tempfile.NamedTemporaryFile() as fd:
             fp = fd.name
             t = 0
-            cursor = get_method(start, end)
+            cursor = get_method(ref_start, ref_end)
 
             for row in cursor:
                 if row_number is 0:
@@ -81,44 +75,25 @@ class Backup:
                     fd.flush()
 
             if row_number > 0:
-                logging.info('backing up for %s scan #%d [%d, %d) with %d observed refs', name, scan_id, start, end, row_number)
+                logging.info('backing up for %s scan [%d, %d) with %d observed refs', name, ref_start, ref_end, row_number)
                             
                 try:
-                    archive_id = self.vault.upload_archive(fp, 'Snapshot of scan %s #%d at %s (scan at %s)' % (scan['type'], scan_id, created, scan_time))
+                    archive_id = self.vault.upload_archive(fp, 'Snapshot of scan %s %s records [%s, %s)' % (name, created, ref_start, ref_end))
                     logging.info('wrote archive %s' % (archive_id,))
-                    self.backupservice.mark_backed_up(scan_id, row_number, archive_id)
-                    delete_method(start, end)
+                    self.backupservice.backed_up(name, ref_start, ref_end, archive_id)
+                    delete_method(ref_start, ref_end)
                     return
                 except boto.glacier.exceptions.UnexpectedHTTPResponseError as e:
                     logging.warn('Ignoring HTTP error %s', str(e))
                     return
 
         logging.info('not backing up empty scan')
-        self.backupservice.mark_backed_up(scan_id, 0, None)
 
     def _runEdges(self):
-        scans = self.backupservice.get_scans_not_backedup('followers_wide')
-        if len(scans):
+        ival = self.backupservice.get_ref_interval('tuser_tuser', self.PAGE_SIZE)
+
+        if ival is not None:
+            (min_id, max_id) = ival
             getter = getattr(self.edgeservice, 'get_edges_between')
             deleter = getattr(self.edgeservice, 'delete_between')
-            self._backupTable(getter, deleter, scans[0], 'followers')
-
-    def _runTweets(self):
-        '''
-        scans = self.backupservice.get_scans_not_backedup('tweets')
-        if False: #disable for now
-            counter = getattr(self.tweetservice, 'get_tweets_between_count')
-            getter = getattr(self.tweetservice, 'get_tweets_between')
-            deleter = getattr(self.tweetservice, 'delete_between')
-            self._backupTable(counter, getter, deleter, scans[0], 'tweets')
-        '''
-
-    def _runUsers(self):
-        '''
-        scans = self.backupservice.get_scans_not_backedup('info')
-        if len(scans) and len(scans) > 1: # need at least one 
-            counter = getattr(self.userservice, 'get_users_between_count')
-            getter = getattr(self.userservice, 'get_users_between')
-            deleter = getattr(self.userservice, 'delete_between')
-            self._backupTable(counter, getter, deleter, scans[0], 'info')
-        '''
+            self._backupTable(getter, deleter, min_id, max_id, 'followers')
