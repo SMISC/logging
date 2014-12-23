@@ -279,7 +279,7 @@ class SMISC:
                 'tweets': self.getService('scan', 'tweets')
             }
 
-            return Backup(vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices)
+            return Backup(vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices, int(float(self.config.get('smisc', 'backup_page_size'))))
         
         elif 'scoring' == which:
             lockservice = self.getService('lock', which)

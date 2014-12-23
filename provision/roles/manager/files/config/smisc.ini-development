@@ -1,6 +1,7 @@
 [smisc]
 log = /var/local/log/smisc.log
 log_level = DEBUG
+backup_page_size = 5
 
 [influxdb]
 username = smisc

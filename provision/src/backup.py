@@ -8,9 +8,8 @@ import boto.glacier.exceptions
 class Backup:
     RECORD_SEPARATOR = 30
     FIELD_SEPARATOR = 31
-    PAGE_SIZE = 1E4
 
-    def __init__(self, vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices):
+    def __init__(self, vault, lockservice, backupservice, edgeservice, userservice, tweetservice, scanservices, page_size):
         self.vault = vault
         self.lockservice = lockservice
         self.backupservice = backupservice
@@ -18,6 +17,7 @@ class Backup:
         self.userservice = userservice
         self.tweetservice = tweetservice
         self.scanservices = scanservices
+        self.page_size = page_size
 
     def main(self):
         if not self.lockservice.acquire(None): # there is no expire time
@@ -90,7 +90,7 @@ class Backup:
         logging.info('not backing up empty scan')
 
     def _runEdges(self):
-        ival = self.backupservice.get_ref_interval('tuser_tuser', self.PAGE_SIZE)
+        ival = self.backupservice.get_ref_interval('tuser_tuser', self.page_size)
 
         if ival is not None:
             (min_id, max_id) = ival
