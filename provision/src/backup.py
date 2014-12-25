@@ -90,10 +90,23 @@ class Backup:
         logging.info('not backing up empty scan')
 
     def _runEdges(self):
+        logging.info('Running edges backup - fetching interval size up to %d', self.page_size)
         ival = self.backupservice.get_ref_interval('tuser_tuser', self.page_size)
 
-        if ival is not None:
-            (min_id, max_id) = ival
-            getter = getattr(self.edgeservice, 'get_edges_between')
-            deleter = getattr(self.edgeservice, 'delete_between')
-            self._backupTable(getter, deleter, min_id, max_id, 'followers')
+        if ival is None:
+            logging.info('got no interval')
+            return
+
+        (min_id, max_id) = ival
+
+        logging.info('got interval [%s, %s)', str(min_id), str(max_id))
+
+        if (max_id - min_id) < self.page_size:
+            logging.info('interval is too small')
+            return
+
+        logging.info('running')
+
+        getter = getattr(self.edgeservice, 'get_edges_between')
+        deleter = getattr(self.edgeservice, 'delete_between')
+        self._backupTable(getter, deleter, min_id, max_id, 'followers')

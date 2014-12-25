@@ -311,7 +311,7 @@ if __name__ == '__main__':
     app_name = sys.argv[1]
 
     smisc = SMISC(app_name)
-    smisc.setupLogging(logging.DEBUG)
+    smisc.setupLogging(logging.INFO)
 
     app = smisc.getProgram(app_name)
     stats = smisc.getStats()
