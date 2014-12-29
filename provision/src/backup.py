@@ -102,7 +102,7 @@ class Backup:
         logging.info('got interval [%s, %s)', str(min_id), str(max_id))
 
         if (max_id - min_id) < self.page_size:
-            logging.info('interval is too small')
+            logging.info('interval is too small (%d or %0.2f)', (max_id - min_id), float(max_id - min_id) / self.page_size * 100)
             return
 
         logging.info('running')
