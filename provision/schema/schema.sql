@@ -8,6 +8,20 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -20,7 +34,7 @@ SET default_with_oids = false;
 
 CREATE TABLE backups (
     id integer NOT NULL,
-    "table" varchar(20),
+    "table" character varying(20),
     "timestamp" integer,
     ref_start bigint,
     ref_end bigint,
@@ -30,19 +44,16 @@ CREATE TABLE backups (
 
 ALTER TABLE public.backups OWNER TO pacsocial;
 
-CREATE UNIQUE INDEX backupsbyid ON backups USING btree (id);
-CREATE INDEX backups_byrefend ON backups USING btree (ref_end);
-
 --
 -- Name: backups_id_seq; Type: SEQUENCE; Schema: public; Owner: pacsocial
 --
 
 CREATE SEQUENCE backups_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.backups_id_seq OWNER TO pacsocial;
@@ -71,11 +82,11 @@ ALTER TABLE public.cron_score OWNER TO pacsocial;
 --
 
 CREATE SEQUENCE cron_score_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.cron_score_id_seq OWNER TO pacsocial;
@@ -107,11 +118,11 @@ ALTER TABLE public.point OWNER TO pacsocial;
 --
 
 CREATE SEQUENCE point_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.point_id_seq OWNER TO pacsocial;
@@ -121,6 +132,7 @@ ALTER TABLE public.point_id_seq OWNER TO pacsocial;
 --
 
 ALTER SEQUENCE point_id_seq OWNED BY point.id;
+
 
 --
 -- Name: scan; Type: TABLE; Schema: public; Owner: pacsocial; Tablespace: 
@@ -157,11 +169,11 @@ COMMENT ON COLUMN scan.ref_end IS 'inclusive';
 --
 
 CREATE SEQUENCE scan_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.scan_id_seq OWNER TO pacsocial;
@@ -223,11 +235,11 @@ COMMENT ON COLUMN team_bot.type IS '0 = scorer, 1 = helper';
 --
 
 CREATE SEQUENCE team_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.team_id_seq OWNER TO pacsocial;
@@ -281,11 +293,11 @@ ALTER TABLE public.tuser OWNER TO pacsocial;
 --
 
 CREATE SEQUENCE tuser_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.tuser_id_seq OWNER TO pacsocial;
@@ -306,7 +318,7 @@ CREATE TABLE tuser_tuser (
     from_user character varying(32),
     to_user character varying(32),
     weight smallint,
-    id bigint NOT NULL PRIMARY KEY,
+    id bigint NOT NULL,
     bot boolean
 );
 
@@ -332,11 +344,11 @@ ALTER TABLE public.tuser_tuser_bot OWNER TO pacsocial;
 --
 
 CREATE SEQUENCE tuser_tuser_bot_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.tuser_tuser_bot_id_seq OWNER TO pacsocial;
@@ -353,11 +365,11 @@ ALTER SEQUENCE tuser_tuser_bot_id_seq OWNED BY tuser_tuser_bot.id;
 --
 
 CREATE SEQUENCE tuser_tuser_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.tuser_tuser_id_seq OWNER TO pacsocial;
@@ -404,11 +416,11 @@ ALTER TABLE public.tweet_entity OWNER TO pacsocial;
 --
 
 CREATE SEQUENCE tweet_entity_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.tweet_entity_id_seq OWNER TO pacsocial;
@@ -425,11 +437,11 @@ ALTER SEQUENCE tweet_entity_id_seq OWNED BY tweet_entity.id;
 --
 
 CREATE SEQUENCE tweet_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 ALTER TABLE public.tweet_id_seq OWNER TO pacsocial;
@@ -516,11 +528,50 @@ ALTER TABLE ONLY tweet_entity ALTER COLUMN id SET DEFAULT nextval('tweet_entity_
 --
 
 ALTER TABLE ONLY scan
-ADD CONSTRAINT scan_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT scan_pkey PRIMARY KEY (id);
 
 
 --
--- Name: e (twitter_id);
+-- Name: team_pkey; Type: CONSTRAINT; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+ALTER TABLE ONLY team
+    ADD CONSTRAINT team_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: by id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX "by id" ON tuser USING btree (user_id);
+
+
+--
+-- Name: by_tuser_id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX by_tuser_id ON team_bot USING btree (twitter_id);
+
+
+--
+-- Name: byiddddd; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX byiddddd ON tweet USING btree (id, user_id);
+
+
+--
+-- Name: bytweet; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX bytweet ON tweet_entity USING btree (tweet_id);
+
+
+--
+-- Name: targets_by_id; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX targets_by_id ON targets USING btree (twitter_id);
 
 
 --
@@ -528,6 +579,13 @@ ADD CONSTRAINT scan_pkey PRIMARY KEY (id);
 --
 
 CREATE INDEX tuser_tuser_bot_touser ON tuser_tuser_bot USING btree (to_user, from_user);
+
+
+--
+-- Name: tuser_tuser_byid; Type: INDEX; Schema: public; Owner: pacsocial; Tablespace: 
+--
+
+CREATE INDEX tuser_tuser_byid ON tuser_tuser USING btree (id);
 
 
 --
@@ -555,6 +613,16 @@ REVOKE ALL ON TABLE backups FROM PUBLIC;
 REVOKE ALL ON TABLE backups FROM pacsocial;
 GRANT ALL ON TABLE backups TO pacsocial;
 GRANT SELECT ON TABLE backups TO dashboard;
+
+
+--
+-- Name: cron_score; Type: ACL; Schema: public; Owner: pacsocial
+--
+
+REVOKE ALL ON TABLE cron_score FROM PUBLIC;
+REVOKE ALL ON TABLE cron_score FROM pacsocial;
+GRANT ALL ON TABLE cron_score TO pacsocial;
+GRANT SELECT ON TABLE cron_score TO dashboard;
 
 
 --
