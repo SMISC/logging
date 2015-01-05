@@ -1,5 +1,10 @@
 ---
-- hosts: smisc
+- hosts: manager
   sudo: yes
   roles:
     - manager
+- hosts: database
+  sudo: yes
+  roles:
+    - manager
+    - db

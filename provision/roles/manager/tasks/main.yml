@@ -113,7 +113,7 @@
     - psutil
 
 - name: Install Python modules for 2-7
-  pip: name={{ item }} executable=pip-2.7
+  pip: name={{ item }} executable=pip-2.7 state=latest
   with_items:
     - psycopg2
     - boto
