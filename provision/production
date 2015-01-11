@@ -1,7 +1,7 @@
 [manager]
 104.131.71.175 ansible_ssh_user=root fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"
-54.148.32.182 ansible_ssh_user=admin fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"
+54.187.68.10 ansible_ssh_user=admin fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"
 
 [database]
-54.148.32.182 ansible_ssh_user=admin fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"
+54.187.68.10 ansible_ssh_user=admin fqdn="smisc.jacobgreenleaf.com" hostname="smisc" domain="jacobgreenleaf.com" config_file="smisc.ini-production"
 

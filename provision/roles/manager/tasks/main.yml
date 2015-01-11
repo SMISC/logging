@@ -299,22 +299,22 @@
     - hot
 
 - name: turn off the wide follower scraper job
-  cron: state=present name="wide follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_wide"
+  cron: state=absent name="wide follower scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_wide"
 
 - name: turn on the hourly bot follower scraper job v2
-  cron: state=present name="bot follower scraper v2" minute="0" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot_v2"
+  cron: state=absent name="bot follower scraper v2" minute="0" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py followers_bot_v2"
 
 - name: turn on the competition tweets scraper scraper job
-  cron: state=present name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py competition-tweets"
+  cron: state=absent name="competition tweets scraper" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py competition-tweets"
 
 - name: turn on the info scraper job
-  cron: state=present name="info scraper" minute="0,30" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py info"
+  cron: state=absent name="info scraper" minute="0,30" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py info"
 
 - name: turn on the daily backup job
-  cron: state=present name="backup" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py backup"
+  cron: state=absent name="backup" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py backup"
 
 - name: turn on the scoring job
-  cron: state=present name="score" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py scoring"
+  cron: state=absent name="score" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py scoring"
 
 - name: turn on the stats reporting job
-  cron: state=present name="reporter" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py reporter"
+  cron: state=absent name="reporter" minute="*" hour="*" day="*" month="*" job="/usr/local/bin/python3.4 /usr/local/src/smisc/app.py reporter"
