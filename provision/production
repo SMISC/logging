@@ -1,4 +1,5 @@
 [database]
-54.187.68.10 ansible_ssh_user=admin config_file="smisc.ini-production"
-54.68.250.89 ansible_ssh_user=admin config_file="smisc.ini-production"
+smisc.jacobgreenleaf.com config_file="smisc.ini-production"
 
+[cassandra]
+cassandra[1-2].jacobgreenleaf.com

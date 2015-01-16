@@ -1,0 +1,35 @@
+---
+- name: install ZFSonlinux repository
+  get_url: url=http://archive.zfsonlinux.org/debian/pool/main/z/zfsonlinux/zfsonlinux_4_all.deb dest=/tmp/zfsonlinux.deb
+
+- name: install ZFSonlinux repository
+  sudo: yes
+  command: dpkg -i /tmp/zfsonlinux.deb creates=/etc/apt/sources.list.d/zfsonlinux.list
+
+- name: update aptitude
+  sudo: yes
+  apt: update_cache=yes
+
+- name: install and/or upgrade core packages
+  sudo: yes
+  apt: name={{ item }} state=latest
+  with_items:
+    - tmux
+    - debian-zfs
+    - git
+    - python-pip
+    - postgresql-9.1
+    - nagios3
+    - ganglia-monitor
+    - nginx
+    - php5-fpm
+
+- name: download glacier-cmd
+  sudo: yes
+  git: repo=https://github.com/uskudnik/amazon-glacier-cmd-interface.git dest=/usr/local/src/glacier-cmd
+
+- name: install glacier-cmd
+  sudo: yes
+  command: python setup.py install
+  args:
+    chdir: /usr/local/src/glacier-cmd
