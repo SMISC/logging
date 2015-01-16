@@ -1,7 +1,0 @@
-- name: clone boto
-  git: repo=https://github.com/jacobgreenleaf/boto.git
-       dest=/opt/boto
-       version=4790dae1a6659635b1b74f58bf7eabc334722851
-
-- name: install boto
-  command: python3.4 /opt/boto/setup.py install chdir=/opt/boto

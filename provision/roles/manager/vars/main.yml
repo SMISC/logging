@@ -1,9 +1,0 @@
-pacsocial_password: 1234qwer
-dashboard_password: 1234qwer
-influxdb_root_password: wKAtPbrjUIAB
-influxdb_smisc_database: smisc
-influxdb_smisc_user: smisc
-influxdb_smisc_password: EkcLmAVO6IUq
-influxdb_dashboard_database: dashboard
-influxdb_dashboard_user: dashboard
-influxdb_dashboard_password: 1234qwer
