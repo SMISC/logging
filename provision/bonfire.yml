@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tasks:
+      - digital_ocean: >
+          unique_name=yes
+          state=present 
+          ssh_key_ids=402820
+          name="cassandra{{ item }}"
+          size_id=66
+          region_id=3
+          image_id=6372526
+        with_sequence: count=2
