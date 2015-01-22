@@ -11,6 +11,7 @@
     - 7000
     - 7001
     - 7199
+    - 9160
 
 - name: Set UFW policy
   ufw: state=enabled direction=incoming policy=deny

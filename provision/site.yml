@@ -3,10 +3,13 @@
   sudo: yes
   roles: 
     - database
-- hosts: cassandra-base
+
+- hosts: cassandra-node
   sudo: yes
   roles: 
     - cassandra-base
+    - cassandra-node
+
 - hosts: cassandra-admin
   sudo: yes
   roles:
