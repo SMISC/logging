@@ -4,9 +4,9 @@
       - digital_ocean: >
           unique_name=yes
           state=present 
-          ssh_key_ids=402820
+          ssh_key_ids=402820,628994
           name="cassandra{{ item }}"
-          size_id=66
+          size_id=62
           region_id=3
           image_id=6372526
-        with_sequence: count=2
+        with_sequence: count=5

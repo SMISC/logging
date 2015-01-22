@@ -1,0 +1,26 @@
+- apt: name={{ item }} state=installed
+  with_items:
+    - build-essential
+    - python-pip
+    - python-dev
+    - libjna-java
+    - htop
+
+- pip: name=ansible state=present
+
+- file: path=/opt/java/7u12 state=directory recurse=yes
+- unarchive: src=/bfd/rawdata/download/server-jre-7u72-linux-x64.gz dest=/opt/java/7u12
+- alternatives: name=java link=/usr/bin/java path=/opt/java/7u12/jdk1.7.0_72/jre/bin/java
+
+- apt_repository: repo='deb http://debian.datastax.com/community stable main' state=present
+- apt_repository: repo='deb http://ftp.us.debian.org/debian wheezy main contrib non-free' state=present
+- apt_key: url=http://debian.datastax.com/debian/repo_key state=present
+  register: aptkey
+- apt: update_cache=yes
+  when: aptkey.changed
+
+- apt: pkg={{ item }} state=present
+  with_items:
+    - dsc20=2.0.11-1
+    - cassandra=2.0.11
+- service: name=cassandra state=stopped
