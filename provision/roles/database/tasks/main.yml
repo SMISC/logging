@@ -20,9 +20,9 @@
     - python-pip
     - postgresql-9.1
     - nagios3
-    - ganglia-monitor
     - nginx
     - php5-fpm
+    - rrdtool
 
 - name: download glacier-cmd
   sudo: yes
@@ -33,3 +33,16 @@
   command: python setup.py install
   args:
     chdir: /usr/local/src/glacier-cmd
+
+- name: delete the default nginx site
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify:
+    - reload nginx
+
+- name: add the nginx base site
+  copy: src=nginx.conf dest=/etc/nginx/sites-enabled/smisc
+  notify:
+    - reload nginx
+
+- name: ensure permissions on webroot
+  file: path=/usr/local/src/smisc state=directory owner=www-data mode=0555 recurse=yes

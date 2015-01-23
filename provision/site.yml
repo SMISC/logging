@@ -3,12 +3,15 @@
   sudo: yes
   roles: 
     - database
+    - ganglia-master
+    - ganglia-node
 
 - hosts: cassandra-node
   sudo: yes
   roles: 
     - cassandra-base
     - cassandra-node
+    - ganglia-node
 
 - hosts: cassandra-admin
   sudo: yes

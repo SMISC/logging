@@ -1,8 +1,8 @@
 [database]
-smisc.jacobgreenleaf.com config_file="smisc.ini-production" ansible_ssh_user=admin
+smisc.jacobgreenleaf.com config_file="smisc.ini-production" ansible_ssh_user=admin ganglia_cluster="www"
 
 [cassandra-node]
-cassandra[1:5].jacobgreenleaf.com
+cassandra[1:5].jacobgreenleaf.com ganglia_cluster="cassandra"
 
 [cassandra-admin]
 smisc.jacobgreenleaf.com

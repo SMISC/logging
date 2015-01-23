@@ -11,12 +11,13 @@
     - 7000
     - 7001
     - 7199
+    - 9042
     - 9160
 
 - name: Set UFW policy
   ufw: state=enabled direction=incoming policy=deny
 
 - template: src=cassandra.yaml dest=/etc/cassandra/cassandra.yaml
+- copy: src=cassandra/log4j-server.properties dest=/etc/cassandra/log4j-server.properties
 - command: /etc/init.d/cassandra force-reload
 - service: name=cassandra state=running
-

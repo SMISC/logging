@@ -1,0 +1,31 @@
+---
+- name: install and/or upgrade core packages
+  sudo: yes
+  apt: name={{ item }} state=latest
+  with_items:
+    - ganglia-monitor
+    - rrdtool
+    - nginx
+
+- name: clone ganglia web frontend source
+  sudo: yes
+  git: repo=https://github.com/ganglia/ganglia-web.git dest=/usr/local/src/smisc/ganglia-web
+
+- name: synchronize ganglia web configuration
+  sudo: yes
+  copy: src={{ item }} dest=/usr/local/src/smisc/{{ item }}
+  with_items:
+    - ganglia-web/Makefile
+
+- name: make ganglia web
+  sudo: yes
+  command: make install chdir=/usr/local/src/smisc/ganglia-web
+
+- name: set the owner of ganglia web
+  sudo: yes
+  file: path=/usr/local/src/smisc/ganglia-web mode=0555 recurse=yes owner=www-data
+
+- name: Synchronize node configuration
+  copy: src=gmetad.conf dest=/etc/ganglia/gmetad.conf
+  notify:
+    - restart gmetad

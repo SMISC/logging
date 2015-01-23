@@ -1,0 +1,3 @@
+---
+cassandra_seed_ips:
+  - {{ lookup('dns', 'cassandra1.jacobgreenleaf.com') }}
