@@ -3,7 +3,7 @@
   sudo: yes
   apt: name={{ item }} state=latest
   with_items:
-    - gmetad
+    - ganglia-monitor
     - rrdtool
     - nginx
     - ufw
@@ -14,6 +14,7 @@
     - 8649
 
 - name: Synchronize node configuration
-  template: src=gmond.conf dest=/etc/ganglia/gmond.conf
+#  template: src={{ ganglia_conf }} dest=/etc/ganglia/gmond.conf
+  template: src={{ ganglia_conf }} dest=/etc/ganglia/gmond.conf
   notify:
     - restart gmond

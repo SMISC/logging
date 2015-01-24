@@ -3,7 +3,7 @@
   sudo: yes
   apt: name={{ item }} state=latest
   with_items:
-    - ganglia-monitor
+    - gmetad
     - rrdtool
     - nginx
 
@@ -25,7 +25,7 @@
   sudo: yes
   file: path=/usr/local/src/smisc/ganglia-web mode=0555 recurse=yes owner=www-data
 
-- name: Synchronize node configuration
-  copy: src=gmetad.conf dest=/etc/ganglia/gmetad.conf
+- name: Synchronize gmetad configuration
+  template: src=gmetad.conf dest=/etc/ganglia/gmetad.conf
   notify:
     - restart gmetad
