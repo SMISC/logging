@@ -24,6 +24,34 @@
     - php5-fpm
     - rrdtool
 
+- name: install virtualenv
+  pip: name=virtualenv state=present
+
+- name: create virtualenv for smisc api
+  command: virtualenv /usr/local/share/smisc-api creates=/usr/local/share/smisc-api
+
+- name: install packages
+  pip: name={{ item }} state=present virtualenv=/usr/local/share/smisc-api
+  with_items:
+    - Flask
+    - uwsgi
+
+- name: make api src directory
+  file: path=/usr/local/share/smisc-api/local/src state=directory
+
+- name: checkout smisc api code
+  git: repo=git@github.com:SMISC/api.git dest=/usr/local/share/smisc-api/local/src/ accept_hostkey=yes key_file=/usr/local/share/smisc.pem
+  notify: 
+    - restart uwsgi
+
+- name: synchronize the uwsgi init script 
+  copy: src=init-uwsgi dest=/etc/init.d/uwsgi
+  notify: 
+    - restart uwsgi
+
+- name: make uwsgi init script modifiable
+  file: path=/etc/init.d/uwsgi mode=0755
+
 - name: download glacier-cmd
   sudo: yes
   git: repo=https://github.com/uskudnik/amazon-glacier-cmd-interface.git dest=/usr/local/src/glacier-cmd
@@ -46,3 +74,9 @@
 
 - name: ensure permissions on webroot
   file: path=/usr/local/src/smisc state=directory owner=www-data mode=0555 recurse=yes
+
+- name: ensure permissions on api webroot
+  file: path=/usr/local/share/smisc-api state=directory owner=www-data mode=0555 recurse=yes
+
+- service: name=uwsgi state=running
+- service: name=nginx state=running
