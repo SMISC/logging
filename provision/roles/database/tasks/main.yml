@@ -23,6 +23,7 @@
     - nginx
     - php5-fpm
     - rrdtool
+    - postgresql-server-dev-9.1
 
 - name: install virtualenv
   pip: name=virtualenv state=present
@@ -35,14 +36,23 @@
   with_items:
     - Flask
     - uwsgi
+    - SQLAlchemy
+    - Flask-SQLAlchemy
+    - psycopg2
 
 - name: make api src directory
-  file: path=/usr/local/share/smisc-api/local/src state=directory
+  file: path={{ item }} state=directory
+  with_items:
+    - /usr/local/share/smisc-api/local/src
+    - /usr/local/share/smisc-api/local/webroot
 
 - name: checkout smisc api code
   git: repo=git@github.com:SMISC/api.git dest=/usr/local/share/smisc-api/local/src/ accept_hostkey=yes key_file=/usr/local/share/smisc.pem
   notify: 
     - restart uwsgi
+
+- name: template the configuration files 
+  copy: src=app.ini dest=/usr/local/share/smisc-api/local/src/configuration.ini
 
 - name: synchronize the uwsgi init script 
   copy: src=init-uwsgi dest=/etc/init.d/uwsgi
