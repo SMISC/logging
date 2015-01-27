@@ -1,0 +1,8 @@
+export DO_CLIENT_ID={{ do_client_id }}
+export DO_API_KEY={{ do_api_key }}
+TMP=`/usr/local/src/ansible/plugins/inventory/digital_ocean.py --droplets | /home/admin/smisc/provision/hosts.py hosts`
+ANSIBLE_CONFIG=/home/admin/smisc/provision/ansible.cfg /usr/bin/ansible --private-key=/home/admin/upsilon -U root all -i /usr/local/src/ansible/plugins/inventory/digital_ocean.py -m copy -a "src=$TMP dest=/etc/hosts"
+ANSIBLE_CONFIG=/home/admin/smisc/provision/ansible.cfg /usr/bin/ansible --private-key=/home/admin/upsilon -U root all -i /usr/local/src/ansible/plugins/inventory/digital_ocean.py -m shell -a 'echo "127.0.0.1 $(hostname).jacobgreenleaf.com $(hostname)" >> /etc/hosts'
+cp $TMP /etc/hosts
+echo "127.0.0.1 smisc.jacobgreenleaf.com smisc" >> /etc/hosts
+rm $TMP

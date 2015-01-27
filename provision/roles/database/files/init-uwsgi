@@ -23,7 +23,7 @@ DESC="uwsgi"
 NAME=uwsgi
 DAEMON=/usr/local/share/smisc-api/bin/uwsgi
 WD=/usr/local/share/smisc-api/local/src
-DAEMON_ARGS="--master --processes 8 --die-on-term --socket /var/run/uwsgi.sock --daemonize /var/log/uwsgi -w hello:app"
+DAEMON_ARGS="--master --processes 8 --die-on-term --socket /var/run/uwsgi.sock --daemonize /var/log/uwsgi -w app:app"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
